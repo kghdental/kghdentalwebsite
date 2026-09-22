@@ -207,3 +207,112 @@ html {
   }
 }
 
+/* ==============================================================================
+   Rich Text Blog Article Typography & Styling
+   ============================================================================== */
+.kgh-blog-content {
+  color: #27272a;
+  line-height: 1.8;
+}
+
+.kgh-blog-content h2 {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #09090b;
+  margin-top: 2rem;
+  margin-bottom: 0.85rem;
+  letter-spacing: -0.02em;
+}
+
+.kgh-blog-content h3 {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #18181b;
+  margin-top: 1.5rem;
+  margin-bottom: 0.65rem;
+}
+
+.kgh-blog-content p {
+  margin-bottom: 1.25rem;
+  font-size: 1rem;
+}
+
+.kgh-blog-content ul {
+  list-style-type: disc;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+  space-y: 0.5rem;
+}
+
+.kgh-blog-content ol {
+  list-style-type: decimal;
+  padding-left: 1.5rem;
+  margin-bottom: 1.25rem;
+}
+
+.kgh-blog-content li {
+  margin-bottom: 0.4rem;
+}
+
+.kgh-blog-content strong {
+  font-weight: 700;
+  color: #09090b;
+}
+
+.kgh-blog-content .kgh-quote {
+  border-left: 4px solid #1c362b;
+  background-color: #f4f4f5;
+  padding: 1.25rem 1.5rem;
+  border-radius: 0 1rem 1rem 0;
+  margin: 1.75rem 0;
+  font-style: italic;
+  color: #18181b;
+}
+
+.kgh-blog-content .kgh-quote cite {
+  display: block;
+  font-size: 0.8rem;
+  font-style: normal;
+  font-weight: 700;
+  color: #71717a;
+  margin-top: 0.5rem;
+}
+
+.kgh-blog-content .kgh-callout {
+  background-color: #fffbeb;
+  border: 1px solid #fef3c7;
+  border-left: 4px solid #d97706;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  color: #92400e;
+  font-size: 0.95rem;
+}
+
+.kgh-blog-content .kgh-tip {
+  background-color: #f0fdf4;
+  border: 1px solid #dcfce7;
+  border-left: 4px solid #16a34a;
+  border-radius: 0.75rem;
+  padding: 1rem 1.25rem;
+  margin: 1.5rem 0;
+  color: #166534;
+  font-size: 0.95rem;
+}
+
+.kgh-blog-content figure.kgh-figure {
+  margin: 2rem 0;
+}
+
+.kgh-blog-content figure.kgh-figure img {
+  border-radius: 1rem;
+  width: 100%;
+  object-fit: cover;
+  box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.05);
+}
+
+.kgh-blog-content figure.kgh-video {
+  margin: 2.25rem 0;
+}
+
+

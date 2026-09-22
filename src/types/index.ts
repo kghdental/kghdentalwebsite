@@ -75,7 +75,13 @@ export interface BlogPost {
   readTime: string;
   date: string;
   targetKeyword: string;
-  content: {
+  coverImage?: string;
+  authorName?: BilingualText;
+  authorRole?: BilingualText;
+  authorPhotoUrl?: string;
+  tags?: string[];
+  contentHtml?: BilingualText;
+  content?: {
     hook: BilingualText;
     overview: BilingualText;
     symptomsOrOptions: BilingualText[];
@@ -148,10 +154,23 @@ export interface ClinicSettings {
 export interface GalleryItem {
   id: string;
   title: BilingualText;
-  category: "chamber" | "treatments" | "sterilization";
+  category: "clinic" | "team" | "chamber" | "treatments" | "sterilization" | string;
   desc: BilingualText;
   imageUrl: string;
+  sortOrder?: number;
 }
+
+export interface BeforeAfterItem {
+  id: string;
+  title: BilingualText;
+  category: string;
+  beforeImageUrl: string;
+  afterImageUrl: string;
+  desc?: BilingualText;
+  sortOrder?: number;
+  tags?: string[];
+}
+
 
 export interface ProtocolStep {
   number: string;

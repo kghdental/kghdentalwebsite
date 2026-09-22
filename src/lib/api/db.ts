@@ -11,6 +11,7 @@ import {
   ClinicSettings,
   BlogPost,
   GalleryItem,
+  BeforeAfterItem,
   GoogleReview,
   WhyChooseCard,
   ClinicalCreedData,
@@ -855,50 +856,149 @@ export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<
 
 export const INITIAL_GALLERY: GalleryItem[] = [
   {
-    id: "gal-1",
-    title: { en: "Modern Dental Operatory Suite", bn: "আধুনিক ডেন্টাল চেয়ার ও ক্লিনিক্যাল রুম" },
-    category: "chamber",
+    id: "gal-clinic-1",
+    title: { en: "Doctor Consultation & Treatment", bn: "ডাক্তার ও রোগীর চেম্বার কেয়ার" },
+    category: "clinic",
+    desc: { en: "Specialized doctors performing precise procedure in modern surgical setup.", bn: "আধুনিক যন্ত্রপাতি ও সর্বোচ্চ সতর্কতায় চিকিৎসা প্রদান।" },
+    imageUrl: "/images/gallery/clinic-team-1.jpg",
+  },
+  {
+    id: "gal-case-1",
+    title: { en: "Tooth Extraction", bn: "দাঁত তোলা (টুথ এক্সট্রাকশন)" },
+    category: "clinic",
+    desc: { en: "Painless extraction of complicated molar tooth with pre-op radiograph.", bn: "ব্যথামুক্ত জটিল মোলার দাঁত তোলার সফল কেস।" },
+    imageUrl: "/images/gallery/tooth-extraction.jpg",
+  },
+  {
+    id: "gal-case-2",
+    title: { en: "Crown work", bn: "ক্রাউন প্রস্তুতি ও স্থাপন" },
+    category: "clinic",
+    desc: { en: "Custom ceramic crown fitting on precision dental cast model.", bn: "কাস্ট মডেলে তৈরি নিখুঁত সিরামিক ক্রাউন।" },
+    imageUrl: "/images/gallery/crown-work.jpg",
+  },
+  {
+    id: "gal-case-3",
+    title: { en: "Tooth Restoration", bn: "দাঁত ফিলিং ও রিস্টোরেশন" },
+    category: "clinic",
+    desc: { en: "Aesthetic tooth-colored composite restoration preserving original shape.", bn: "দাঁতের স্বাভাবিক রঙের কম্পোজিট রিস্টোরেশন।" },
+    imageUrl: "/images/gallery/tooth-restoration.jpg",
+  },
+  {
+    id: "gal-case-4",
+    title: { en: "Full Mouth Crown", bn: "ফুল মাউথ ক্রাউন রিহ্যাবিলিটেশন" },
+    category: "clinic",
+    desc: { en: "Comprehensive rehabilitation of dentition for functional mastication.", bn: "সম্পূর্ণ মুখের দাঁতের স্থায়ী প্রতিস্থাপন ও সৌন্দর্য ফিরিয়ে আনা।" },
+    imageUrl: "/images/gallery/full-mouth-crown.jpg",
+  },
+  {
+    id: "gal-case-5",
+    title: { en: "Dental bridge", bn: "ডেন্টাল ব্রিজ ও প্যানোরামিক এক্স-রে" },
+    category: "clinic",
+    desc: { en: "Multi-unit fixed bridge replacing missing teeth seamlessly.", bn: "হারানো দাঁতের জায়গায় ফিক্সড ডেন্টাল ব্রিজ।" },
+    imageUrl: "/images/gallery/dental-bridge-1.jpg",
+  },
+  {
+    id: "gal-case-6",
+    title: { en: "Dental bridge (Lower)", bn: "নিচের চোয়ালের ডেন্টাল ব্রিজ" },
+    category: "clinic",
+    desc: { en: "Lower arch fixed prosthesis providing optimal bite and aesthetics.", bn: "নিচের পাটির মজবুত ও স্থায়ী দাঁতের ব্রিজ।" },
+    imageUrl: "/images/gallery/dental-bridge-lower.jpg",
+  },
+  {
+    id: "gal-case-7",
+    title: { en: "Full Mouth Bridge (lower)", bn: "ফুল মাউথ লোয়ার ব্রিজ" },
+    category: "clinic",
+    desc: { en: "Lower arch comprehensive bridge restoration with OPG confirmation.", bn: "নিচের পাটির সম্পূর্ণ ব্রিজ প্রতিস্থাপন।" },
+    imageUrl: "/images/gallery/full-mouth-bridge-lower.jpg",
+  },
+  {
+    id: "gal-case-8",
+    title: { en: "Root Canal (lower molar)", bn: "রুট ক্যানেল চিকিৎসা (মোলার দাঁত)" },
+    category: "clinic",
+    desc: { en: "Microscopic endodontic canal shaping and hermetic seal.", bn: "মোলার দাঁতের সম্পূর্ণ জীবাণুমুক্ত রুট ক্যানেল ও সিলিং।" },
+    imageUrl: "/images/gallery/root-canal-1.jpg",
+  },
+  {
+    id: "gal-case-9",
+    title: { en: "Root Canal (lower molar)", bn: "রুট ক্যানেল (মোলার দাঁত - পর্যায় ২)" },
+    category: "clinic",
+    desc: { en: "Multi-canal root obturation radiograph showing clean root tips.", bn: "নিখুঁত ও শক্ত ক্যানেল সিলিংয়ের এক্স-রে।" },
+    imageUrl: "/images/gallery/root-canal-2.jpg",
+  },
+  {
+    id: "gal-case-10",
+    title: { en: "Root Canal (lower molar)", bn: "রুট ক্যানেল (মোলার দাঁত - পর্যায় ৩)" },
+    category: "clinic",
+    desc: { en: "High precision endodontic therapy preserving natural tooth root.", bn: "প্রাকৃতিক দাঁতের শিকড় বাঁচিয়ে সফল চিকিৎসা।" },
+    imageUrl: "/images/gallery/root-canal-3.jpg",
+  },
+  {
+    id: "gal-case-11",
+    title: { en: "Root Canal (lower molar)", bn: "রুট ক্যানেল (মোলার দাঁত - পর্যায় ৪)" },
+    category: "clinic",
+    desc: { en: "Final obturation x-ray verifying complete apico-coronal sealing.", bn: "চূড়ান্ত রুট ক্যানেল ফিনিশিং ও প্রটেকশন।" },
+    imageUrl: "/images/gallery/root-canal-4.jpg",
+  },
+  {
+    id: "gal-case-12",
+    title: { en: "Mid line Diastema", bn: "মিডলাইন ডায়াস্টেমা (দাঁতের ফাঁক)" },
+    category: "clinic",
+    desc: { en: "Midline spacing correction and smile alignment process.", bn: "সামনের দুটি দাঁতের মাঝখানের ফাঁক সংশোধনের প্রক্রিয়া।" },
+    imageUrl: "/images/gallery/midline-diastema.jpg",
+  },
+  {
+    id: "gal-case-13",
+    title: { en: "Zirconia Crown (Upper lower)", bn: "জিরকোনিয়া ক্রাউন (উপর ও নিচ)" },
+    category: "clinic",
+    desc: { en: "Premium zirconia crowns on both upper and lower arches.", bn: "উচ্চমানের জিরকোনিয়া ক্রাউনের মাধ্যমে সুন্দর হাসি।" },
+    imageUrl: "/images/gallery/zirconia-crown.jpg",
+  },
+  {
+    id: "gal-team-1",
+    title: { en: "Specialist Dental Surgeon & Team", bn: "বিশেষজ্ঞ ডেন্টাল সার্জন ও মেডিকেল টিম" },
+    category: "team",
+    desc: { en: "Dedicated specialist surgeons and certified nurses serving patient smile.", bn: "রোগীর হাসির যত্নে নিবেদিত সার্জন ও নার্সিং টিম।" },
+    imageUrl: "/images/doctors/dr-diean.jpg",
+  },
+  {
+    id: "gal-team-2",
+    title: { en: "Clinical Staff & Patient Support", bn: "ক্লিনিক্যাল টিম ও সাপোর্ট স্টাফ" },
+    category: "team",
+    desc: { en: "Warm and compassionate healthcare providers for patient comfort.", bn: "রোগীদের সর্বোচ্চ সহায়তায় প্রস্তুত দক্ষ টিম।" },
+    imageUrl: "/images/why-choose-us/specialist-care.jpg",
+  },
+  {
+    id: "gal-chamber-1",
+    title: { en: "Modern Dental Operatory Suite", bn: "আধুনিক ডেন্টাল চেয়ার ও রুম" },
+    category: "clinic",
     desc: { en: "Ergonomic clinical chairs with integrated digital display systems.", bn: "রোগীর সর্বোচ্চ আরামদায়ক পরিবেশ ও ডিজিটাল মনিটরিং ব্যবস্থা।" },
     imageUrl: "/images/departments/consultation-cta.jpg",
   },
   {
-    id: "gal-2",
-    title: { en: "Digital 3D Intraoral Scanner", bn: "ডিজিটাল থ্রিডি ইন্ট্রাওরাল স্ক্যানার" },
-    category: "treatments",
-    desc: { en: "Micron-precise digital impression taking without silicone putty.", bn: "কোনো আঠালো পেস্ট ছাড়াই সেকেন্ডে দাঁতের ডিজিটাল থ্রিডি মডেল।" },
-    imageUrl: "/images/departments/orthodontics.jpg",
-  },
-  {
-    id: "gal-3",
-    title: { en: "Hospital-Grade Class-B Autoclave", bn: "ক্লাস-বি অটোক্লেভ জীবাণুমুক্তকরণ ইউনিট" },
-    category: "sterilization",
+    id: "gal-chamber-2",
+    title: { en: "Hospital-Grade Class-B Autoclave", bn: "ক্লাস-বি অটোক্লেভ জীবাণুমুক্তকরণ" },
+    category: "clinic",
     desc: { en: "100% bacterial and viral eradication for every surgical instrument.", bn: "আন্তর্জাতিক মান অনুযায়ী প্রতিটি যন্ত্রের শতভাগ জীবাণুমুক্তকরণ।" },
     imageUrl: "/images/departments/oral-surgery.jpg",
-  },
-  {
-    id: "gal-4",
-    title: { en: "Clear Aligners Precision Planning", bn: "ক্লিয়ার অ্যালাইনার পরিকল্পনা" },
-    category: "treatments",
-    desc: { en: "Computerized orthodontic progression from initial visit to final smile.", bn: "কম্পিউটার নিয়ন্ত্রিত সুনির্দিষ্ট দাঁত সোজা করার পরিকল্পনা।" },
-    imageUrl: "/images/departments/endodontics.jpg",
-  },
-  {
-    id: "gal-5",
-    title: { en: "Digital OPG & Panoramic Radiography", bn: "ডিজিটাল ওপিজি ও প্যানোরামিক এক্স-রে" },
-    category: "treatments",
-    desc: { en: "Ultra-low radiation high definition jaw imaging suite.", bn: "স্বল্পমাত্রার রেডিয়েশনসহ চোয়ালের উচ্চমানের ডিজিটাল প্রতিচ্ছবি।" },
-    imageUrl: "/images/departments/periodontics.jpg",
-  },
-  {
-    id: "gal-6",
-    title: { en: "Patient Consultation Lounge", bn: "রোগী ও পরিবারের আরামদায়ক লাউঞ্জ" },
-    category: "chamber",
-    desc: { en: "Serene, quiet waiting environment designed for patient peace of mind.", bn: "মানসিক প্রশান্তিদায়ক শান্ত ও স্নিগ্ধ অপেক্ষার পরিবেশ।" },
-    imageUrl: "/images/departments/prosthodontics.jpg",
   },
 ];
 
 export async function fetchLiveGalleryItems(): Promise<GalleryItem[]> {
+  // Check client-side storage cache first if available
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_gallery_items");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
   if (!isSupabaseConfigured) return INITIAL_GALLERY;
 
   try {
@@ -911,13 +1011,24 @@ export async function fetchLiveGalleryItems(): Promise<GalleryItem[]> {
       return INITIAL_GALLERY;
     }
 
-    return data.map((d: any) => ({
+    const items = data.map((d: any) => ({
       id: d.id,
       title: { en: d.title_en, bn: d.title_bn },
       category: d.category,
-      desc: { en: d.desc_en, bn: d.desc_bn },
+      desc: { en: d.desc_en || "", bn: d.desc_bn || "" },
       imageUrl: d.image_url,
+      sortOrder: d.sort_order,
     }));
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("kgh_gallery_items", JSON.stringify(items));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return items;
   } catch (err) {
     console.error("fetchLiveGalleryItems error:", err);
     return INITIAL_GALLERY;
@@ -925,6 +1036,23 @@ export async function fetchLiveGalleryItems(): Promise<GalleryItem[]> {
 }
 
 export async function saveLiveGalleryItem(item: GalleryItem): Promise<{ success: boolean; data?: any; error?: string }> {
+  // Update client cache
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_gallery_items");
+      let list: GalleryItem[] = cached ? JSON.parse(cached) : [...INITIAL_GALLERY];
+      const idx = list.findIndex((i) => i.id === item.id);
+      if (idx >= 0) {
+        list[idx] = item;
+      } else {
+        list = [item, ...list];
+      }
+      localStorage.setItem("kgh_gallery_items", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
   if (!isSupabaseConfigured) return { success: true };
 
   try {
@@ -963,6 +1091,17 @@ export async function saveLiveGalleryItem(item: GalleryItem): Promise<{ success:
 }
 
 export async function deleteLiveGalleryItem(id: string): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_gallery_items");
+      let list: GalleryItem[] = cached ? JSON.parse(cached) : [...INITIAL_GALLERY];
+      list = list.filter((i) => i.id !== id);
+      localStorage.setItem("kgh_gallery_items", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
   if (!isSupabaseConfigured) return { success: true };
 
   try {
@@ -977,6 +1116,202 @@ export async function deleteLiveGalleryItem(id: string): Promise<{ success: bool
     return { success: false, error: err.message };
   }
 }
+
+// ==============================================================================
+// 5.1 BEFORE & AFTER API
+// ==============================================================================
+
+export const INITIAL_BEFORE_AFTER: BeforeAfterItem[] = [
+  {
+    id: "ba-scaling-1",
+    title: { en: "Scaling & Stain Removal", bn: "স্কেলিং" },
+    category: "Periodontics",
+    beforeImageUrl: "/images/gallery/scaling-before.jpg",
+    afterImageUrl: "/images/gallery/scaling-after.jpg",
+    desc: {
+      en: "Ultrasonic scaling removed severe supragingival tartar, plaque, and nicotine stains, restoring natural enamel tone and gum health.",
+      bn: "আল্ট্রাসনিক স্কেলিংয়ের মাধ্যমে দাঁতের জমে থাকা শক্ত পাথর ও দাগ দূর করে স্বাভাবিক রঙ ও সুস্থ মাড়ি ফিরিয়ে আনা হয়েছে।",
+    },
+    sortOrder: 1,
+  },
+  {
+    id: "ba-crown-1",
+    title: { en: "Crown (PFM & Zirconia)", bn: "ক্রাউন (পিএফএম ও জিরকোনিয়া)" },
+    category: "Prosthodontics",
+    beforeImageUrl: "/images/gallery/crown-before.jpg",
+    afterImageUrl: "/images/gallery/crown-after.jpg",
+    desc: {
+      en: "Severe tooth wear and decay restored with aesthetic porcelain-fused-to-metal and layered zirconia crowns for permanent chewing strength.",
+      bn: "ক্ষয়ে যাওয়া ও ভেঙে পড়া দাঁতে পিএফএম ও টেকসই জিরকোনিয়া ক্রাউন বসিয়ে সুন্দর ও শক্তিশালী কামড়ের অনুভূতি ফিরিয়ে দেওয়া হয়েছে।",
+    },
+    sortOrder: 2,
+  },
+  {
+    id: "ba-diastema-1",
+    title: { en: "Midline Diastema Closure", bn: "দাঁতের ফাঁক বন্ধকরণ ও স্মাইল মেকওভার" },
+    category: "Aesthetic",
+    beforeImageUrl: "/images/gallery/midline-diastema.jpg",
+    afterImageUrl: "/images/gallery/tooth-restoration.jpg",
+    desc: {
+      en: "Direct aesthetic resin composite layering closed the conspicuous front gap in a single gentle session without tooth structure reduction.",
+      bn: "কোনো প্রকার দাঁত না কেটে মাত্র এক সিটিংয়ে সামনের দাঁতের ফাঁক নিখুঁত নান্দনিক ফিলিং দিয়ে বন্ধ করা হয়েছে।",
+    },
+    sortOrder: 3,
+  },
+  {
+    id: "ba-rootcanal-1",
+    title: { en: "Root Canal & Crown Protection", bn: "রুট ক্যানেল ও ক্রাউন প্রটেকশন" },
+    category: "Endodontics",
+    beforeImageUrl: "/images/gallery/root-canal-1.jpg",
+    afterImageUrl: "/images/gallery/zirconia-crown.jpg",
+    desc: {
+      en: "Deep pulp infection completely resolved with hermetic gutta-percha obturation, reinforced with full-coverage zirconia crown.",
+      bn: "দাঁতের মারাত্মক ইনফেকশন নির্মূল করে সম্পূর্ণ ব্যথামুক্ত রুট ক্যানেল এবং জিরকোনিয়া ক্রাউন দিয়ে স্থায়ী সুরক্ষা প্রদান।",
+    },
+    sortOrder: 4,
+  },
+];
+
+export async function fetchLiveBeforeAfterItems(): Promise<BeforeAfterItem[]> {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_before_after_items");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return INITIAL_BEFORE_AFTER;
+
+  try {
+    const { data, error } = await supabase
+      .from("before_after_items")
+      .select("*")
+      .order("sort_order", { ascending: true });
+
+    if (error || !data || data.length === 0) {
+      return INITIAL_BEFORE_AFTER;
+    }
+
+    const items: BeforeAfterItem[] = data.map((d: any) => ({
+      id: d.id,
+      title: { en: d.title_en, bn: d.title_bn },
+      category: d.category || "General",
+      beforeImageUrl: d.before_image_url,
+      afterImageUrl: d.after_image_url,
+      desc: { en: d.desc_en || "", bn: d.desc_bn || "" },
+      sortOrder: d.sort_order || 0,
+    }));
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("kgh_before_after_items", JSON.stringify(items));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return items;
+  } catch (err) {
+    console.error("fetchLiveBeforeAfterItems error:", err);
+    return INITIAL_BEFORE_AFTER;
+  }
+}
+
+export async function saveLiveBeforeAfterItem(
+  item: BeforeAfterItem
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  // Update client cache
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_before_after_items");
+      let list: BeforeAfterItem[] = cached ? JSON.parse(cached) : [...INITIAL_BEFORE_AFTER];
+      const idx = list.findIndex((i) => i.id === item.id);
+      if (idx >= 0) {
+        list[idx] = item;
+      } else {
+        list = [...list, item];
+      }
+      localStorage.setItem("kgh_before_after_items", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return { success: true };
+
+  try {
+    const payload = {
+      title_en: item.title.en,
+      title_bn: item.title.bn,
+      category: item.category,
+      before_image_url: item.beforeImageUrl,
+      after_image_url: item.afterImageUrl,
+      desc_en: item.desc?.en || null,
+      desc_bn: item.desc?.bn || null,
+      sort_order: item.sortOrder ?? 0,
+    };
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
+
+    if (isUuid) {
+      const { data, error } = await supabase
+        .from("before_after_items")
+        .upsert({ id: item.id, ...payload })
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } else {
+      const { data, error } = await supabase
+        .from("before_after_items")
+        .insert(payload)
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    }
+  } catch (err: any) {
+    console.error("saveLiveBeforeAfterItem error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
+export async function deleteLiveBeforeAfterItem(
+  id: string
+): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_before_after_items");
+      let list: BeforeAfterItem[] = cached ? JSON.parse(cached) : [...INITIAL_BEFORE_AFTER];
+      list = list.filter((i) => i.id !== id);
+      localStorage.setItem("kgh_before_after_items", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return { success: true };
+
+  try {
+    const { error } = await supabase
+      .from("before_after_items")
+      .delete()
+      .eq("id", id);
+    if (error) throw error;
+    return { success: true };
+  } catch (err: any) {
+    console.error("deleteLiveBeforeAfterItem error:", err);
+    return { success: false, error: err.message };
+  }
+}
+
 
 // ==============================================================================
 // 6. REVIEWS API
@@ -1610,4 +1945,212 @@ export async function saveLiveClinicalCreed(creed: ClinicalCreedData): Promise<{
     return { success: true };
   }
 }
+
+// ==============================================================================
+// 10. BLOG POSTS API (With Rich Text & Media Support)
+// ==============================================================================
+
+export const ENRICHED_BLOG_POSTS: BlogPost[] = BLOG_POSTS.map((post, idx) => {
+  const covers = [
+    "/images/sub_services/3. 1. Root Canal Treatment.png",
+    "/images/sub_services/1. B. Clear Aligners.png",
+    "/images/sub_services/2.2. Impacted Wisdom Tooth.png",
+    "/images/sub_services/4. 1. Dental Crowns.png",
+    "/images/sub_services/5.8. Child Dental Check-up & Preventive Counselling.png",
+    "/images/sub_services/6. 3. Gum Disease.png",
+    "/images/sub_services/3. 9. Toothe whitening.png",
+    "/images/sub_services/1. c. Smile Design.png",
+    "/images/sub_services/6. 8. Bad Breath (Halitosis) Management.png",
+    "/images/sub_services/8. 5. Emergency Dental Care.png",
+  ];
+
+  return {
+    ...post,
+    coverImage: post.coverImage || covers[idx % covers.length] || "/images/departments/consultation-cta.jpg",
+    authorName: post.authorName || { en: "Dr. Diean Dental Specialists", bn: "ডাঃ দিয়েন ডেন্টাল বিশেষজ্ঞ টিম" },
+    authorRole: post.authorRole || { en: "Consultant Dental Surgeon", bn: "কনসালটেন্ট ডেন্টাল সার্জন" },
+    authorPhotoUrl: post.authorPhotoUrl || "/images/doctors/dr-diean.jpg",
+    tags: post.tags || [post.departmentSlug, "dental health", "kgh dental"],
+  };
+});
+
+export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
+  // Check client-side storage cache first for immediate local testing
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_blog_posts");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          return parsed;
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return ENRICHED_BLOG_POSTS;
+
+  try {
+    const { data, error } = await supabase
+      .from("blog_posts")
+      .select("*")
+      .order("created_at", { ascending: false });
+
+    if (error || !data || data.length === 0) {
+      return ENRICHED_BLOG_POSTS;
+    }
+
+    const livePosts: BlogPost[] = data.map((d: any) => ({
+      id: d.id,
+      slug: d.slug,
+      title: { en: d.title_en, bn: d.title_bn },
+      excerpt: { en: d.excerpt_en || "", bn: d.excerpt_bn || "" },
+      coverImage: d.cover_image || "/images/departments/consultation-cta.jpg",
+      departmentSlug: d.department_slug || "general-consultation",
+      departmentName: {
+        en: d.department_name_en || "General Consultation",
+        bn: d.department_name_bn || "সাধারণ পরামর্শ",
+      },
+      readTime: d.read_time || "5 min read",
+      date: d.date_str || "Updated 2026",
+      targetKeyword: d.target_keyword || "",
+      authorName: d.author_name_en
+        ? { en: d.author_name_en, bn: d.author_name_bn || d.author_name_en }
+        : { en: "KGH Clinical Specialists", bn: "কেজিএইচ ক্লিনিক্যাল বিশেষজ্ঞ টিম" },
+      authorRole: {
+        en: d.author_role_en || "Consultant Dental Surgeon",
+        bn: d.author_role_bn || "কনসালটেন্ট ডেন্টাল সার্জন",
+      },
+      authorPhotoUrl: d.author_photo_url || "/images/doctors/dr-diean.jpg",
+      tags: d.tags || [],
+      contentHtml: {
+        en: d.content_html_en || "",
+        bn: d.content_html_bn || "",
+      },
+      content: d.legacy_content || undefined,
+    }));
+
+    if (typeof window !== "undefined") {
+      try {
+        localStorage.setItem("kgh_blog_posts", JSON.stringify(livePosts));
+      } catch (e) {
+        // ignore
+      }
+    }
+
+    return livePosts;
+  } catch (err) {
+    console.warn("fetchLiveBlogPosts database fallback:", err);
+    return ENRICHED_BLOG_POSTS;
+  }
+}
+
+export async function fetchLiveBlogPostBySlug(slug: string): Promise<BlogPost | null> {
+  const allPosts = await fetchLiveBlogPosts();
+  return allPosts.find((p) => p.slug === slug) || null;
+}
+
+export async function saveLiveBlogPost(
+  post: BlogPost
+): Promise<{ success: boolean; data?: any; error?: string }> {
+  // Always update client storage cache so local testing works 100% immediately
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_blog_posts");
+      let list: BlogPost[] = cached ? JSON.parse(cached) : [...ENRICHED_BLOG_POSTS];
+      const idx = list.findIndex((p) => p.id === post.id || p.slug === post.slug);
+      if (idx >= 0) {
+        list[idx] = post;
+      } else {
+        list = [post, ...list];
+      }
+      localStorage.setItem("kgh_blog_posts", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return { success: true };
+
+  try {
+    const payload = {
+      slug: post.slug,
+      title_en: post.title.en,
+      title_bn: post.title.bn,
+      excerpt_en: post.excerpt.en,
+      excerpt_bn: post.excerpt.bn,
+      cover_image: post.coverImage || "/images/departments/consultation-cta.jpg",
+      department_slug: post.departmentSlug,
+      department_name_en: post.departmentName.en,
+      department_name_bn: post.departmentName.bn,
+      read_time: post.readTime,
+      date_str: post.date,
+      target_keyword: post.targetKeyword,
+      author_name_en: post.authorName?.en || "KGH Specialist",
+      author_name_bn: post.authorName?.bn || "কেজিএইচ বিশেষজ্ঞ",
+      author_role_en: post.authorRole?.en || "Dental Surgeon",
+      author_role_bn: post.authorRole?.bn || "ডেন্টাল সার্জন",
+      author_photo_url: post.authorPhotoUrl || "/images/doctors/dr-diean.jpg",
+      tags: post.tags || [],
+      content_html_en: post.contentHtml?.en || "",
+      content_html_bn: post.contentHtml?.bn || "",
+      legacy_content: post.content || null,
+      updated_at: new Date().toISOString(),
+    };
+
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post.id);
+
+    if (isUuid) {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .upsert({ id: post.id, ...payload }, { onConflict: "id" })
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    } else {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .upsert(payload, { onConflict: "slug" })
+        .select()
+        .single();
+      if (error) throw error;
+      return { success: true, data };
+    }
+  } catch (err: any) {
+    console.warn("saveLiveBlogPost database warning (local cache is active):", err.message);
+    return { success: true };
+  }
+}
+
+export async function deleteLiveBlogPost(id: string): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_blog_posts");
+      let list: BlogPost[] = cached ? JSON.parse(cached) : [...ENRICHED_BLOG_POSTS];
+      list = list.filter((p) => p.id !== id);
+      localStorage.setItem("kgh_blog_posts", JSON.stringify(list));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return { success: true };
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+      await supabase.from("blog_posts").delete().eq("id", id);
+    } else {
+      await supabase.from("blog_posts").delete().eq("slug", id);
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.warn("deleteLiveBlogPost database warning:", err);
+    return { success: true };
+  }
+}
+
 

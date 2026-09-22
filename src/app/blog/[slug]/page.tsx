@@ -1,143 +1,305 @@
 "use client";
 
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, notFound } from "next/navigation";
 import Link from "next/link";
-import { ArrowLeft, Clock, Tag, Calendar, ShieldCheck, CheckCircle2 } from "lucide-react";
-import { BLOG_POSTS } from "@/data/blog";
+import {
+  ArrowLeft,
+  Clock,
+  Tag,
+  Calendar,
+  ShieldCheck,
+  CheckCircle2,
+  Share2,
+  Bookmark,
+  Check,
+  Phone,
+  Sparkles,
+  ArrowRight,
+} from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CtaBanner } from "@/components/home/CtaBanner";
+import { fetchLiveBlogPosts, ENRICHED_BLOG_POSTS } from "@/lib/api/db";
+import { BlogPost } from "@/types";
 
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params?.slug as string;
-  const { t, isBn } = useLanguage();
+  const { isBn } = useLanguage();
 
-  const post = BLOG_POSTS.find((p) => p.slug === slug);
+  const [posts, setPosts] = useState<BlogPost[]>(ENRICHED_BLOG_POSTS);
+  const [post, setPost] = useState<BlogPost | null | undefined>(() =>
+    slug ? ENRICHED_BLOG_POSTS.find((p) => p.slug === slug) || null : undefined
+  );
+  const [isCopied, setIsCopied] = useState(false);
 
-  if (!post) {
+  useEffect(() => {
+    if (!slug) return;
+    fetchLiveBlogPosts().then((livePosts) => {
+      const all = livePosts && livePosts.length > 0 ? livePosts : ENRICHED_BLOG_POSTS;
+      setPosts(all);
+      const found = all.find((p) => p.slug === slug);
+      setPost(found || null);
+    });
+  }, [slug]);
+
+  if (post === undefined) {
+    return (
+      <div className="min-h-screen bg-[#f7f6f2] flex items-center justify-center py-24">
+        <div className="w-8 h-8 rounded-full border-2 border-zinc-300 border-t-zinc-900 animate-spin" />
+      </div>
+    );
+  }
+
+  if (post === null) {
     notFound();
   }
 
-  return (
-    <div className="min-h-screen bg-white">
-      {/* Header Banner */}
-      <section className="bg-zinc-50 border-b border-zinc-200 py-12 sm:py-16">
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-          <Link
-            href="/blog"
-            className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black mb-6 transition-colors"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span>{isBn ? "সকল গাইডে ফিরে যান" : "Back to All Guides"}</span>
-          </Link>
+  const currentPost = post;
 
-          <div className="flex items-center gap-3 mb-4">
-            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-zinc-200 text-zinc-800">
-              <Tag className="w-3 h-3 text-zinc-600" />
-              <span>{t(post.departmentName)}</span>
-            </span>
-            <span className="flex items-center gap-1 text-xs text-zinc-500">
-              <Clock className="w-3.5 h-3.5" />
-              <span>{post.readTime}</span>
-            </span>
-            <span className="text-xs text-zinc-400">• {post.date}</span>
+  const handleCopyLink = () => {
+    if (typeof window !== "undefined") {
+      navigator.clipboard.writeText(window.location.href);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2500);
+    }
+  };
+
+  const relatedPosts = posts
+    .filter((p) => p.id !== currentPost.id && p.departmentSlug === currentPost.departmentSlug)
+    .slice(0, 2);
+
+  const activeContentHtml = isBn ? currentPost.contentHtml?.bn : currentPost.contentHtml?.en;
+
+  return (
+    <div className="min-h-screen bg-[#f7f6f2] text-zinc-900">
+      {/* Header Banner */}
+      <section className="bg-white border-b border-zinc-200/80 pt-10 sm:pt-14 pb-8 sm:pb-12">
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-5">
+          {/* Breadcrumbs */}
+          <div className="flex items-center justify-between">
+            <Link
+              href="/blog"
+              className="inline-flex items-center gap-2 text-xs font-bold text-zinc-600 hover:text-black transition-colors"
+            >
+              <ArrowLeft className="w-4 h-4" />
+              <span>{isBn ? "সকল ডেন্টাল গাইডে ফিরে যান" : "Back to All Guides"}</span>
+            </Link>
+
+            <button
+              onClick={handleCopyLink}
+              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold bg-zinc-100 hover:bg-zinc-200 text-zinc-700 transition-colors cursor-pointer"
+            >
+              {isCopied ? (
+                <>
+                  <Check className="w-3.5 h-3.5 text-emerald-600" />
+                  <span className="text-emerald-700">{isBn ? "লিঙ্ক কপি হয়েছে" : "Link Copied!"}</span>
+                </>
+              ) : (
+                <>
+                  <Share2 className="w-3.5 h-3.5" />
+                  <span>{isBn ? "শেয়ার করুন" : "Share Guide"}</span>
+                </>
+              )}
+            </button>
           </div>
 
-          <h1 className="text-2xl sm:text-3xl lg:text-4xl font-extrabold text-zinc-950 tracking-tight leading-tight">
-            {t(post.title)}
+          {/* Badges */}
+          <div className="flex flex-wrap items-center gap-3">
+            <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
+              <Tag className="w-3 h-3 text-emerald-700" />
+              <span>{isBn ? currentPost.departmentName.bn : currentPost.departmentName.en}</span>
+            </span>
+
+            <span className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
+              <Clock className="w-3.5 h-3.5 text-zinc-400" />
+              <span>{currentPost.readTime}</span>
+            </span>
+
+            <span className="text-xs text-zinc-400">• {currentPost.date}</span>
+          </div>
+
+          {/* Title */}
+          <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-[#1a2f23] tracking-tight leading-tight">
+            {isBn ? currentPost.title.bn : currentPost.title.en}
           </h1>
 
-          <p className="text-base text-zinc-600 mt-4 leading-relaxed">
-            {t(post.excerpt)}
+          {/* Excerpt */}
+          <p className="text-base sm:text-lg text-zinc-600 leading-relaxed font-normal">
+            {isBn ? currentPost.excerpt.bn : currentPost.excerpt.en}
           </p>
+
+          {/* Doctor / Author Info */}
+          <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border-2 border-white shadow-sm shrink-0">
+                <img
+                  src={currentPost.authorPhotoUrl || "/images/doctors/dr-diean.jpg"}
+                  alt="Doctor"
+                  className="w-full h-full object-cover"
+                />
+              </div>
+              <div>
+                <p className="text-xs sm:text-sm font-bold text-zinc-950">
+                  {isBn ? currentPost.authorName?.bn : currentPost.authorName?.en}
+                </p>
+                <p className="text-[11px] text-zinc-500">
+                  {isBn ? currentPost.authorRole?.bn : currentPost.authorRole?.en}
+                </p>
+              </div>
+            </div>
+
+            <div className="hidden sm:flex items-center gap-1 text-[11px] text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-200">
+              <ShieldCheck className="w-4 h-4 text-emerald-700" />
+              <span>{isBn ? "ক্লিনিক্যাল যাচাইকৃত পরামর্শ" : "Clinically Verified Information"}</span>
+            </div>
+          </div>
         </div>
       </section>
 
-      {/* Article Body */}
+      {/* Featured Cover Hero Image */}
+      {currentPost.coverImage && (
+        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 -mt-2 pt-6">
+          <div className="aspect-16/9 rounded-3xl overflow-hidden shadow-md border border-zinc-200/80 bg-zinc-950">
+            <img
+              src={currentPost.coverImage}
+              alt={isBn ? currentPost.title.bn : currentPost.title.en}
+              className="w-full h-full object-cover"
+            />
+          </div>
+        </div>
+      )}
+
+      {/* Main Article Body */}
       <article className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          {/* Hook Callout */}
-          <div className="p-6 rounded-2xl bg-zinc-100 border-l-4 border-zinc-950 text-zinc-800 text-base font-medium italic leading-relaxed">
-            &ldquo;{t(post.content.hook)}&rdquo;
-          </div>
+          {/* If rich HTML is provided, render it cleanly */}
+          {activeContentHtml ? (
+            <div
+              className="kgh-blog-content bg-white p-6 sm:p-10 rounded-3xl border border-zinc-200/80 shadow-xs leading-relaxed text-zinc-800 text-sm sm:text-base space-y-4"
+              dangerouslySetInnerHTML={{ __html: activeContentHtml }}
+            />
+          ) : currentPost.content ? (
+            /* Structured Legacy View */
+            <div className="bg-white p-6 sm:p-10 rounded-3xl border border-zinc-200/80 shadow-xs space-y-8">
+              {/* Hook Callout */}
+              <div className="p-6 rounded-2xl bg-zinc-50 border-l-4 border-[#1c362b] text-zinc-800 text-base font-medium italic leading-relaxed">
+                &ldquo;{isBn ? currentPost.content.hook.bn : currentPost.content.hook.en}&rdquo;
+              </div>
 
-          {/* Overview */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-950">
-              {isBn ? "বিষয়টির সাধারণ পর্যালোচনা ও মূল সত্য" : "Clinical Overview & Key Facts"}
-            </h2>
-            <p className="text-sm sm:text-base text-zinc-700 leading-relaxed">
-              {t(post.content.overview)}
-            </p>
-          </div>
+              {/* Overview */}
+              <div className="space-y-3">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-950 tracking-tight">
+                  {isBn ? "বিষয়টির সাধারণ পর্যালোচনা ও মূল সত্য" : "Clinical Overview & Key Facts"}
+                </h2>
+                <p className="text-sm sm:text-base text-zinc-700 leading-relaxed">
+                  {isBn ? currentPost.content.overview.bn : currentPost.content.overview.en}
+                </p>
+              </div>
 
-          {/* Key Points or Symptoms */}
-          {post.content.symptomsOrOptions.length > 0 && (
-            <div className="space-y-4">
-              <h2 className="text-xl font-bold text-zinc-950">
-                {isBn ? "গুরুত্বপূর্ণ বিষয় ও লক্ষণসমূহ" : "Key Insights & Patient Options"}
-              </h2>
-              <div className="grid grid-cols-1 gap-3">
-                {post.content.symptomsOrOptions.map((item, idx) => (
-                  <div
-                    key={idx}
-                    className="p-4 rounded-xl bg-zinc-50 border border-zinc-200 flex items-start gap-3"
-                  >
-                    <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
-                    <p className="text-sm text-zinc-800 leading-relaxed">
-                      {t(item)}
-                    </p>
+              {/* Key Points or Symptoms */}
+              {currentPost.content.symptomsOrOptions.length > 0 && (
+                <div className="space-y-4">
+                  <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-950 tracking-tight">
+                    {isBn ? "গুরুত্বপূর্ণ বিষয় ও লক্ষণসমূহ" : "Key Insights & Patient Options"}
+                  </h2>
+                  <div className="grid grid-cols-1 gap-3">
+                    {currentPost.content.symptomsOrOptions.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="p-4 rounded-xl bg-zinc-50/70 border border-zinc-200 flex items-start gap-3"
+                      >
+                        <CheckCircle2 className="w-5 h-5 text-emerald-700 shrink-0 mt-0.5" />
+                        <p className="text-sm text-zinc-800 leading-relaxed">
+                          {isBn ? item.bn : item.en}
+                        </p>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                </div>
+              )}
+
+              {/* Procedure or Expectations */}
+              <div className="space-y-3">
+                <h2 className="text-xl sm:text-2xl font-extrabold text-zinc-950 tracking-tight">
+                  {isBn ? "চিকিৎসার সময় কী প্রত্যাশা করবেন?" : "What to Expect During Clinical Treatment"}
+                </h2>
+                <p className="text-sm sm:text-base text-zinc-700 leading-relaxed">
+                  {isBn
+                    ? currentPost.content.procedureOrExpectations.bn
+                    : currentPost.content.procedureOrExpectations.en}
+                </p>
+              </div>
+
+              {/* Prevention or Aftercare */}
+              <div className="p-6 rounded-2xl bg-emerald-50/80 border border-emerald-200 text-emerald-950 space-y-2">
+                <div className="flex items-center gap-2 font-bold text-sm text-emerald-900">
+                  <Sparkles className="w-4 h-4 text-emerald-700" />
+                  <span>{isBn ? "প্রতিরোধ ও পরবর্তী যত্ন" : "Prevention & Post-Op Aftercare"}</span>
+                </div>
+                <p className="text-xs sm:text-sm leading-relaxed text-emerald-900">
+                  {isBn
+                    ? currentPost.content.preventionOrAftercare.bn
+                    : currentPost.content.preventionOrAftercare.en}
+                </p>
               </div>
             </div>
-          )}
+          ) : null}
 
-          {/* Procedure or Expectations */}
-          <div className="space-y-4">
-            <h2 className="text-xl font-bold text-zinc-950">
-              {isBn ? "চিকিৎসার সময় কী প্রত্যাশা করবেন?" : "What to Expect During Clinical Treatment"}
-            </h2>
-            <p className="text-sm sm:text-base text-zinc-700 leading-relaxed">
-              {t(post.content.procedureOrExpectations)}
-            </p>
-          </div>
-
-          {/* Aftercare & Prevention */}
-          <div className="p-6 rounded-2xl bg-[#474B4E] text-white space-y-3 shadow-sm">
-            <div className="flex items-center gap-2">
-              <ShieldCheck className="w-5 h-5 text-amber-300" />
-              <h3 className="text-base font-bold text-white">
-                {isBn ? "প্রতিরোধ ও চিকিৎসা পরবর্তী যত্ন" : "Prevention & Post-Treatment Care"}
-              </h3>
-            </div>
-            <p className="text-xs sm:text-sm text-zinc-300 leading-relaxed">
-              {t(post.content.preventionOrAftercare)}
-            </p>
-          </div>
-
-          {/* Department Booking Callout */}
-          <div className="p-6 rounded-2xl bg-zinc-50 border border-zinc-200 flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div>
-              <h3 className="text-base font-bold text-zinc-950">
-                {isBn ? "এই বিষয়ে বিশেষজ্ঞের পরামর্শ প্রয়োজন?" : "Need an In-Person Specialist Evaluation?"}
-              </h3>
-              <p className="text-xs text-zinc-600 mt-1">
+          {/* Doctor Consultation Card */}
+          <div className="p-6 sm:p-8 rounded-3xl bg-[#1c362b] text-white flex flex-col sm:flex-row items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-2 text-center sm:text-left">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-emerald-300">
+                {isBn ? "ব্যক্তিগত ডেন্টাল পরামর্শ" : "Personalized Dental Consultation"}
+              </span>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-white">
                 {isBn
-                  ? "কেজিএইচ ডেন্টালের অভিজ্ঞ চিকিৎসকদের সাথে সরাসরি কনসালটেশন শিডিউল করুন।"
-                  : "Book a personalized clinical session with our board-certified dental consultants."}
+                  ? "আপনার দাঁতের সমস্যা নিয়ে বিশেষজ্ঞের পরামর্শ চান?"
+                  : "Have specific concerns about this dental issue?"}
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-300 max-w-lg">
+                {isBn
+                  ? "কেজিএইচ ডেন্টালের বিশেষজ্ঞ ডেন্টাল সার্জনদের সাথে সরাসরি কথা বলে সঠিক চিকিৎসা পরিকল্পনা গ্রহণ করুন।"
+                  : "Schedule a thorough clinical evaluation with our specialist team at Banani, Dhaka."}
               </p>
             </div>
 
             <Link
-              href={`/appointment?department=${post.departmentSlug}`}
-              className="inline-flex items-center gap-2 px-6 py-3 bg-[#474B4E] hover:bg-[#373a3c] active:bg-[#2b2d2f] text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs transition-colors shrink-0"
+              href="/appointment"
+              className="inline-flex items-center gap-2 px-6 py-3.5 bg-white hover:bg-zinc-100 text-zinc-950 text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors shrink-0"
             >
-              <Calendar className="w-4 h-4" />
-              <span>{isBn ? "কনসালটেশন বুক করুন" : "Schedule Appointment"}</span>
+              <span>{isBn ? "সিরিয়াল নিন" : "Book an Appointment"}</span>
+              <ArrowRight className="w-4 h-4" />
             </Link>
           </div>
+
+          {/* Related Articles */}
+          {relatedPosts.length > 0 && (
+            <div className="pt-6 space-y-4">
+              <h3 className="text-lg sm:text-xl font-bold text-zinc-950">
+                {isBn ? "একই বিভাগের অন্যান্য গাইড" : "Related Dental Guides"}
+              </h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {relatedPosts.map((r) => (
+                  <Link
+                    key={r.id}
+                    href={`/blog/${r.slug}`}
+                    className="p-5 rounded-2xl bg-white border border-zinc-200 hover:shadow-md transition-all block group"
+                  >
+                    <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
+                      {isBn ? r.departmentName.bn : r.departmentName.en}
+                    </span>
+                    <h4 className="text-sm font-bold text-zinc-900 group-hover:text-[#1c362b] mt-2 line-clamp-2">
+                      {isBn ? r.title.bn : r.title.en}
+                    </h4>
+                    <p className="text-xs text-zinc-500 line-clamp-2 mt-1">
+                      {isBn ? r.excerpt.bn : r.excerpt.en}
+                    </p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </article>
 
