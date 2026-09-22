@@ -16,6 +16,7 @@ import {
   AlertCircle,
   Sparkles,
   Printer,
+  Download,
   Copy,
   Check,
   ShieldCheck,
@@ -41,6 +42,7 @@ import { DEPARTMENTS } from "@/data/departments";
 import { useLanguage } from "@/context/LanguageContext";
 import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { UI_STRINGS } from "@/data/translations";
+import { downloadSlipPdf } from "@/lib/pdf-export";
 
 export function BookingWizard() {
   const searchParams = useSearchParams();
@@ -120,7 +122,9 @@ export function BookingWizard() {
   const [bookingRef, setBookingRef] = useState<string>("");
   const [isSubmitted, setIsSubmitted] = useState<boolean>(false);
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
-  const [showSlipPreview, setShowSlipPreview] = useState<boolean>(false);
+  const [showSlipPreview, setShowSlipPreview] = useState<boolean>(true);
+  const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+  const slipContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Calendar and slot collision states
   const [blockedDates, setBlockedDates] = useState<string[]>([]);
@@ -286,6 +290,7 @@ export function BookingWizard() {
       });
 
       setIsSubmitted(true);
+      setShowSlipPreview(true);
       setCurrentStep(3);
       if (typeof window !== "undefined") {
         window.scrollTo({ top: 250, behavior: "smooth" });
@@ -294,6 +299,7 @@ export function BookingWizard() {
       console.warn("Appointment confirmation warning:", err);
       // Even if network fails, booking ref is shown from local cache
       setIsSubmitted(true);
+      setShowSlipPreview(true);
       setCurrentStep(3);
     } finally {
       setIsSubmitting(false);
@@ -309,7 +315,7 @@ export function BookingWizard() {
     setPatientEmail("");
     setVisitReason("");
     setIsSubmitted(false);
-    setShowSlipPreview(false);
+    setShowSlipPreview(true);
   };
 
   const copyRefCode = () => {
@@ -317,6 +323,32 @@ export function BookingWizard() {
       navigator.clipboard.writeText(bookingRef);
       setCopiedRef(true);
       setTimeout(() => setCopiedRef(false), 2000);
+    }
+  };
+
+  const handleDownloadPdf = async () => {
+    if (!showSlipPreview) {
+      setShowSlipPreview(true);
+      await new Promise((resolve) => setTimeout(resolve, 100));
+    }
+    setIsDownloadingPdf(true);
+    try {
+      const el =
+        (slipContainerRef.current?.querySelector(".printable-slip-wrapper") as HTMLElement) ||
+        slipContainerRef.current ||
+        (document.getElementById("kgh-print-slip") as HTMLElement | null);
+
+      if (!el) {
+        console.warn("Slip element not found for PDF export.");
+        return;
+      }
+
+      const fileName = `KGH-Appointment-${bookingRef || "Slip"}.pdf`;
+      await downloadSlipPdf(el, fileName);
+    } catch (err) {
+      console.error("PDF download error:", err);
+    } finally {
+      setIsDownloadingPdf(false);
     }
   };
 
@@ -951,7 +983,30 @@ export function BookingWizard() {
                   <span>{isBn ? "অফিসিয়াল স্লিপ প্রিন্ট করুন" : "Print Official Slip"}</span>
                 </button>
 
-                {/* 2. Track Status Online Button */}
+                {/* 2. Download Official Slip PDF */}
+                <button
+                  type="button"
+                  onClick={handleDownloadPdf}
+                  disabled={isDownloadingPdf}
+                  className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-6 py-3 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+                >
+                  {isDownloadingPdf ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <Download className="w-4 h-4" />
+                  )}
+                  <span>
+                    {isDownloadingPdf
+                      ? isBn
+                        ? "পিডিএফ তৈরি হচ্ছে..."
+                        : "Generating PDF..."
+                      : isBn
+                      ? "ডাউনলোড স্লিপ (PDF)"
+                      : "Download Slip (PDF)"}
+                  </span>
+                </button>
+
+                {/* 3. Track Status Online Button */}
                 <Link
                   href={`/appointment/track?ref=${bookingRef}`}
                   className="w-full sm:w-auto inline-flex items-center justify-center gap-2 px-5 py-3 rounded-xl bg-white hover:bg-zinc-100 text-zinc-900 border border-zinc-300 text-xs font-bold shadow-xs transition-all"
@@ -960,7 +1015,7 @@ export function BookingWizard() {
                   <span>{isBn ? "সিরিয়াল ট্র্যাক করুন" : "Track Status"}</span>
                 </Link>
 
-                {/* 3. WhatsApp Assist */}
+                {/* 4. WhatsApp Assist */}
                 <a
                   href={`https://wa.me/${(clinicSettings.emergencyPhone || "8801700000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
                     `Hello KGH Dental, I booked an appointment.\nRef: ${bookingRef}\nPatient: ${patientName}\nDoctor: ${activeDoctor ? activeDoctor.name.en : ""}\nDate: ${selectedDateFormatted} at ${selectedTimeSlot}`
@@ -973,7 +1028,7 @@ export function BookingWizard() {
                   <span>{isBn ? UI_STRINGS.bookingWizard.confirmation.whatsappBtn.bn : UI_STRINGS.bookingWizard.confirmation.whatsappBtn.en}</span>
                 </a>
 
-                {/* 4. Book Another */}
+                {/* 5. Book Another */}
                 <button
                   type="button"
                   onClick={resetWizard}
@@ -983,7 +1038,7 @@ export function BookingWizard() {
                 </button>
               </div>
 
-              {/* 5. Preview Official Appointment Slip Button */}
+              {/* 6. Preview Official Appointment Slip Button */}
               <div className="pt-1 text-center">
                 <button
                   type="button"
@@ -1003,35 +1058,53 @@ export function BookingWizard() {
                 </button>
               </div>
 
-              {/* Printable Slip Render when preview toggled */}
+              {/* Printable Slip Render when preview toggled (Open by default) */}
               {showSlipPreview && (
                 <div className="mt-6 pt-6 border-t border-zinc-200">
                   <div className="flex items-center justify-between mb-4">
                     <span className="text-xs font-bold text-zinc-700">
-                      {isBn ? "প্রিন্ট প্রিভিউ:" : "Official Slip Preview:"}
+                      {isBn ? "অফিসিয়াল স্লিপ প্রিভিউ:" : "Official Slip Preview:"}
                     </span>
-                    <button
-                      type="button"
-                      onClick={() => {
-                        if (typeof window !== "undefined") window.print();
-                      }}
-                      className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#474B4E] text-white text-xs font-bold shadow-sm hover:bg-[#3b3f42] cursor-pointer"
-                    >
-                      <Printer className="w-3.5 h-3.5" />
-                      <span>{isBn ? "প্রিন্ট করুন" : "Print Now"}</span>
-                    </button>
+                    <div className="flex items-center gap-2">
+                      <button
+                        type="button"
+                        onClick={handleDownloadPdf}
+                        disabled={isDownloadingPdf}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-teal-700 hover:bg-teal-800 disabled:opacity-60 text-white text-xs font-bold shadow-sm transition-all cursor-pointer"
+                      >
+                        {isDownloadingPdf ? (
+                          <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                        ) : (
+                          <Download className="w-3.5 h-3.5" />
+                        )}
+                        <span>{isBn ? "ডাউনলোড (PDF)" : "Download PDF"}</span>
+                      </button>
+
+                      <button
+                        type="button"
+                        onClick={() => {
+                          if (typeof window !== "undefined") window.print();
+                        }}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-[#474B4E] text-white text-xs font-bold shadow-sm hover:bg-[#3b3f42] cursor-pointer"
+                      >
+                        <Printer className="w-3.5 h-3.5" />
+                        <span>{isBn ? "প্রিন্ট করুন" : "Print Now"}</span>
+                      </button>
+                    </div>
                   </div>
-                  <AppointmentPrintSlip
-                    bookingRef={bookingRef}
-                    doctorName={activeDoctor ? t(activeDoctor.name) : ""}
-                    departmentName={activeDoctor ? t(activeDoctor.specialty) : ""}
-                    date={selectedDateFormatted}
-                    timeSlot={selectedTimeSlot}
-                    patientName={patientName}
-                    patientPhone={patientPhone}
-                    patientEmail={patientEmail}
-                    symptoms={visitReason}
-                  />
+                  <div ref={slipContainerRef}>
+                    <AppointmentPrintSlip
+                      bookingRef={bookingRef}
+                      doctorName={activeDoctor ? t(activeDoctor.name) : ""}
+                      departmentName={activeDoctor ? t(activeDoctor.specialty) : ""}
+                      date={selectedDateFormatted}
+                      timeSlot={selectedTimeSlot}
+                      patientName={patientName}
+                      patientPhone={patientPhone}
+                      patientEmail={patientEmail}
+                      symptoms={visitReason}
+                    />
+                  </div>
                 </div>
               )}
 

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, Suspense } from "react";
+import React, { useState, useEffect, useRef, Suspense } from "react";
 import { useSearchParams } from "next/navigation";
 import Link from "next/link";
 import {
@@ -14,6 +14,8 @@ import {
   Clock3,
   XCircle,
   Printer,
+  Download,
+  Loader2,
   Copy,
   Check,
   MessageSquare,
@@ -26,6 +28,7 @@ import { AppointmentRecord } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
 import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { AppointmentPrintSlip } from "@/components/appointment/AppointmentPrintSlip";
+import { downloadSlipPdf } from "@/lib/pdf-export";
 
 function TrackContent() {
   const searchParams = useSearchParams();
@@ -39,6 +42,9 @@ function TrackContent() {
   const [results, setResults] = useState<AppointmentRecord[]>([]);
   const [copiedCode, setCopiedCode] = useState<string | null>(null);
   const [printingRecord, setPrintingRecord] = useState<AppointmentRecord | null>(null);
+  const [downloadingRecordId, setDownloadingRecordId] = useState<string | null>(null);
+  const [downloadingRecord, setDownloadingRecord] = useState<AppointmentRecord | null>(null);
+  const trackPdfContainerRef = useRef<HTMLDivElement>(null);
 
   const performSearch = async (searchTerm: string) => {
     if (!searchTerm.trim()) return;
@@ -70,10 +76,38 @@ function TrackContent() {
     performSearch(query);
   };
 
+
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     setCopiedCode(text);
     setTimeout(() => setCopiedCode(null), 2000);
+  };
+
+  const handleDownloadPdf = async (record: AppointmentRecord) => {
+    const recId = record.id || record.reference_code;
+    setDownloadingRecordId(recId);
+    setDownloadingRecord(record);
+    // Allow state to mount container
+    await new Promise((resolve) => setTimeout(resolve, 100));
+    try {
+      const el =
+        (trackPdfContainerRef.current?.querySelector(".printable-slip-wrapper") as HTMLElement) ||
+        trackPdfContainerRef.current ||
+        (document.getElementById("kgh-print-slip") as HTMLElement | null);
+
+      if (!el) {
+        console.warn("Slip element not found for PDF export.");
+        return;
+      }
+
+      const fileName = `KGH-Appointment-${record.reference_code || "Slip"}.pdf`;
+      await downloadSlipPdf(el, fileName);
+    } catch (err) {
+      console.error("Track PDF download error:", err);
+    } finally {
+      setDownloadingRecordId(null);
+      setDownloadingRecord(null);
+    }
   };
 
   const getStatusBadge = (status: string) => {
@@ -332,13 +366,35 @@ function TrackContent() {
                         <div className="flex items-center gap-2">
                           <button
                             type="button"
+                            onClick={() => handleDownloadPdf(record)}
+                            disabled={downloadingRecordId === (record.id || record.reference_code)}
+                            className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-xl bg-teal-700 hover:bg-teal-800 disabled:opacity-60 text-white text-xs font-bold transition-colors shadow-2xs cursor-pointer"
+                          >
+                            {downloadingRecordId === (record.id || record.reference_code) ? (
+                              <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                            ) : (
+                              <Download className="w-3.5 h-3.5" />
+                            )}
+                            <span>
+                              {downloadingRecordId === (record.id || record.reference_code)
+                                ? isBn
+                                  ? "ডাউনলোড হচ্ছে..."
+                                  : "Downloading..."
+                                : isBn
+                                ? "পিডিএফ ডাউনলোড"
+                                : "Download PDF"}
+                            </span>
+                          </button>
+
+                          <button
+                            type="button"
                             onClick={() => {
                               setPrintingRecord(record);
                               setTimeout(() => {
                                 window.print();
                               }, 150);
                             }}
-                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition-colors shadow-2xs"
+                            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-zinc-100 hover:bg-zinc-200 text-zinc-800 text-xs font-bold transition-colors shadow-2xs cursor-pointer"
                           >
                             <Printer className="w-3.5 h-3.5" />
                             <span>{isBn ? "স্লিপ প্রিন্ট" : "Print Pass"}</span>
@@ -378,6 +434,26 @@ function TrackContent() {
             patientName={printingRecord.patient_name}
             patientPhone={printingRecord.patient_phone}
             symptoms={printingRecord.symptoms}
+            paymentStatus="UNPAID"
+          />
+        </div>
+      )}
+
+      {/* Hidden offscreen container for PDF capture */}
+      {downloadingRecord && (
+        <div
+          ref={trackPdfContainerRef}
+          style={{ position: "fixed", left: "-9999px", top: 0, width: "800px", zIndex: -50 }}
+        >
+          <AppointmentPrintSlip
+            bookingRef={downloadingRecord.reference_code}
+            doctorName={downloadingRecord.doctor_name}
+            departmentName={downloadingRecord.department_name}
+            date={downloadingRecord.appointment_date}
+            timeSlot={downloadingRecord.time_slot}
+            patientName={downloadingRecord.patient_name}
+            patientPhone={downloadingRecord.patient_phone}
+            symptoms={downloadingRecord.symptoms}
             paymentStatus="UNPAID"
           />
         </div>
