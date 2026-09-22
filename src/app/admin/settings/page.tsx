@@ -14,25 +14,30 @@ import {
   QrCode,
   ExternalLink,
 } from "lucide-react";
-import { CLINIC_SETTINGS } from "@/data/settings";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { ClinicSettings } from "@/types";
-import { fetchLiveClinicSettings, saveLiveClinicSettings } from "@/lib/api/db";
 
 export default function AdminSettingsPage() {
-  const [settings, setSettings] = useState<ClinicSettings>(CLINIC_SETTINGS);
+  const { settings: globalSettings, updateSettings } = useClinicSettings();
+  const [settings, setSettings] = useState<ClinicSettings>(globalSettings);
   const [savedSuccess, setSavedSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
-    fetchLiveClinicSettings().then((liveSet) => {
-      if (liveSet) setSettings(liveSet);
-    });
-  }, []);
+    if (globalSettings) {
+      setSettings(globalSettings);
+    }
+  }, [globalSettings]);
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSavedSuccess(true);
-    await saveLiveClinicSettings(settings);
-    setTimeout(() => setSavedSuccess(false), 3000);
+    setIsSaving(true);
+    const success = await updateSettings(settings);
+    setIsSaving(false);
+    if (success) {
+      setSavedSuccess(true);
+      setTimeout(() => setSavedSuccess(false), 3500);
+    }
   };
 
   const handleAddPhone = () => {
@@ -59,45 +64,62 @@ export default function AdminSettingsPage() {
             Clinic Settings & Hours
           </h1>
           <p className="text-xs sm:text-sm text-zinc-600">
-            Configure chamber telephone lines, emergency hotlines, weekly opening shifts, and location address.
+            Configure chamber telephone lines, emergency hotlines, weekly opening shifts, email, and location address.
           </p>
         </div>
 
         {savedSuccess && (
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold animate-in fade-in">
             <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-            <span>Settings Saved Successfully!</span>
+            <span>Settings Saved & Synced Globally!</span>
           </div>
         )}
       </div>
 
       <form onSubmit={handleSave} className="space-y-6">
-        {/* Phone Numbers Card */}
+        {/* Phone Numbers & Contact Card */}
         <div className="p-6 sm:p-8 rounded-3xl bg-white border border-zinc-200 shadow-sm space-y-4">
           <div className="flex items-center gap-3 pb-3 border-b border-zinc-100">
             <div className="p-2.5 bg-zinc-950 text-white rounded-xl">
               <Phone className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-950">Chamber Phone Lines</h3>
-              <p className="text-xs text-zinc-500">Primary reception and booking hotlines</p>
+              <h3 className="text-base font-bold text-zinc-950">Chamber Phone Lines & Email</h3>
+              <p className="text-xs text-zinc-500">Primary reception hotlines and patient support email</p>
             </div>
           </div>
 
-          <div className="space-y-3 text-xs sm:text-sm">
-            <div>
-              <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
-                Emergency Hotline Number *
-              </label>
-              <input
-                type="text"
-                required
-                value={settings.emergencyPhone}
-                onChange={(e) =>
-                  setSettings({ ...settings, emergencyPhone: e.target.value })
-                }
-                className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-sm"
-              />
+          <div className="space-y-4 text-xs sm:text-sm">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                  Emergency Hotline Number *
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={settings.emergencyPhone}
+                  onChange={(e) =>
+                    setSettings({ ...settings, emergencyPhone: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-sm"
+                />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                  Reception / Inquiries Email *
+                </label>
+                <input
+                  type="email"
+                  required
+                  value={settings.email || "care@kghdental.com"}
+                  onChange={(e) =>
+                    setSettings({ ...settings, email: e.target.value })
+                  }
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-sm"
+                />
+              </div>
             </div>
 
             <div>
@@ -151,43 +173,81 @@ export default function AdminSettingsPage() {
               <Clock className="w-5 h-5" />
             </div>
             <div>
-              <h3 className="text-base font-bold text-zinc-950">Chamber Hours & Shifts</h3>
-              <p className="text-xs text-zinc-500">Weekly shift schedules shown on the website</p>
+              <h3 className="text-base font-bold text-zinc-950">Chamber Hours & Shifts (Bilingual)</h3>
+              <p className="text-xs text-zinc-500">Weekly shift schedules shown on the website (both EN & BN)</p>
             </div>
           </div>
 
-          <div className="space-y-3 text-xs sm:text-sm">
+          <div className="space-y-4 text-xs sm:text-sm">
             {settings.workingHours.map((wh, idx) => (
-              <div key={idx} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
-                    Days ({idx === 0 ? "Weekdays" : "Weekend"})
-                  </label>
-                  <input
-                    type="text"
-                    value={wh.days.en}
-                    onChange={(e) => {
-                      const updated = [...settings.workingHours];
-                      updated[idx].days.en = e.target.value;
-                      setSettings({ ...settings, workingHours: updated });
-                    }}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
-                  />
+              <div key={idx} className="p-4 rounded-2xl bg-zinc-50 border border-zinc-200 space-y-3">
+                <div className="text-xs font-bold text-zinc-900 uppercase">
+                  Shift Schedule #{idx + 1} ({idx === 0 ? "Weekdays" : "Weekend"})
                 </div>
-                <div>
-                  <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
-                    Hours / Shifts
-                  </label>
-                  <input
-                    type="text"
-                    value={wh.hours.en}
-                    onChange={(e) => {
-                      const updated = [...settings.workingHours];
-                      updated[idx].hours.en = e.target.value;
-                      setSettings({ ...settings, workingHours: updated });
-                    }}
-                    className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
-                  />
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                      Days Label (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={wh.days.en}
+                      onChange={(e) => {
+                        const updated = [...settings.workingHours];
+                        updated[idx].days.en = e.target.value;
+                        setSettings({ ...settings, workingHours: updated });
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                      Days Label (Bengali)
+                    </label>
+                    <input
+                      type="text"
+                      value={wh.days.bn || ""}
+                      onChange={(e) => {
+                        const updated = [...settings.workingHours];
+                        updated[idx].days.bn = e.target.value;
+                        setSettings({ ...settings, workingHours: updated });
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                      Hours / Shifts (English)
+                    </label>
+                    <input
+                      type="text"
+                      value={wh.hours.en}
+                      onChange={(e) => {
+                        const updated = [...settings.workingHours];
+                        updated[idx].hours.en = e.target.value;
+                        setSettings({ ...settings, workingHours: updated });
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-[11px] font-bold uppercase text-zinc-600 mb-1">
+                      Hours / Shifts (Bengali)
+                    </label>
+                    <input
+                      type="text"
+                      value={wh.hours.bn || ""}
+                      onChange={(e) => {
+                        const updated = [...settings.workingHours];
+                        updated[idx].hours.bn = e.target.value;
+                        setSettings({ ...settings, workingHours: updated });
+                      }}
+                      className="w-full px-3 py-2 rounded-xl border border-zinc-300 text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             ))}
@@ -390,10 +450,11 @@ export default function AdminSettingsPage() {
         <div className="flex justify-end">
           <button
             type="submit"
-            className="inline-flex items-center gap-2 px-8 py-3.5 bg-zinc-950 hover:bg-black text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all active:scale-98"
+            disabled={isSaving}
+            className="inline-flex items-center gap-2 px-8 py-3.5 bg-zinc-950 hover:bg-black disabled:bg-zinc-600 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-all active:scale-98 cursor-pointer disabled:cursor-not-allowed"
           >
             <Save className="w-4 h-4" />
-            <span>Save All Settings</span>
+            <span>{isSaving ? "Saving & Syncing..." : "Save All Settings"}</span>
           </button>
         </div>
       </form>

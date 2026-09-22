@@ -2,7 +2,7 @@
 
 import React from "react";
 import Image from "next/image";
-import { CLINIC_SETTINGS } from "@/data/settings";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 
 export interface AppointmentPrintSlipProps {
   bookingRef: string;
@@ -30,6 +30,7 @@ export function AppointmentPrintSlip({
   symptoms,
   paymentStatus = "UNPAID",
 }: AppointmentPrintSlipProps) {
+  const { settings } = useClinicSettings();
   const currentDateFormatted = new Date().toLocaleDateString("en-GB", {
     day: "numeric",
     month: "short",
@@ -57,10 +58,10 @@ export function AppointmentPrintSlip({
           </div>
         </div>
         <div className="text-right text-xs text-zinc-600 leading-relaxed">
-          <p className="font-bold text-zinc-950 text-sm tracking-tight">KGH DENTAL CARE</p>
-          <p>{CLINIC_SETTINGS.address.en}</p>
+          <p className="font-bold text-zinc-950 text-sm tracking-tight">{settings.name || "KGH DENTAL CARE"}</p>
+          <p>{settings.address.en}</p>
           <p className="font-medium text-zinc-800">
-            Hotline: {CLINIC_SETTINGS.phoneNumbers[0]} | Web: www.kghdental.com
+            Hotline: {settings.phoneNumbers[0]} | Web: www.kghdental.com
           </p>
         </div>
       </div>
@@ -160,7 +161,7 @@ export function AppointmentPrintSlip({
         <ul className="list-disc pl-4 space-y-0.5">
           <li>নির্ধারিত সময়ের কমপক্ষে ১০-১৫ মিনিট পূর্বে চেম্বারে উপস্থিত থাকার অনুরোধ করা হচ্ছে।</li>
           <li>রিসিপশনে এই স্লিপ অথবা রেফারেন্স কোডটি ({bookingRef}) প্রদর্শন করে সিরিয়াল নিশ্চিত করুন।</li>
-          <li>যেকোনো তথ্য বা সময় পরিবর্তনের জন্য আমাদের হেল্পলাইনে যোগাযোগ করুন: {CLINIC_SETTINGS.phoneNumbers[0]}।</li>
+          <li>যেকোনো তথ্য বা সময় পরিবর্তনের জন্য আমাদের হেল্পলাইনে যোগাযোগ করুন: {settings.phoneNumbers[0]}।</li>
         </ul>
       </div>
 

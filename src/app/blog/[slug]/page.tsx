@@ -36,12 +36,21 @@ export default function BlogPostPage() {
 
   useEffect(() => {
     if (!slug) return;
-    fetchLiveBlogPosts().then((livePosts) => {
-      const all = livePosts && livePosts.length > 0 ? livePosts : ENRICHED_BLOG_POSTS;
-      setPosts(all);
-      const found = all.find((p) => p.slug === slug);
-      setPost(found || null);
-    });
+    const load = () => {
+      fetchLiveBlogPosts().then((livePosts) => {
+        const all = livePosts && livePosts.length > 0 ? livePosts : ENRICHED_BLOG_POSTS;
+        setPosts(all);
+        const found = all.find((p) => p.slug === slug);
+        setPost(found || null);
+      });
+    };
+    load();
+    window.addEventListener("kgh_blogs_updated", load);
+    window.addEventListener("storage", load);
+    return () => {
+      window.removeEventListener("kgh_blogs_updated", load);
+      window.removeEventListener("storage", load);
+    };
   }, [slug]);
 
   if (post === undefined) {

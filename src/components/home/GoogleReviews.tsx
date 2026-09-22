@@ -18,14 +18,14 @@ import {
 } from "lucide-react";
 import { REVIEWS } from "@/data/reviews";
 import { useLanguage } from "@/context/LanguageContext";
-import { CLINIC_SETTINGS } from "@/data/settings";
-import { GoogleReview, ClinicSettings } from "@/types";
-import { fetchLiveReviews, fetchLiveClinicSettings } from "@/lib/api/db";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
+import { GoogleReview } from "@/types";
+import { fetchLiveReviews } from "@/lib/api/db";
 
 export function GoogleReviews() {
   const { t, isBn } = useLanguage();
+  const { settings: clinicSettings } = useClinicSettings();
   const [reviewsList, setReviewsList] = useState<GoogleReview[]>(REVIEWS);
-  const [clinicSettings, setClinicSettings] = useState<ClinicSettings>(CLINIC_SETTINGS);
   const [activeIndex, setActiveIndex] = useState<number>(0);
   const [isPaused, setIsPaused] = useState<boolean>(false);
   const [activeCategory, setActiveCategory] = useState<string>("all");
@@ -35,9 +35,6 @@ export function GoogleReviews() {
   useEffect(() => {
     fetchLiveReviews().then((live) => {
       if (live && live.length > 0) setReviewsList(live);
-    });
-    fetchLiveClinicSettings().then((set) => {
-      if (set) setClinicSettings(set);
     });
   }, []);
 
@@ -182,7 +179,7 @@ export function GoogleReviews() {
                   <div className="relative overflow-hidden rounded-xl bg-white p-2">
                     <img
                       src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-                        clinicSettings.googleReviewUrl || CLINIC_SETTINGS.googleReviewUrl
+                        clinicSettings.googleReviewUrl || "https://g.page/r/kgh-dental-review"
                       )}`}
                       alt="Google Review QR Code"
                       className="w-32 h-32 sm:w-36 sm:h-36 object-contain mx-auto transition-transform duration-300 group-hover/qr:scale-105"
@@ -196,7 +193,7 @@ export function GoogleReviews() {
 
                 {/* Direct Action Link */}
                 <a
-                  href={clinicSettings.googleReviewUrl || CLINIC_SETTINGS.googleReviewUrl}
+                  href={clinicSettings.googleReviewUrl || "https://g.page/r/kgh-dental-review"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="w-full inline-flex items-center justify-center gap-2 px-5 py-3 text-xs sm:text-sm font-bold text-white bg-[#2D3134] hover:bg-zinc-950 active:bg-black rounded-xl transition-all shadow-md hover:shadow-lg active:scale-98 group/btn"

@@ -785,6 +785,8 @@ export async function fetchLiveClinicSettings(): Promise<ClinicSettings> {
     const merged: ClinicSettings = {
       ...CLINIC_SETTINGS,
       ...(cached || {}),
+      name: data.name || cached?.name || CLINIC_SETTINGS.name,
+      email: data.email || cached?.email || CLINIC_SETTINGS.email,
       phoneNumbers: data.phone_numbers || cached?.phoneNumbers || CLINIC_SETTINGS.phoneNumbers,
       emergencyPhone: data.emergency_phone || cached?.emergencyPhone || CLINIC_SETTINGS.emergencyPhone,
       workingHours: data.working_hours || cached?.workingHours || CLINIC_SETTINGS.workingHours,
@@ -817,6 +819,9 @@ export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<
   if (typeof window !== "undefined") {
     try {
       localStorage.setItem("kgh_live_clinic_settings", JSON.stringify(settings));
+      // Dispatch custom event for instant cross-component sync on same page & storage event for cross-tabs
+      window.dispatchEvent(new CustomEvent("kgh_settings_updated", { detail: settings }));
+      window.dispatchEvent(new Event("storage"));
     } catch {
       // ignore
     }
@@ -827,6 +832,8 @@ export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<
   try {
     const payload = {
       id: 1,
+      name: settings.name || "KGH Dental",
+      email: settings.email || "care@kghdental.com",
       phone_numbers: settings.phoneNumbers,
       emergency_phone: settings.emergencyPhone,
       working_hours: settings.workingHours,
@@ -1975,7 +1982,69 @@ export const ENRICHED_BLOG_POSTS: BlogPost[] = BLOG_POSTS.map((post, idx) => {
 });
 
 export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
-  // Check client-side storage cache first for immediate local testing
+  // 1. If Supabase is configured, fetch fresh posts from Supabase first
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from("blog_posts")
+        .select("*")
+        .order("created_at", { ascending: false });
+
+      if (!error && data && data.length > 0) {
+        const livePosts: BlogPost[] = data.map((d: any) => {
+          const staticPost = ENRICHED_BLOG_POSTS.find((s) => s.slug === d.slug || s.id === d.id);
+          return {
+            id: d.id,
+            slug: d.slug,
+            title: {
+              en: d.title_en || staticPost?.title.en || "",
+              bn: d.title_bn || staticPost?.title.bn || "",
+            },
+            excerpt: {
+              en: d.excerpt_en || staticPost?.excerpt.en || "",
+              bn: d.excerpt_bn || staticPost?.excerpt.bn || "",
+            },
+            coverImage: d.cover_image || staticPost?.coverImage || "/images/departments/consultation-cta.jpg",
+            departmentSlug: d.department_slug || staticPost?.departmentSlug || "general-consultation",
+            departmentName: {
+              en: d.department_name_en || staticPost?.departmentName.en || "General Consultation",
+              bn: d.department_name_bn || staticPost?.departmentName.bn || "সাধারণ পরামর্শ",
+            },
+            readTime: d.read_time || staticPost?.readTime || "8 min read",
+            date: d.date_str || staticPost?.date || "Updated 2026",
+            targetKeyword: d.target_keyword || staticPost?.targetKeyword || "",
+            authorName: d.author_name_en
+              ? { en: d.author_name_en, bn: d.author_name_bn || d.author_name_en }
+              : { en: "Admin", bn: "এডমিন" },
+            authorRole: {
+              en: d.author_role_en || "Admin",
+              bn: d.author_role_bn || "এডমিন",
+            },
+            authorPhotoUrl: d.author_photo_url || staticPost?.authorPhotoUrl || "",
+            tags: d.tags || staticPost?.tags || [],
+            contentHtml: {
+              en: d.content_html_en || staticPost?.contentHtml?.en || "",
+              bn: d.content_html_bn || staticPost?.contentHtml?.bn || "",
+            },
+            content: d.legacy_content || staticPost?.content || undefined,
+          };
+        });
+
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("kgh_blog_posts", JSON.stringify(livePosts));
+          } catch (e) {
+            // ignore
+          }
+        }
+        return livePosts;
+      }
+    } catch (err) {
+      console.warn("fetchLiveBlogPosts Supabase query error, falling back:", err);
+    }
+  }
+
+  // 2. Client-side local cache fallback
   if (typeof window !== "undefined") {
     try {
       const cached = localStorage.getItem("kgh_blog_posts");
@@ -1997,64 +2066,8 @@ export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
     }
   }
 
-  if (!isSupabaseConfigured) return ENRICHED_BLOG_POSTS;
-
-  try {
-    const { data, error } = await supabase
-      .from("blog_posts")
-      .select("*")
-      .order("created_at", { ascending: false });
-
-    if (error || !data || data.length === 0) {
-      return ENRICHED_BLOG_POSTS;
-    }
-
-    const livePosts: BlogPost[] = data.map((d: any) => {
-      const staticPost = ENRICHED_BLOG_POSTS.find((s) => s.slug === d.slug || s.id === d.id);
-      return {
-        id: d.id,
-        slug: d.slug,
-        title: { en: d.title_en || staticPost?.title.en, bn: d.title_bn || staticPost?.title.bn },
-        excerpt: { en: d.excerpt_en || staticPost?.excerpt.en || "", bn: d.excerpt_bn || staticPost?.excerpt.bn || "" },
-        coverImage: d.cover_image || staticPost?.coverImage || "/images/departments/consultation-cta.jpg",
-        departmentSlug: d.department_slug || staticPost?.departmentSlug || "general-consultation",
-        departmentName: {
-          en: d.department_name_en || staticPost?.departmentName.en || "General Consultation",
-          bn: d.department_name_bn || staticPost?.departmentName.bn || "সাধারণ পরামর্শ",
-        },
-        readTime: d.read_time || staticPost?.readTime || "8 min read",
-        date: d.date_str || "Updated 2026",
-        targetKeyword: d.target_keyword || staticPost?.targetKeyword || "",
-        authorName: d.author_name_en
-          ? { en: d.author_name_en, bn: d.author_name_bn || d.author_name_en }
-          : { en: "Admin", bn: "এডমিন" },
-        authorRole: {
-          en: d.author_role_en || "Admin",
-          bn: d.author_role_bn || "এডমিন",
-        },
-        authorPhotoUrl: d.author_photo_url || "",
-        tags: d.tags || staticPost?.tags || [],
-        contentHtml: {
-          en: d.content_html_en || staticPost?.contentHtml?.en || "",
-          bn: d.content_html_bn || staticPost?.contentHtml?.bn || "",
-        },
-        content: d.legacy_content || staticPost?.content || undefined,
-      };
-    });
-
-    if (typeof window !== "undefined") {
-      try {
-        localStorage.setItem("kgh_blog_posts", JSON.stringify(livePosts));
-      } catch (e) {
-        // ignore
-      }
-    }
-
-    return livePosts;
-  } catch (err) {
-    console.warn("fetchLiveBlogPosts database fallback:", err);
-    return ENRICHED_BLOG_POSTS;
-  }
+  // 3. Static initial fallback
+  return ENRICHED_BLOG_POSTS;
 }
 
 export async function fetchLiveBlogPostBySlug(slug: string): Promise<BlogPost | null> {
@@ -2063,85 +2076,142 @@ export async function fetchLiveBlogPostBySlug(slug: string): Promise<BlogPost | 
 }
 
 export async function saveLiveBlogPost(
-  post: BlogPost
+  post: BlogPost,
+  originalSlug?: string,
+  originalId?: string
 ): Promise<{ success: boolean; data?: any; error?: string }> {
-  // Always update client storage cache so local testing works 100% immediately
+  const isExistingEdit = Boolean(originalSlug || originalId);
+  const targetId = originalId || post.id;
+  const isTargetUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(targetId);
+
+  // If new post without a valid UUID, generate one so Supabase primary key is well-formed
+  let finalPostId = post.id;
+  if (!isExistingEdit && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(finalPostId)) {
+    if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
+      finalPostId = crypto.randomUUID();
+    }
+  }
+  const postToSave: BlogPost = { ...post, id: finalPostId };
+
+  // Always update client storage cache so local testing and offline fallback work immediately
   if (typeof window !== "undefined") {
     try {
       const cached = localStorage.getItem("kgh_blog_posts");
       let list: BlogPost[] = cached ? JSON.parse(cached) : [...ENRICHED_BLOG_POSTS];
-      const idx = list.findIndex((p) => p.id === post.id || p.slug === post.slug);
+
+      const idx = list.findIndex(
+        (p) =>
+          (targetId && p.id === targetId) ||
+          (originalSlug && p.slug === originalSlug) ||
+          p.id === postToSave.id ||
+          p.slug === postToSave.slug
+      );
+
       if (idx >= 0) {
-        list[idx] = post;
+        list[idx] = postToSave;
       } else {
-        list = [post, ...list];
+        list = [postToSave, ...list];
       }
       localStorage.setItem("kgh_blog_posts", JSON.stringify(list));
+
+      // Dispatch custom reactive event for instant intra-tab and cross-tab update
+      window.dispatchEvent(new CustomEvent("kgh_blogs_updated", { detail: postToSave }));
+      window.dispatchEvent(new Event("storage"));
     } catch (e) {
       // ignore
     }
   }
 
-  if (!isSupabaseConfigured) return { success: true };
+  if (!isSupabaseConfigured) return { success: true, data: postToSave };
 
   try {
     const payload = {
-      slug: post.slug,
-      title_en: post.title.en,
-      title_bn: post.title.bn,
-      excerpt_en: post.excerpt.en,
-      excerpt_bn: post.excerpt.bn,
-      cover_image: post.coverImage || "/images/departments/consultation-cta.jpg",
-      department_slug: post.departmentSlug,
-      department_name_en: post.departmentName.en,
-      department_name_bn: post.departmentName.bn,
-      read_time: post.readTime,
-      date_str: post.date,
-      target_keyword: post.targetKeyword,
-      author_name_en: post.authorName?.en || "Admin",
-      author_name_bn: post.authorName?.bn || "এডমিন",
-      author_role_en: post.authorRole?.en || "Admin",
-      author_role_bn: post.authorRole?.bn || "এডমিন",
-      author_photo_url: post.authorPhotoUrl || "",
-      tags: post.tags || [],
-      content_html_en: post.contentHtml?.en || "",
-      content_html_bn: post.contentHtml?.bn || "",
-      legacy_content: post.content || null,
+      slug: postToSave.slug,
+      title_en: postToSave.title.en,
+      title_bn: postToSave.title.bn,
+      excerpt_en: postToSave.excerpt.en,
+      excerpt_bn: postToSave.excerpt.bn,
+      cover_image: postToSave.coverImage || "/images/departments/consultation-cta.jpg",
+      department_slug: postToSave.departmentSlug,
+      department_name_en: postToSave.departmentName.en,
+      department_name_bn: postToSave.departmentName.bn,
+      read_time: postToSave.readTime,
+      date_str: postToSave.date,
+      target_keyword: postToSave.targetKeyword,
+      author_name_en: postToSave.authorName?.en || "Admin",
+      author_name_bn: postToSave.authorName?.bn || "এডমিন",
+      author_role_en: postToSave.authorRole?.en || "Admin",
+      author_role_bn: postToSave.authorRole?.bn || "এডমিন",
+      author_photo_url: postToSave.authorPhotoUrl || "",
+      tags: postToSave.tags || [],
+      content_html_en: postToSave.contentHtml?.en || "",
+      content_html_bn: postToSave.contentHtml?.bn || "",
+      legacy_content: postToSave.content || null,
       updated_at: new Date().toISOString(),
     };
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(post.id);
+    if (isExistingEdit) {
+      // 1. UPDATE EXISTING POST: target specifically by targetId or originalSlug so NO duplicate row is created!
+      let query = supabase.from("blog_posts").update(payload as any);
+      if (isTargetUuid) {
+        query = query.eq("id", targetId);
+      } else if (originalSlug) {
+        query = query.eq("slug", originalSlug);
+      } else {
+        query = query.eq("slug", postToSave.slug);
+      }
 
-    if (isUuid) {
-      const { data, error } = await supabase
-        .from("blog_posts")
-        .upsert({ id: post.id, ...payload }, { onConflict: "id" })
-        .select()
-        .single();
-      if (error) throw error;
-      return { success: true, data };
+      const { data, error } = await query.select();
+      if (error || !data || data.length === 0) {
+        // Fallback upsert if matching row was missing in DB
+        const { data: upsertData, error: upsertError } = await supabase
+          .from("blog_posts")
+          .upsert(
+            (isTargetUuid ? { id: targetId, ...payload } : payload) as any,
+            { onConflict: isTargetUuid ? "id" : "slug" }
+          )
+          .select()
+          .single();
+        if (upsertError) throw upsertError;
+        return { success: true, data: upsertData };
+      }
+      return { success: true, data: data[0] };
     } else {
+      // 2. INSERT NEW POST
+      const insertPayload = isTargetUuid
+        ? { id: postToSave.id, ...payload }
+        : payload;
+
       const { data, error } = await supabase
         .from("blog_posts")
-        .upsert(payload, { onConflict: "slug" })
+        .upsert(insertPayload as any, { onConflict: "slug" })
         .select()
         .single();
       if (error) throw error;
       return { success: true, data };
     }
   } catch (err: any) {
-    console.warn("saveLiveBlogPost database warning (local cache is active):", err.message);
-    return { success: true };
+    console.warn("saveLiveBlogPost database error (local state active):", err?.message || err);
+    return { success: true, data: postToSave };
   }
 }
 
-export async function deleteLiveBlogPost(id: string): Promise<{ success: boolean; error?: string }> {
+export async function deleteLiveBlogPost(
+  id: string,
+  slug?: string
+): Promise<{ success: boolean; error?: string }> {
   if (typeof window !== "undefined") {
     try {
       const cached = localStorage.getItem("kgh_blog_posts");
       let list: BlogPost[] = cached ? JSON.parse(cached) : [...ENRICHED_BLOG_POSTS];
-      list = list.filter((p) => p.id !== id);
+      list = list.filter((p) => p.id !== id && (!slug || p.slug !== slug));
       localStorage.setItem("kgh_blog_posts", JSON.stringify(list));
+
+      // Dispatch custom reactive event for instant update
+      window.dispatchEvent(
+        new CustomEvent("kgh_blogs_updated", { detail: { id, slug, deleted: true } })
+      );
+      window.dispatchEvent(new Event("storage"));
     } catch (e) {
       // ignore
     }
@@ -2153,9 +2223,13 @@ export async function deleteLiveBlogPost(id: string): Promise<{ success: boolean
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
     if (isUuid) {
       await supabase.from("blog_posts").delete().eq("id", id);
-    } else {
-      await supabase.from("blog_posts").delete().eq("slug", id);
     }
+
+    const targetSlug = slug || (!isUuid ? id : undefined);
+    if (targetSlug) {
+      await supabase.from("blog_posts").delete().eq("slug", targetSlug);
+    }
+
     return { success: true };
   } catch (err: any) {
     console.warn("deleteLiveBlogPost database warning:", err);

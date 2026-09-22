@@ -3,7 +3,7 @@
 import React from "react";
 import { X, QrCode, Star, ExternalLink } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { CLINIC_SETTINGS } from "@/data/settings";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 
 interface ReviewQrModalProps {
   isOpen: boolean;
@@ -12,6 +12,7 @@ interface ReviewQrModalProps {
 
 export function ReviewQrModal({ isOpen, onClose }: ReviewQrModalProps) {
   const { isBn } = useLanguage();
+  const { settings } = useClinicSettings();
 
   if (!isOpen) return null;
 
@@ -53,7 +54,7 @@ export function ReviewQrModal({ isOpen, onClose }: ReviewQrModalProps) {
         <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl inline-block mb-6 shadow-inner">
           <img
             src={`https://api.qrserver.com/v1/create-qr-code/?size=180x180&data=${encodeURIComponent(
-              CLINIC_SETTINGS.googleReviewUrl
+              settings.googleReviewUrl || "https://g.page/r/kgh-dental-review"
             )}`}
             alt="Google Review QR Code"
             className="w-40 h-40 object-contain mx-auto"
@@ -65,7 +66,7 @@ export function ReviewQrModal({ isOpen, onClose }: ReviewQrModalProps) {
 
         <div className="flex flex-col sm:flex-row gap-3">
           <a
-            href={CLINIC_SETTINGS.googleReviewUrl}
+            href={settings.googleReviewUrl || "https://g.page/r/kgh-dental-review"}
             target="_blank"
             rel="noopener noreferrer"
             className="flex-1 inline-flex items-center justify-center gap-2 px-5 py-3 text-sm font-semibold text-white bg-zinc-900 hover:bg-zinc-800 rounded-xl transition-all shadow-sm"

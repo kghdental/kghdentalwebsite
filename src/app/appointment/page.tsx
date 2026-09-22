@@ -4,11 +4,12 @@ import React, { Suspense } from "react";
 import Link from "next/link";
 import { BookingWizard } from "@/components/appointment/BookingWizard";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { Phone, Clock, ShieldCheck } from "lucide-react";
-import { CLINIC_SETTINGS } from "@/data/settings";
 
 function AppointmentContent() {
   const { isBn } = useLanguage();
+  const { settings } = useClinicSettings();
 
   return (
     <div className="min-h-screen bg-zinc-50/60 py-16 sm:py-20">
@@ -61,8 +62,8 @@ function AppointmentContent() {
             <Phone className="w-5 h-5 text-zinc-900 shrink-0" />
             <span>
               {isBn
-                ? `হেল্পলাইন: ${CLINIC_SETTINGS.emergencyPhone}`
-                : `Need Help? Call ${CLINIC_SETTINGS.emergencyPhone}`}
+                ? `হেল্পলাইন: ${settings.emergencyPhone}`
+                : `Need Help? Call ${settings.emergencyPhone}`}
             </span>
           </div>
         </div>

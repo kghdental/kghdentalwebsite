@@ -12,11 +12,20 @@ export function BlogSection() {
   const [posts, setPosts] = useState<BlogPost[]>(ENRICHED_BLOG_POSTS);
 
   useEffect(() => {
-    fetchLiveBlogPosts().then((live) => {
-      if (live && live.length > 0) {
-        setPosts(live);
-      }
-    });
+    const load = () => {
+      fetchLiveBlogPosts().then((live) => {
+        if (live && live.length > 0) {
+          setPosts(live);
+        }
+      });
+    };
+    load();
+    window.addEventListener("kgh_blogs_updated", load);
+    window.addEventListener("storage", load);
+    return () => {
+      window.removeEventListener("kgh_blogs_updated", load);
+      window.removeEventListener("storage", load);
+    };
   }, []);
 
   // Display top 4 articles in a single row

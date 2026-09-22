@@ -12,11 +12,12 @@ import {
   MessageSquare,
   ExternalLink,
 } from "lucide-react";
-import { CLINIC_SETTINGS } from "@/data/settings";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 
 export default function ContactPage() {
   const { t, isBn } = useLanguage();
+  const { settings } = useClinicSettings();
 
   const [formData, setFormData] = useState({
     name: "",
@@ -75,18 +76,18 @@ export default function ContactPage() {
                       {isBn ? "চেম্বার ফোন ও হটলাইন" : "Chamber Phone Lines"}
                     </span>
                     <h3 className="text-base font-bold text-zinc-950">
-                      {CLINIC_SETTINGS.phoneNumbers[0]}
+                      {settings.phoneNumbers[0]}
                     </h3>
                   </div>
                 </div>
                 <p className="text-xs text-zinc-600">
                   {isBn
-                    ? "জরুরি হটলাইন: " + CLINIC_SETTINGS.emergencyPhone
-                    : "Emergency Direct Line: " + CLINIC_SETTINGS.emergencyPhone}
+                    ? "জরুরি হটলাইন: " + settings.emergencyPhone
+                    : "Emergency Direct Line: " + settings.emergencyPhone}
                 </p>
                 <div className="pt-2">
                   <a
-                    href={`https://wa.me/8801700000000?text=${encodeURIComponent("Hello KGH Dental, I have an inquiry.")}`}
+                    href={settings.socialLinks?.whatsapp || `https://wa.me/${(settings.emergencyPhone || "8801700000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent("Hello KGH Dental, I have an inquiry.")}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-2 text-xs font-bold text-emerald-700 hover:text-emerald-800"
@@ -113,7 +114,7 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <div className="space-y-2 text-xs text-zinc-700 pt-1">
-                  {CLINIC_SETTINGS.workingHours.map((wh, idx) => (
+                  {settings.workingHours.map((wh, idx) => (
                     <div key={idx} className="flex justify-between border-b border-zinc-200 pb-1.5">
                       <span className="font-semibold">{t(wh.days)}</span>
                       <span>{t(wh.hours)}</span>
@@ -138,11 +139,11 @@ export default function ContactPage() {
                   </div>
                 </div>
                 <p className="text-xs text-zinc-700 leading-relaxed font-medium">
-                  {t(CLINIC_SETTINGS.address)}
+                  {t(settings.address)}
                 </p>
                 <div className="pt-1">
                   <a
-                    href={CLINIC_SETTINGS.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
+                    href={settings.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-700 hover:text-emerald-800 transition-colors"
@@ -276,7 +277,7 @@ export default function ContactPage() {
                       </h4>
                     </div>
                     <a
-                      href={CLINIC_SETTINGS.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
+                      href={settings.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 text-white text-xs font-bold rounded-xl transition-all shadow-xs self-start sm:self-auto"

@@ -41,13 +41,24 @@ export default function AdminBlogPage() {
 
   // Cover Image picker modal
   const [isCoverPickerOpen, setIsCoverPickerOpen] = useState(false);
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchLiveBlogPosts().then((live) => {
-      if (live && live.length > 0) {
-        setPosts(live);
-      }
-    });
+    const loadBlogs = () => {
+      fetchLiveBlogPosts().then((live) => {
+        if (live && live.length > 0) {
+          setPosts(live);
+        }
+      });
+    };
+    loadBlogs();
+
+    window.addEventListener("kgh_blogs_updated", loadBlogs);
+    window.addEventListener("storage", loadBlogs);
+    return () => {
+      window.removeEventListener("kgh_blogs_updated", loadBlogs);
+      window.removeEventListener("storage", loadBlogs);
+    };
   }, []);
 
   const [formData, setFormData] = useState<BlogPost>({
@@ -70,7 +81,9 @@ export default function AdminBlogPage() {
 
   const handleOpenAdd = () => {
     setEditingPost(null);
-    const newId = `blog-${Date.now()}`;
+    const newId = typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+      ? crypto.randomUUID()
+      : `blog-${Date.now()}`;
     setFormData({
       id: newId,
       slug: `guide-${Date.now()}`,
@@ -153,10 +166,12 @@ ${
     setIsModalOpen(true);
   };
 
-  const handleDelete = async (id: string) => {
-    if (confirm("Are you sure you want to delete this blog article?")) {
-      setPosts(posts.filter((p) => p.id !== id));
-      await deleteLiveBlogPost(id);
+  const handleDelete = async (post: BlogPost) => {
+    if (confirm(`Are you sure you want to delete "${post.title.en || post.slug}"? This will delete it permanently from the database.`)) {
+      setPosts(posts.filter((p) => p.id !== post.id && p.slug !== post.slug));
+      await deleteLiveBlogPost(post.id, post.slug);
+      setSaveStatus("Article deleted from database successfully.");
+      setTimeout(() => setSaveStatus(null), 3500);
     }
   };
 
@@ -170,19 +185,33 @@ ${
       .split(/\s+/).length;
     const estTime = `${Math.max(3, Math.ceil(wordCount / 160))} min read`;
 
-    const updatedPost = {
+    const updatedPost: BlogPost = {
       ...formData,
       readTime: estTime,
     };
 
+    const originalSlug = editingPost ? editingPost.slug : undefined;
+    const originalId = editingPost ? editingPost.id : undefined;
+
     if (editingPost) {
-      setPosts(posts.map((p) => (p.id === editingPost.id ? updatedPost : p)));
+      // In-place update: match by existing ID or slug
+      setPosts(
+        posts.map((p) =>
+          (originalId && p.id === originalId) || (originalSlug && p.slug === originalSlug)
+            ? updatedPost
+            : p
+        )
+      );
     } else {
       setPosts([updatedPost, ...posts]);
     }
 
     setIsModalOpen(false);
-    await saveLiveBlogPost(updatedPost);
+    setSaveStatus(editingPost ? "Article updated successfully in database!" : "New article published successfully!");
+    setTimeout(() => setSaveStatus(null), 3500);
+
+    // Save with explicit originalSlug & originalId to prevent duplicate row creation
+    await saveLiveBlogPost(updatedPost, originalSlug, originalId);
 
     const refreshed = await fetchLiveBlogPosts();
     if (refreshed && refreshed.length > 0) {
@@ -227,13 +256,22 @@ ${
           </p>
         </div>
 
-        <button
-          onClick={handleOpenAdd}
-          className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
-        >
-          <Plus className="w-4 h-4" />
-          <span>Write New Article</span>
-        </button>
+        <div className="flex items-center gap-3">
+          {saveStatus && (
+            <div className="inline-flex items-center gap-2 px-3.5 py-2 rounded-xl bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-bold animate-in fade-in">
+              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+              <span>{saveStatus}</span>
+            </div>
+          )}
+
+          <button
+            onClick={handleOpenAdd}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-950 hover:bg-black text-white text-xs font-bold shadow-xs transition-colors self-start sm:self-auto cursor-pointer"
+          >
+            <Plus className="w-4 h-4" />
+            <span>Write New Article</span>
+          </button>
+        </div>
       </div>
 
       {/* Filter and Search Bar */}
@@ -324,7 +362,7 @@ ${
                     <span>Edit</span>
                   </button>
                   <button
-                    onClick={() => handleDelete(post.id)}
+                    onClick={() => handleDelete(post)}
                     className="p-1.5 text-zinc-400 hover:text-red-600 rounded-lg hover:bg-red-50 cursor-pointer"
                   >
                     <Trash2 className="w-4 h-4" />

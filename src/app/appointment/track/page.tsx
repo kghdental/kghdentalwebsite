@@ -24,7 +24,7 @@ import {
 import { fetchAppointmentsByQuery } from "@/lib/api/db";
 import { AppointmentRecord } from "@/types";
 import { useLanguage } from "@/context/LanguageContext";
-import { CLINIC_SETTINGS } from "@/data/settings";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { AppointmentPrintSlip } from "@/components/appointment/AppointmentPrintSlip";
 
 function TrackContent() {
@@ -32,6 +32,7 @@ function TrackContent() {
   const initialRef = searchParams.get("ref") || "";
 
   const { t, isBn } = useLanguage();
+  const { settings } = useClinicSettings();
   const [query, setQuery] = useState(initialRef);
   const [loading, setLoading] = useState(false);
   const [searched, setSearched] = useState(false);
@@ -185,12 +186,12 @@ function TrackContent() {
               </p>
               <div className="pt-2">
                 <a
-                  href={`tel:${CLINIC_SETTINGS.emergencyPhone}`}
+                  href={`tel:${settings.emergencyPhone}`}
                   className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-zinc-900 text-white text-xs font-bold shadow-xs hover:bg-black transition-colors"
                 >
                   <Phone className="w-4 h-4" />
                   <span>
-                    {isBn ? `হেল্পলাইনে কল করুন: ${CLINIC_SETTINGS.emergencyPhone}` : `Call Helpline: ${CLINIC_SETTINGS.emergencyPhone}`}
+                    {isBn ? `হেল্পলাইনে কল করুন: ${settings.emergencyPhone}` : `Call Helpline: ${settings.emergencyPhone}`}
                   </span>
                 </a>
               </div>
@@ -205,7 +206,7 @@ function TrackContent() {
                     ? `মোট ${results.length}টি বুকিং পাওয়া গেছে`
                     : `Found ${results.length} booking record(s)`}
                 </span>
-                <span className="font-semibold text-zinc-900">{CLINIC_SETTINGS.name}</span>
+                <span className="font-semibold text-zinc-900">{settings.name}</span>
               </div>
 
               {results.map((record) => {
@@ -325,7 +326,7 @@ function TrackContent() {
                       <div className="pt-4 border-t border-zinc-100 flex flex-wrap items-center justify-between gap-3">
                         <div className="flex items-center gap-2 text-[11px] text-zinc-500">
                           <Building className="w-3.5 h-3.5 text-zinc-400" />
-                          <span>{isBn ? t(CLINIC_SETTINGS.address) : CLINIC_SETTINGS.address.en}</span>
+                          <span>{isBn ? t(settings.address) : settings.address.en}</span>
                         </div>
 
                         <div className="flex items-center gap-2">

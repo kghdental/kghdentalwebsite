@@ -6,7 +6,7 @@ import { X, ChevronDown, Phone, Calendar, Globe } from "lucide-react";
 import { DEPARTMENTS } from "@/data/departments";
 import { DepartmentIcon } from "@/components/shared/DepartmentIcon";
 import { useLanguage } from "@/context/LanguageContext";
-import { CLINIC_SETTINGS } from "@/data/settings";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -15,6 +15,7 @@ interface MobileNavProps {
 
 export function MobileNav({ isOpen, onClose }: MobileNavProps) {
   const { language, setLanguage, t, isBn } = useLanguage();
+  const { settings } = useClinicSettings();
   const [isServicesOpen, setIsServicesOpen] = useState(false);
 
   if (!isOpen) return null;
@@ -180,11 +181,11 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
           </Link>
 
           <a
-            href={`tel:${CLINIC_SETTINGS.phoneNumbers[0]}`}
+            href={`tel:${settings.phoneNumbers[0]}`}
             className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-100 text-xs font-semibold rounded-xl"
           >
             <Phone className="w-4 h-4 text-zinc-600" />
-            <span>{CLINIC_SETTINGS.phoneNumbers[0]}</span>
+            <span>{settings.phoneNumbers[0]}</span>
           </a>
         </div>
       </div>

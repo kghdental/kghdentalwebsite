@@ -4,11 +4,12 @@ import React from "react";
 import Link from "next/link";
 import { Calendar, Phone } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { UI_STRINGS } from "@/data/translations";
-import { CLINIC_SETTINGS } from "@/data/settings";
 
 export function CtaBanner() {
   const { isBn } = useLanguage();
+  const { settings } = useClinicSettings();
 
   return (
     <section className="py-20 sm:py-28 lg:py-32 bg-[#E9E8F0] text-zinc-900 relative overflow-hidden border-t border-zinc-300/80">
@@ -39,17 +40,17 @@ export function CtaBanner() {
           </Link>
 
           <a
-            href={`tel:${CLINIC_SETTINGS.phoneNumbers[0]}`}
+            href={`tel:${settings.phoneNumbers[0]}`}
             className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 sm:px-9 py-4 bg-white/80 hover:bg-white border border-zinc-300/80 text-zinc-900 text-sm sm:text-base font-semibold rounded-xl transition-colors shadow-2xs"
           >
             <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-700" />
-            <span>{CLINIC_SETTINGS.phoneNumbers[0]}</span>
+            <span>{settings.phoneNumbers[0]}</span>
           </a>
         </div>
 
         <p className="text-xs sm:text-sm text-zinc-600 pt-2">
           {isBn ? UI_STRINGS.ctaBand.helpline.bn : UI_STRINGS.ctaBand.helpline.en}{" "}
-          <span className="text-zinc-950 font-bold">{CLINIC_SETTINGS.emergencyPhone}</span>
+          <span className="text-zinc-950 font-bold">{settings.emergencyPhone}</span>
         </p>
       </div>
     </section>

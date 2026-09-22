@@ -39,8 +39,8 @@ import { CalendarMonthView } from "@/components/appointment/CalendarMonthView";
 import { AppointmentPrintSlip } from "@/components/appointment/AppointmentPrintSlip";
 import { DEPARTMENTS } from "@/data/departments";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { UI_STRINGS } from "@/data/translations";
-import { CLINIC_SETTINGS } from "@/data/settings";
 
 export function BookingWizard() {
   const searchParams = useSearchParams();
@@ -49,6 +49,7 @@ export function BookingWizard() {
   const preSelectedTreatment = searchParams.get("treatment");
 
   const { t, isBn } = useLanguage();
+  const { settings: clinicSettings } = useClinicSettings();
   const [doctorsList, setDoctorsList] = useState<Doctor[]>(DOCTORS);
 
   useEffect(() => {
@@ -961,7 +962,7 @@ export function BookingWizard() {
 
                 {/* 3. WhatsApp Assist */}
                 <a
-                  href={`https://wa.me/${(CLINIC_SETTINGS.emergencyPhone || "8801700000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
+                  href={`https://wa.me/${(clinicSettings.emergencyPhone || "8801700000000").replace(/[^0-9]/g, "")}?text=${encodeURIComponent(
                     `Hello KGH Dental, I booked an appointment.\nRef: ${bookingRef}\nPatient: ${patientName}\nDoctor: ${activeDoctor ? activeDoctor.name.en : ""}\nDate: ${selectedDateFormatted} at ${selectedTimeSlot}`
                   )}`}
                   target="_blank"

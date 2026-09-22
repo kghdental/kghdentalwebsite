@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Inter, Hind_Siliguri } from "next/font/google";
 import "./globals.css";
 import { LanguageProvider } from "@/context/LanguageContext";
+import { ClinicSettingsProvider } from "@/context/ClinicSettingsContext";
 import { Navbar } from "@/components/layout/Navbar";
 import { Footer } from "@/components/layout/Footer";
 
@@ -51,9 +52,11 @@ export default function RootLayout({
     <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${hindSiliguri.variable} scroll-smooth`}>
       <body className="min-h-screen flex flex-col font-sans antialiased selection:bg-zinc-900 selection:text-white">
         <LanguageProvider>
-          <Navbar />
-          <main className="flex-1">{children}</main>
-          <Footer />
+          <ClinicSettingsProvider>
+            <Navbar />
+            <main className="flex-1">{children}</main>
+            <Footer />
+          </ClinicSettingsProvider>
         </LanguageProvider>
       </body>
     </html>

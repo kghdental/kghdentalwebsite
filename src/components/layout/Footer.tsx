@@ -5,14 +5,15 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Phone, Mail, MapPin, Clock, Star, ArrowUpRight, ShieldCheck } from "lucide-react";
 import { DEPARTMENTS } from "@/data/departments";
-import { CLINIC_SETTINGS } from "@/data/settings";
 import { UI_STRINGS } from "@/data/translations";
 import { useLanguage } from "@/context/LanguageContext";
+import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { ReviewQrModal } from "@/components/shared/ReviewQrModal";
 
 export function Footer() {
   const pathname = usePathname();
   const { t, isBn } = useLanguage();
+  const { settings } = useClinicSettings();
   const [isQrModalOpen, setIsQrModalOpen] = useState(false);
 
   if (pathname?.startsWith("/admin")) {
@@ -81,30 +82,30 @@ export function Footer() {
               <div className="flex items-start gap-2.5">
                 <MapPin className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" />
                 <a
-                  href={CLINIC_SETTINGS.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
+                  href={settings.googleMapUrl || "https://maps.app.goo.gl/aztfz8BxL5vug12L7"}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-zinc-300 hover:text-white transition-colors"
                 >
-                  {t(CLINIC_SETTINGS.address)}
+                  {t(settings.address)}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Phone className="w-4 h-4 text-zinc-400 shrink-0" />
                 <a
-                  href={`tel:${CLINIC_SETTINGS.phoneNumbers[0]}`}
+                  href={`tel:${settings.phoneNumbers[0]}`}
                   className="hover:text-white transition-colors"
                 >
-                  {CLINIC_SETTINGS.phoneNumbers[0]}
+                  {settings.phoneNumbers[0]}
                 </a>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-zinc-400 shrink-0" />
                 <a
-                  href={`mailto:${CLINIC_SETTINGS.email}`}
+                  href={`mailto:${settings.email}`}
                   className="hover:text-white transition-colors"
                 >
-                  {CLINIC_SETTINGS.email}
+                  {settings.email}
                 </a>
               </div>
             </div>
@@ -174,7 +175,7 @@ export function Footer() {
               {isBn ? "চেম্বারের সময়সূচি" : "Working Hours"}
             </h5>
             <div className="space-y-3 text-xs text-zinc-300">
-              {CLINIC_SETTINGS.workingHours.map((wh, idx) => (
+              {settings.workingHours.map((wh, idx) => (
                 <div key={idx} className="border-b border-white/10 pb-2">
                   <div className="flex items-center gap-1.5 font-medium text-white">
                     <Clock className="w-3.5 h-3.5 text-zinc-400" />
