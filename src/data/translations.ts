@@ -311,10 +311,10 @@ export const UI_STRINGS = {
       bn: "আপনার পছন্দের ডাক্তার বেছে নিন, সুবিধাজনক একটা সময় নির্বাচন করুন — বাকিটা আমরা দেখব।",
     },
     steps: {
-      step1: { en: "1. Select Doctor", bn: "১. ডাক্তার নির্বাচন" },
-      step2: { en: "2. Date & Time", bn: "২. তারিখ ও সময়" },
-      step3: { en: "3. Patient Details", bn: "৩. রোগীর তথ্য" },
-      step4: { en: "4. Confirmation", bn: "৪. নিশ্চিতকরণ" },
+      step1: { en: "1. Date, Doctor & Time", bn: "১. তারিখ, ডাক্তার ও সময়" },
+      step2: { en: "2. Patient Details", bn: "২. রোগীর তথ্য" },
+      step3: { en: "3. Confirmation", bn: "৩. নিশ্চিতকরণ" },
+      step4: { en: "Completed", bn: "সম্পন্ন" },
     },
     labels: {
       chooseDoctor: { en: "Select Doctor or Department", bn: "ডাক্তার বা বিভাগ নির্বাচন করুন" },

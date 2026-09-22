@@ -22,8 +22,8 @@ function AppointmentContent() {
           </h1>
           <p className="text-sm sm:text-base text-zinc-600 mt-3 max-w-2xl mx-auto">
             {isBn
-              ? "আপনার পছন্দের ডাক্তার বেছে নিন, সুবিধাজনক একটা সময় নির্বাচন করুন — বাকিটা আমরা দেখব।"
-              : "Choose your doctor, pick a time that works for you, and we'll take care of the rest."}
+              ? "প্রথমে আপনার সুবিধাজনক তারিখ নির্বাচন করুন, এরপর ওই তারিখে উপলব্ধ বিশেষজ্ঞ ডাক্তার ও ৩০ মিনিটের সময় বেছে নিন।"
+              : "Pick your preferred date first to view available specialists and select your dedicated 30-minute consultation slot."}
           </p>
 
           <div className="mt-5">
@@ -44,7 +44,7 @@ function AppointmentContent() {
         <BookingWizard />
 
         {/* Supporting Trust Strip */}
-        <div className="max-w-4xl mx-auto mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-700">
+        <div className="max-w-6xl mx-auto mt-12 grid grid-cols-1 sm:grid-cols-3 gap-4 text-xs text-zinc-700">
           <div className="p-4 rounded-2xl bg-white border border-zinc-200 flex items-center gap-3">
             <ShieldCheck className="w-5 h-5 text-zinc-900 shrink-0" />
             <span>

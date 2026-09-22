@@ -1,13 +1,14 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Check, Info } from "lucide-react";
+import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Sparkles } from "lucide-react";
 import { Doctor } from "@/types";
 
 interface CalendarMonthViewProps {
   selectedDate: string; // YYYY-MM-DD
   onSelectDate: (date: string) => void;
-  doctor: Doctor;
+  doctor?: Doctor;
+  doctors?: Doctor[];
   blockedDates?: string[]; // YYYY-MM-DD
   isBn: boolean;
 }
@@ -16,11 +17,23 @@ export function CalendarMonthView({
   selectedDate,
   onSelectDate,
   doctor,
+  doctors,
   blockedDates = [],
   isBn,
 }: CalendarMonthViewProps) {
-  // Current view month/year
   const today = useMemo(() => new Date(), []);
+  
+  // Convert date to YYYY-MM-DD
+  const formatIso = (d: Date) => {
+    const y = d.getFullYear();
+    const m = String(d.getMonth() + 1).padStart(2, "0");
+    const day = String(d.getDate()).padStart(2, "0");
+    return `${y}-${m}-${day}`;
+  };
+
+  const todayStr = useMemo(() => formatIso(today), [today]);
+
+  // Current view month/year
   const [viewDate, setViewDate] = useState<Date>(() => {
     if (selectedDate) {
       const [y, m] = selectedDate.split("-").map(Number);
@@ -67,6 +80,20 @@ export function CalendarMonthView({
     return viewDate >= maxDate;
   }, [viewDate, today]);
 
+  // Quick select date helper
+  const quickSelect = (targetDate: Date) => {
+    const iso = formatIso(targetDate);
+    setViewDate(new Date(targetDate.getFullYear(), targetDate.getMonth(), 1));
+    onSelectDate(iso);
+  };
+
+  // Calculate upcoming weekend dates (Saturday & Friday)
+  const tomorrow = useMemo(() => {
+    const d = new Date(today);
+    d.setDate(d.getDate() + 1);
+    return d;
+  }, [today]);
+
   // Calendar cells generation
   const calendarDays = useMemo(() => {
     const firstDayIndex = new Date(currentYear, currentMonth, 1).getDay(); // 0=Sun..6=Sat
@@ -77,6 +104,7 @@ export function CalendarMonthView({
       dateString: string;
       isCurrentMonth: boolean;
       isAvailable: boolean;
+      availableCount: number;
       isBlocked: boolean;
       isPast: boolean;
       isToday: boolean;
@@ -90,16 +118,13 @@ export function CalendarMonthView({
         dateString: "",
         isCurrentMonth: false,
         isAvailable: false,
+        availableCount: 0,
         isBlocked: false,
         isPast: true,
         isToday: false,
         isSelected: false,
       });
     }
-
-    const todayStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, "0")}-${String(
-      today.getDate()
-    ).padStart(2, "0")}`;
 
     for (let d = 1; d <= daysInMonth; d++) {
       const dateObj = new Date(currentYear, currentMonth, d);
@@ -110,16 +135,33 @@ export function CalendarMonthView({
       const isToday = dateString === todayStr;
       const isSelected = dateString === selectedDate;
 
-      // Doctor's weekly active schedule check
-      const matchesSchedule = doctor?.schedule?.daysOfWeek?.includes(dayOfWeek) ?? true;
-      const isBlocked = blockedDates.includes(dateString);
-      const isAvailable = !isPast && matchesSchedule && !isBlocked;
+      // Available check: either for a specific doctor OR clinic-wide across all doctors
+      let availableCount = 0;
+      let isBlocked = false;
+
+      if (doctors && doctors.length > 0) {
+        const matchingDoctors = doctors.filter((doc) => {
+          const worksOnDay = doc.schedule.daysOfWeek.includes(dayOfWeek);
+          const isDocBlocked = blockedDates.includes(`${doc.id}:${dateString}`) || blockedDates.includes(dateString);
+          return worksOnDay && !isDocBlocked;
+        });
+        availableCount = matchingDoctors.length;
+      } else if (doctor) {
+        const worksOnDay = doctor.schedule.daysOfWeek.includes(dayOfWeek);
+        isBlocked = blockedDates.includes(dateString);
+        availableCount = worksOnDay && !isBlocked ? 1 : 0;
+      } else {
+        availableCount = 1;
+      }
+
+      const isAvailable = !isPast && availableCount > 0;
 
       cells.push({
         dayNumber: d,
         dateString,
         isCurrentMonth: true,
         isAvailable,
+        availableCount,
         isBlocked,
         isPast,
         isToday,
@@ -128,12 +170,44 @@ export function CalendarMonthView({
     }
 
     return cells;
-  }, [currentYear, currentMonth, today, selectedDate, doctor, blockedDates]);
+  }, [currentYear, currentMonth, todayStr, selectedDate, doctor, doctors, blockedDates]);
 
   return (
     <div className="bg-white rounded-2xl border border-zinc-200/90 shadow-sm p-4 sm:p-5">
+      {/* Quick Select Chips */}
+      <div className="mb-4 pb-3 border-b border-zinc-100 flex items-center justify-between gap-2 overflow-x-auto">
+        <span className="text-[11px] font-bold text-zinc-400 uppercase tracking-wider shrink-0 flex items-center gap-1">
+          <Sparkles className="w-3 h-3 text-amber-500" />
+          {isBn ? "কুইক তারিখ:" : "Quick Date:"}
+        </span>
+        <div className="flex items-center gap-1.5 shrink-0">
+          <button
+            type="button"
+            onClick={() => quickSelect(today)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+              selectedDate === todayStr
+                ? "bg-[#474B4E] text-white border-[#474B4E] shadow-2xs"
+                : "bg-zinc-50 text-zinc-700 border-zinc-200 hover:bg-zinc-100"
+            }`}
+          >
+            {isBn ? "আজকে" : "Today"}
+          </button>
+          <button
+            type="button"
+            onClick={() => quickSelect(tomorrow)}
+            className={`px-2.5 py-1 rounded-lg text-xs font-semibold border transition-all cursor-pointer ${
+              selectedDate === formatIso(tomorrow)
+                ? "bg-[#474B4E] text-white border-[#474B4E] shadow-2xs"
+                : "bg-zinc-50 text-zinc-700 border-zinc-200 hover:bg-zinc-100"
+            }`}
+          >
+            {isBn ? "কালকে" : "Tomorrow"}
+          </button>
+        </div>
+      </div>
+
       {/* Month Navigation Header */}
-      <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-100">
+      <div className="flex items-center justify-between mb-3">
         <div className="flex items-center gap-2">
           <div className="p-2 rounded-xl bg-zinc-100 text-zinc-800">
             <CalendarIcon className="w-4 h-4" />
@@ -143,7 +217,7 @@ export function CalendarMonthView({
               {isBn ? monthNamesBn[currentMonth] : monthNamesEn[currentMonth]} {currentYear}
             </h4>
             <p className="text-[11px] text-zinc-500">
-              {isBn ? "চেম্বারের তারিখ নির্বাচন করুন" : "Pick an active chamber date"}
+              {isBn ? "চেম্বারের দিন নির্বাচন করুন" : "Choose consultation date"}
             </p>
           </div>
         </div>
@@ -156,7 +230,7 @@ export function CalendarMonthView({
             className={`p-2 rounded-xl border transition-all ${
               isPrevDisabled
                 ? "border-zinc-100 text-zinc-300 cursor-not-allowed bg-zinc-50"
-                : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 active:bg-zinc-200 hover:border-zinc-300"
+                : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 active:bg-zinc-200 hover:border-zinc-300 cursor-pointer"
             }`}
             title={isBn ? "পূর্ববর্তী মাস" : "Previous Month"}
           >
@@ -169,7 +243,7 @@ export function CalendarMonthView({
             className={`p-2 rounded-xl border transition-all ${
               isNextDisabled
                 ? "border-zinc-100 text-zinc-300 cursor-not-allowed bg-zinc-50"
-                : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 active:bg-zinc-200 hover:border-zinc-300"
+                : "border-zinc-200 text-zinc-700 hover:bg-zinc-100 active:bg-zinc-200 hover:border-zinc-300 cursor-pointer"
             }`}
             title={isBn ? "পরবর্তী মাস" : "Next Month"}
           >
@@ -179,15 +253,14 @@ export function CalendarMonthView({
       </div>
 
       {/* Day of Week Headers */}
-      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center mb-2">
+      <div className="grid grid-cols-7 gap-1 sm:gap-1.5 text-center mb-1.5">
         {(isBn ? dayHeadersBn : dayHeadersEn).map((dayName, idx) => {
-          // Highlight Friday (idx 5) or Sunday (idx 0)
           const isFri = idx === 5;
           return (
             <div
               key={idx}
-              className={`text-[11px] font-bold py-1.5 uppercase tracking-wider ${
-                isFri ? "text-emerald-700" : "text-zinc-500"
+              className={`text-[10px] sm:text-[11px] font-bold py-1 uppercase tracking-wider ${
+                isFri ? "text-emerald-700 font-extrabold" : "text-zinc-500"
               }`}
             >
               {dayName}
@@ -200,7 +273,7 @@ export function CalendarMonthView({
       <div className="grid grid-cols-7 gap-1 sm:gap-1.5">
         {calendarDays.map((cell, index) => {
           if (!cell.isCurrentMonth) {
-            return <div key={`empty-${index}`} className="h-11 sm:h-12" />;
+            return <div key={`empty-${index}`} className="h-10 sm:h-11" />;
           }
 
           const isClickable = cell.isAvailable;
@@ -208,15 +281,14 @@ export function CalendarMonthView({
           let btnClass = "";
           if (cell.isSelected) {
             btnClass =
-              "bg-zinc-950 text-white font-extrabold shadow-md ring-2 ring-zinc-950 ring-offset-2 scale-102 z-10";
+              "bg-[#474B4E] text-white font-extrabold shadow-md ring-2 ring-[#474B4E] ring-offset-2 scale-102 z-10";
           } else if (cell.isAvailable) {
             btnClass =
-              "bg-emerald-50/70 text-emerald-950 border border-emerald-300 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 font-bold transition-all cursor-pointer hover:shadow-xs active:scale-95";
+              "bg-emerald-50/70 text-emerald-950 border border-emerald-300/80 hover:bg-emerald-600 hover:text-white hover:border-emerald-600 font-bold transition-all cursor-pointer hover:shadow-xs active:scale-95";
           } else if (cell.isBlocked) {
             btnClass =
               "bg-rose-50/50 text-rose-300 border border-dashed border-rose-200 cursor-not-allowed font-medium line-through";
           } else {
-            // Off-day or past date
             btnClass =
               "bg-zinc-50/60 text-zinc-300 border border-zinc-100 cursor-not-allowed font-normal";
           }
@@ -227,19 +299,15 @@ export function CalendarMonthView({
               type="button"
               disabled={!isClickable}
               onClick={() => cell.isAvailable && onSelectDate(cell.dateString)}
-              className={`relative h-11 sm:h-12 rounded-xl flex flex-col items-center justify-center text-xs transition-all ${btnClass}`}
+              className={`relative h-10 sm:h-11 rounded-xl flex flex-col items-center justify-center text-xs transition-all ${btnClass}`}
               title={
                 cell.isBlocked
-                  ? isBn
-                    ? "ডাক্তার ছুটিতে আছেন"
-                    : "Doctor on leave"
+                  ? isBn ? "ডাক্তার ছুটিতে আছেন" : "Specialist on leave"
                   : cell.isAvailable
                   ? isBn
-                    ? "চেম্বার খোলা (স্লট পাওয়া যাবে)"
-                    : "Chamber open"
-                  : isBn
-                  ? "চেম্বার বন্ধ"
-                  : "Chamber closed"
+                    ? `${cell.availableCount} জন ডাক্তার উপলব্ধ আছেন`
+                    : `${cell.availableCount} specialists available`
+                  : isBn ? "চেম্বার বন্ধ" : "Chamber closed"
               }
             >
               <span className="text-xs sm:text-sm">{cell.dayNumber}</span>
@@ -264,18 +332,20 @@ export function CalendarMonthView({
             <span>{isBn ? "চেম্বার খোলা" : "Chamber Open"}</span>
           </div>
           <div className="flex items-center gap-1.5">
-            <span className="w-2.5 h-2.5 rounded-full bg-zinc-950 inline-block" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#474B4E] inline-block" />
             <span>{isBn ? "নির্বাচিত" : "Selected"}</span>
           </div>
           <div className="flex items-center gap-1.5">
             <span className="w-2.5 h-2.5 rounded-full bg-zinc-300 inline-block" />
-            <span>{isBn ? "বন্ধ / ছুটি" : "Off / Leave"}</span>
+            <span>{isBn ? "বন্ধ / অতীত" : "Closed / Past"}</span>
           </div>
         </div>
 
-        <div className="text-[11px] font-medium text-zinc-700 bg-zinc-100/80 px-2.5 py-1 rounded-lg">
-          {isBn ? doctor?.schedule?.availableDaysBn : doctor?.schedule?.availableDaysEn}
-        </div>
+        {doctor && (
+          <div className="text-[11px] font-medium text-zinc-700 bg-zinc-100/80 px-2.5 py-1 rounded-lg">
+            {isBn ? doctor?.schedule?.availableDaysBn : doctor?.schedule?.availableDaysEn}
+          </div>
+        )}
       </div>
     </div>
   );
