@@ -170,7 +170,7 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
     },
     description: {
       en: "Not all oral conditions are related to teeth alone. Our Oral Medicine specialist diagnoses and treats non-healing ulcers, precancerous lesions, OSMF, salivary gland disorders, and systemic conditions with advanced clinical precision.",
-      bn: "মুখের সব সমস্যা শুধুমাত্র দাঁতকেন্দ্রিক নয়। মুখের দীর্ঘস্থায়ী ঘা, প্রিক্যান্সারাস ক্ষত, ওএসএমএফ, বার্নিং মাউথ সিন্ড্রোম ও লালাগ্রন্থির জটিল রোগের আন্তর্জাতিক মানের চিকিৎসা দেন আমাদের বিশেষজ্ঞ।",
+      bn: "মুখের সব সমস্যা কেবল দাঁতেই সীমাবদ্ধ নয়। মুখের দীর্ঘস্থায়ী ঘা, প্রিক্যান্সারাস ক্ষত, ওএসএমএফ, বার্নিং মাউথ সিন্ড্রোম ও লালাগ্রন্থির জটিল রোগের আন্তর্জাতিক মানের চিকিৎসা দেন আমাদের বিশেষজ্ঞ।",
     },
     topTreatments: {
       en: ["Oral Cancer Screening", "Precancerous Lesion Care", "OSMF & Ulcer Therapy", "Oral Biopsy Consultation"],

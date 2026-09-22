@@ -29,7 +29,7 @@ export const DOCTORS: Doctor[] = [
     photoUrl: "/images/doctors/dr-diean.jpg",
     bio: {
       en: "Dr. Ahamed Diean Sammir specializes in prosthodontics, with advanced training in dental implants, fixed and removable prostheses, and full mouth rehabilitation. He holds an MS in Prosthodontics from Bangabandhu Sheikh Mujib Medical University and a BDS from Bangladesh Dental College, and has taught as faculty at several dental colleges alongside his clinical practice.",
-      bn: "ডা. আহমেদ দিয়ান সাম্মির প্রস্থোডন্টিক্সে বিশেষজ্ঞ, ডেন্টাল ইমপ্ল্যান্ট, ফিক্সড ও রিমুভেবল প্রস্থেসিস এবং ফুল মাউথ রিহ্যাবিলিটেশনে উন্নত প্রশিক্ষণপ্রাপ্ত। তিনি বঙ্গবন্ধু শেখ মুজিব মেডিকেল বিশ্ববিদ্যালয় থেকে প্রস্থোডন্টিক্সে এমএস এবং বাংলাদেশ ডেন্টাল কলেজ থেকে বিডিএস সম্পন্ন করেছেন। ক্লিনিক্যাল প্র্যাকটিসের পাশাপাশি তিনি বিভিন্ন ডেন্টাল কলেজে শিক্ষকতাও করেছেন।",
+      bn: "ডা. আহমেদ দিয়ান সাম্মির একজন অভিজ্ঞ প্রস্থোডন্টিস্ট ও ইমপ্ল্যান্টোলজিস্ট। তিনি বাংলাদেশ ডেন্টাল কলেজ থেকে বিডিএস এবং বঙ্গবন্ধু শেখ মুজিব মেডিকেল বিশ্ববিদ্যালয় (বিএসএমএমইউ) থেকে প্রস্থোডন্টিক্সে এমএস সম্পন্ন করেছেন। তিনি ডেন্টাল ইমপ্ল্যান্ট, ফিক্সড ও রিমুভেবল ক্রাউন-ব্রিজ, ডেনচার এবং ফুল মাউথ রিহ্যাবিলিটেশনে বিশেষ পারদর্শী। ক্লিনিক্যাল প্র্যাকটিসের পাশাপাশি তিনি বিভিন্ন ডেন্টাল কলেজে শিক্ষকতায় যুক্ত ছিলেন।",
     },
     experience: {
       en: "Over 10 years of specialized restorative & implant clinical experience.",
@@ -76,7 +76,7 @@ export const DOCTORS: Doctor[] = [
     photoUrl: "/images/doctors/DR. MD. SANWAR HOSSAIN.png",
     bio: {
       en: "Dr. Md. Sanwar Hossain is a fellowship-trained oral and maxillofacial surgeon (FCPS) with extensive experience in oral cancer surgery, facial trauma management, and complex dental surgeries. He currently serves as Assistant Professor at Kumudini Women's Medical College and has published research in oral and maxillofacial pathology.",
-      bn: "ডা. মো. সানোয়ার হোসেন একজন ফেলোশিপপ্রাপ্ত ওরাল ও ম্যাক্সিলোফেসিয়াল সার্জন (এফসিপিএস), যার রয়েছে মুখের ক্যান্সার সার্জারি, মুখমণ্ডলের আঘাত চিকিৎসা এবং জটিল দাঁতের সার্জারিতে বিস্তৃত অভিজ্ঞতা। বর্তমানে তিনি কুমুদিনী উইমেন'স মেডিকেল কলেজে সহকারী অধ্যাপক হিসেবে কর্মরত এবং ওরাল ও ম্যাক্সিলোফেসিয়াল প্যাথলজিতে গবেষণাও প্রকাশ করেছেন।",
+      bn: "ডা. মো. সানোয়ার হোসেন একজন ফেলোশিপপ্রাপ্ত ওরাল অ্যান্ড ম্যাক্সিলোফেসিয়াল সার্জন (এফসিপিএস)। তিনি রাজশাহী মেডিকেল কলেজ থেকে বিডিএস এবং বিসিপিএস থেকে এফসিপিএস সম্পন্ন করেন। মুখমণ্ডলের ট্রমা সার্জারি, ওরাল অনকোলজি এবং জটিল দাঁতের সার্জারিতে তার দীর্ঘ অভিজ্ঞতা রয়েছে। বর্তমানে তিনি কুমুদিনী উইমেন'স মেডিকেল কলেজে সহকারী অধ্যাপক হিসেবে কর্মরত।",
     },
     experience: {
       en: "Fellowship-trained surgeon with high-level trauma & oncological surgery track record.",
@@ -84,7 +84,7 @@ export const DOCTORS: Doctor[] = [
     },
     schedule: {
       availableDaysEn: "Saturday only",
-      availableDaysBn: "শুধুমাত্র শনিবার",
+      availableDaysBn: "প্রতি শনিবার",
       daysOfWeek: [6], // Saturday
       startTime: "17:30",
       endTime: "21:00",
@@ -124,7 +124,7 @@ export const DOCTORS: Doctor[] = [
     photoUrl: "/images/doctors/dr-fatema.jpg",
     bio: {
       en: "Dr. Fatema Tasrin Madhubi is an orthodontist with an MS in Orthodontics from Bangladesh Medical University and a BDS from Rajshahi Medical College. She specializes in clear aligner treatment and correcting dental malocclusions for patients of all ages, with a focus on precise, comfortable, patient-centered care.",
-      bn: "ডা. ফাতেমা তাসরিন মাধুবী একজন অর্থোডন্টিস্ট, বাংলাদেশ মেডিকেল বিশ্ববিদ্যালয় থেকে অর্থোডন্টিক্সে এমএস এবং রাজশাহী মেডিকেল কলেজ থেকে বিডিএস সম্পন্ন করেছেন। তিনি ক্লিয়ার অ্যালাইনার চিকিৎসা এবং সব বয়সের রোগীর দাঁতের অসামঞ্জস্য সংশোধনে বিশেষজ্ঞ, নিখুঁত ও আরামদায়ক রোগী-কেন্দ্রিক চিকিৎসায় মনোযোগী।",
+      bn: "ডা. ফাতেমা তাসরিন মাধুবী একজন অভিজ্ঞ অর্থোডন্টিস্ট। তিনি রাজশাহী মেডিকেল কলেজ থেকে বিডিএস এবং বঙ্গবন্ধু শেখ মুজিব মেডিকেল বিশ্ববিদ্যালয় (বিএসএমএমইউ) থেকে অর্থোডন্টিক্সে এমএস ডিগ্রি অর্জন করেছেন। তিনি ক্লিয়ার অ্যালাইনার এবং সকল বয়সী রোগীর আঁকাবাঁকা দাঁত ও চোয়ালের কামড়ের অসঙ্গতি সংশোধনে অত্যন্ত দক্ষ ও আন্তরিক।",
     },
     experience: {
       en: "Certified in clear aligners and specialized in adolescent & adult teeth realignment.",
@@ -132,7 +132,7 @@ export const DOCTORS: Doctor[] = [
     },
     schedule: {
       availableDaysEn: "Tuesday only",
-      availableDaysBn: "শুধুমাত্র মঙ্গলবার",
+      availableDaysBn: "প্রতি মঙ্গলবার",
       daysOfWeek: [2], // Tuesday
       startTime: "17:00",
       endTime: "21:00",
@@ -171,7 +171,7 @@ export const DOCTORS: Doctor[] = [
     photoUrl: "/images/doctors/dr-Bappy.png",
     bio: {
       en: "Dr. Md. Muhtashim Chowdhury (Bappy) is an Oral and Dental Surgeon holding BDS from Dhaka University (DU) and MPH from North South University (NSU). He completed Post Graduate Training (PGT) in Conservative Dentistry & Maxillofacial Surgery at BSMMU (Ex-PG Hospital). Dr. Bappy has attained Advance Implant Training from USC (USA) and Advance Endodontic Training from Japan, specializing in modern painless root canals, dental implants, and maxillofacial procedures.",
-      bn: "ডা. মো. মুহতাসিম চৌধুরী (বাপ্পী) একজন দক্ষ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ সম্পন্ন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও ম্যাক্সিলোফেসিয়াল সার্জারিতে পিজিটি সম্পন্ন করেন। এছাড়া তিনি আমেরিকার ইউএসসি (USC, USA) থেকে অ্যাডভান্স ইমপ্ল্যান্ট ট্রেনিং এবং জাপান থেকে অ্যাডভান্স এন্ডোডন্টিক ট্রেনিং প্রাপ্ত। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল, ডেন্টাল ইমপ্ল্যান্ট ও ম্যাক্সিলোফেসিয়াল চিকিৎসায় অভিজ্ঞ।",
+      bn: "ডা. মো. মুহতাসিম চৌধুরী (বাপ্পী) একজন দক্ষ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ সম্পন্ন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও ম্যাক্সিলোফেসিয়াল সার্জারিতে পিজিটি সম্পন্ন করেন। এছাড়া তিনি আমেরিকার ইউএসসি (USC, USA) থেকে অ্যাডভান্সড ইমপ্ল্যান্ট ট্রেনিং এবং জাপান থেকে অ্যাডভান্সড এন্ডোডন্টিক ট্রেনিং প্রাপ্ত। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল, ডেন্টাল ইমপ্ল্যান্ট ও ম্যাক্সিলোফেসিয়াল চিকিৎসায় অভিজ্ঞ।",
     },
     experience: {
       en: "Advance Implant Training (USC, USA) • Advance Endodontic Training (Japan) • PGT (BSMMU, Ex-PG Hospital)",
@@ -218,7 +218,7 @@ export const DOCTORS: Doctor[] = [
     photoUrl: "/images/doctors/Dr Jesinta Islam.png",
     bio: {
       en: "Dr. Jesinta Islam is an accomplished Oral and Dental Surgeon holding BDS from Dhaka University (DU) and MPH from North South University (NSU). She completed Post Graduate Training (PGT) in Conservative Dentistry & Endodontics at BSMMU (Ex-PG Hospital) and received Advance Implant Training in Rome, Italy. She specializes in precision root canal therapy, aesthetic dentistry, conservative treatments, and dental implant solutions with patient-centered care.",
-      bn: "ডা. জেসিন্টা ইসলাম একজন নিবেদিতপ্রাণ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ ডিগ্রি অর্জন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে পিজিটি সম্পন্ন করেছেন এবং ইতালির রোম থেকে অ্যাডভান্স ইমপ্ল্যান্ট ট্রেনিং সম্পন্ন করেছেন। তিনি আধুনিক রুট ক্যানেল, নান্দনিক ডেন্টিস্ট্রি ও ডেন্টাল ইমপ্ল্যান্ট চিকিৎসায় বিশেষভাবে পারদর্শী।",
+      bn: "ডা. জেসিন্টা ইসলাম একজন নিবেদিতপ্রাণ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ ডিগ্রি অর্জন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে পিজিটি সম্পন্ন করেছেন এবং ইতালির রোম থেকে অ্যাডভান্সড ইমপ্ল্যান্ট ট্রেনিং সম্পন্ন করেছেন। তিনি আধুনিক রুট ক্যানেল, নান্দনিক ডেন্টিস্ট্রি ও ডেন্টাল ইমপ্ল্যান্ট চিকিৎসায় বিশেষভাবে পারদর্শী।",
     },
     experience: {
       en: "Advance Implant Training (Rome, Italy) • PGT in Conservative Dentistry & Endodontics (BSMMU, Ex-PG Hospital)",
@@ -226,7 +226,7 @@ export const DOCTORS: Doctor[] = [
     },
     schedule: {
       availableDaysEn: "Tuesday only",
-      availableDaysBn: "শুধুমাত্র মঙ্গলবার",
+      availableDaysBn: "প্রতি মঙ্গলবার",
       daysOfWeek: [2],
       startTime: "11:00",
       endTime: "14:00",
@@ -274,14 +274,14 @@ export const DOCTORS: Doctor[] = [
     },
     schedule: {
       availableDaysEn: "Friday only",
-      availableDaysBn: "শুধুমাত্র শুক্রবার",
+      availableDaysBn: "প্রতি শুক্রবার",
       daysOfWeek: [5], // Friday
       startTime: "17:00",
       endTime: "20:00",
       slotDurationMinutes: 30,
       note: {
         en: "5:00 PM – 8:00 PM (Friday only)",
-        bn: "বিকাল ৫:০০ – রাত ৮:০০ (শুধুমাত্র শুক্রবার)",
+        bn: "বিকাল ৫:০০ – রাত ৮:০০ (প্রতি শুক্রবার)",
       },
     },
     isConfirmed: true,

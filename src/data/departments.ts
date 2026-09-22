@@ -27,11 +27,11 @@ export const DEPARTMENTS: Department[] = [
         },
         why: {
           en: "Corrects crowded, gapped, or misaligned teeth effectively.",
-          bn: "ভিড় করা, ফাঁকা বা আঁকাবাঁকা দাঁত সঠিকভাবে সোজা করতে।",
+          bn: "গাদাগাদি, ফাঁকা বা আঁকাবাঁকা দাঁত সঠিকভাবে সোজা ও সারিবদ্ধ করতে।",
         },
         when: {
           en: "Visible crowding, spacing, or bite alignment issues noticed by dentist or patient.",
-          bn: "দাঁতে ভিড়, অনাকাঙ্ক্ষিত ফাঁকা বা বাইট সমস্যা দেখা দিলে।",
+          bn: "দাঁত অতিরিক্ত গাদাগাদি, অনাকাঙ্ক্ষিত ফাঁকা বা কামড়ের অসঙ্গতি (বাইট সমস্যা) দেখা দিলে।",
         },
         benefit: {
           en: "Most affordable, durable, and highly effective for complex alignment corrections.",
@@ -119,7 +119,7 @@ export const DEPARTMENTS: Department[] = [
         },
         benefit: {
           en: "Prevents neighboring teeth from collapsing inward and eliminates future severe crowding.",
-          bn: "ভবিষ্যতে স্থায়ী দাঁতের জটিল ভিড় ও দীর্ঘমেয়াদী ব্রেসেসের প্রয়োজনীয়তা অনেকাংশে কমিয়ে দেয়।",
+          bn: "ভবিষ্যতে স্থায়ী দাঁত গাদাগাদি বা আঁকাবাঁকা হয়ে ওঠার ঝুঁকি দূর করে এবং দীর্ঘমেয়াদী ব্রেসেসের প্রয়োজনীয়তা অনেকাংশে কমিয়ে দেয়।",
         },
       },
       {
@@ -335,7 +335,7 @@ export const DEPARTMENTS: Department[] = [
         imageUrl: "/images/SubServices-images/2.8. Space Infection Abscess Management.png",
         name: {
           en: "Space Infection / Abscess Management",
-          bn: "স্পেস ইনফেকশন ও পুঁজ অপসারণ",
+          bn: "স্পেস ইনফেকশন ও পুঁজ অপসারণ (অ্যাবসেস ম্যানেজমেন্ট)",
         },
         why: {
           en: "Drains and treats deep dental bacterial infections that have spread into facial fascial spaces.",
@@ -424,7 +424,7 @@ export const DEPARTMENTS: Department[] = [
         },
         when: {
           en: "Recurrent pain, tenderness to biting, or apical shadow visible on X-ray after an earlier RCT.",
-          bn: "পূর্বে রুট ক্যানেল করার বেশ কিছুদিন পর আবার কামড় দিলে ব্যথা বা মাড়ি ফুললে।",
+          bn: "পূর্বে রুট ক্যানেল করার বেশ কিছুদিন পর আবার খাবার চিবানোর সময় ব্যথা, অস্বস্তি বা মাড়ি ফুলে উঠলে।",
         },
         benefit: {
           en: "Gives a compromised tooth a second chance at survival, avoiding costly extraction and implants.",
@@ -521,11 +521,11 @@ export const DEPARTMENTS: Department[] = [
         imageUrl: "/images/SubServices-images/3. 7. Post & Core Build-Up.png",
         name: {
           en: "Apicoectomy (Root-End Surgery)",
-          bn: "অ্যাপিকোএক্টমি (রুট-এন্ড সার্জারি)",
+          bn: "এপিসেক্টমি (শিকড়ের অগ্রভাগের মাইক্রো-সার্জারি)",
         },
         why: {
           en: "Surgically accesses and removes persistent infection located precisely at the tooth's root apex.",
-          bn: "দাঁতের শিকড়ের একেবারে ডগায় জমে থাকা না-সারা ইনফেকশন ছোট সার্জারির মাধ্যমে দূর করতে।",
+          bn: "দাঁতের শিকড়ের শেষ প্রান্তে (এপেক্স) জমে থাকা দীর্ঘস্থায়ী ইনফেকশন বা সিস্ট মাইক্রো-সার্জারির মাধ্যমে দূর করতে।",
         },
         when: {
           en: "Infection persists after conventional root canal therapy and retreatment is not feasible.",
@@ -1121,7 +1121,7 @@ export const DEPARTMENTS: Department[] = [
         imageUrl: "/images/SubServices-images/6. 7. Crown Lengthening.png",
         name: {
           en: "Crown Lengthening",
-          bn: "ক্রাউন লেন্থেনিং (দাঁতের দৃশ্যমান অংশ বাড়ানো)",
+          bn: "ক্রাউন লেংথেনিং (দাঁতের দৃশ্যমান অংশ বাড়ানো)",
         },
         why: {
           en: "Reshapes gum and bone margins to expose greater sound natural tooth structure.",
@@ -1223,7 +1223,7 @@ export const DEPARTMENTS: Department[] = [
         imageUrl: "/images/SubServices-images/7. 2. Precancerous Lesion Management (Leukoplakia, Erythroplakia).png",
         name: {
           en: "Precancerous Lesion Management (Leukoplakia, Erythroplakia)",
-          bn: "প্রিক্যান্সারাস ক্ষত চিকিৎসা (লিউoplাকিয়া ও এরিথ্রোপ্লাকিয়া)",
+          bn: "প্রিক্যান্সারাস ক্ষত চিকিৎসা (লিউকোপ্লাকিয়া ও এরিথ্রোপ্লাকিয়া)",
         },
         why: {
           en: "Treats and closely monitors mucosal white and red patches that carry a risk of turning into oral cancer.",

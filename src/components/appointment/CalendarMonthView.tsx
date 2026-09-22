@@ -305,7 +305,7 @@ export function CalendarMonthView({
                   ? isBn ? "ডাক্তার ছুটিতে আছেন" : "Specialist on leave"
                   : cell.isAvailable
                   ? isBn
-                    ? `${cell.availableCount} জন ডাক্তার উপলব্ধ আছেন`
+                    ? `${cell.availableCount} জন বিশেষজ্ঞ ডাক্তার চেম্বারে আছেন`
                     : `${cell.availableCount} specialists available`
                   : isBn ? "চেম্বার বন্ধ" : "Chamber closed"
               }

@@ -23,11 +23,11 @@ const STAGES: StageContent[] = [
     position: "center",
     mainText: {
       en: "Healthy teeth looks like this.",
-      bn: "সুস্থ দাঁত দেখতে এইরকম হয়।",
+      bn: "সুস্থ ও পরিচ্ছন্ন দাঁতের স্বাভাবিক রূপ।",
     },
     differential: {
       en: "But every smile faces different challenges — and needs different experts.",
-      bn: "কিন্তু প্রতিটি দাঁত ভিন্ন চ্যালেঞ্জের মুখোমুখি হয় — আর প্রয়োজন হয় ভিন্ন বিশেষজ্ঞের।",
+      bn: "কিন্তু নানা কারণে দাঁতে বিভিন্ন জটিলতা দেখা দিতে পারে — যার প্রতিটির জন্য প্রয়োজন অভিজ্ঞ বিশেষজ্ঞ।",
     },
   },
   {
@@ -35,7 +35,7 @@ const STAGES: StageContent[] = [
     position: "left",
     mainText: {
       en: "A hidden cavity, quietly turning into pain.",
-      bn: "দাঁতে ক্ষয় বা গর্ত, নীরবে ব্যথায় রূপ নিচ্ছে।",
+      bn: "দাঁতের ক্ষয় বা ক্যাভিটি, যা নীরবে তীব্র ব্যথায় রূপ নেয়।",
     },
     bullets: {
       en: ["Dental Filling (Composite)", "Root Canal Treatment (RCT)", "Pulp Capping", "Post & Core Build-up"],
@@ -43,7 +43,7 @@ const STAGES: StageContent[] = [
     },
     differential: {
       en: "Tooth sensitivity, throbbing pain, swelling near the root, or a blackened tooth — see an Endodontist right away.",
-      bn: "দাঁত শিরশির করা, ব্যথায় দপদপ করা, দাঁতের মাড়ির কাছে ফোলাভাব, বা দাঁত কালো হয়ে যাওয়া — এসব লক্ষণ থাকলে দ্রুত এন্ডোডন্টিস্টের কাছে যাওয়া দরকার।",
+      bn: "ঠান্ডা-গরমে দাঁত শিরশির করা, রাতে তীব্র দপদপে ব্যথা, গোড়ায় ফোলা বা দাঁত বিবর্ণ হওয়া — এসব ক্ষেত্রে এন্ডোডন্টিস্টের পরামর্শ নেওয়া জরুরি।",
     },
     callout: { en: "Cavity", bn: "দাঁতের ক্ষয়" },
   },
@@ -52,66 +52,66 @@ const STAGES: StageContent[] = [
     position: "right",
     mainText: {
       en: "A deep infection, silently damaging the tooth and bone beneath.",
-      bn: "একটি গভীর ইনফেকশন, নীরবে দাঁত ও হাড়ের ক্ষতি করছে।",
+      bn: "দাঁতের গোড়ায় গভীর ইনফেকশন, যা নীরবে চোয়ালের হাড়ের ক্ষতি করে।",
     },
     bullets: {
       en: ["Tooth Extraction", "Apicectomy (Root-End Surgery)", "Impacted Tooth Removal", "Cyst & Abscess Management", "Facial Trauma Treatment"],
-      bn: ["দাঁত তোলা (এক্সট্র্যাকশন)", "এপিসেক্টমি (রুটের ডগা অপারেশন)", "আটকে থাকা দাঁত অপসারণ", "সিস্ট ও ইনফেকশন চিকিৎসা", "মুখমণ্ডলের আঘাতের চিকিৎসা"],
+      bn: ["দাঁত তোলা (এক্সট্র্যাকশন)", "এপিসেক্টমি (শিকড়ের অগ্রভাগের মাইক্রো-সার্জারি)", "ইমপ্যাক্টেড আক্কেল দাঁত অপসারণ", "সিস্ট ও ডিপ ইনফেকশন চিকিৎসা", "মুখমণ্ডল ও চোয়ালের আঘাতের চিকিৎসা"],
     },
     differential: {
       en: "Facial swelling, severe pain at the root, pus formation, or fever — see an Oral & Maxillofacial Surgeon without delay.",
-      bn: "মুখ ফুলে যাওয়া, দাঁতের গোড়ায় প্রচণ্ড ব্যথা, পুঁজ জমা, বা জ্বর — এসব হলে দেরি না করে ওরাল অ্যান্ড ম্যাক্সিলোফেসিয়াল সার্জনের কাছে যেতে হবে।",
+      bn: "মুখ বা গাল ফুলে যাওয়া, দাঁতের গোড়ায় অসহ্য ব্যথা, পুঁজ জমা বা জ্বর — কালক্ষেপণ না করে ওরাল অ্যান্ড ম্যাক্সিলোফেসিয়াল সার্জনের শরণাপন্ন হোন।",
     },
-    callout: { en: "Abscess", bn: "সংক্রমণজনিত ফোলা" },
+    callout: { en: "Abscess", bn: "অ্যাবসেস (পুঁজ ও তীব্র ফোলা)" },
   },
   {
     image: "/images/hero/stage-4-prostho.webp",
     position: "center",
     mainText: {
       en: "A missing tooth is more than just a gap.",
-      bn: "একটি হারানো দাঁত শুধু একটি ফাঁকা জায়গা নয়।",
+      bn: "হারিয়ে যাওয়া দাঁত শুধু ফাঁকা জায়গা নয়, এটি মুখের ভারসাম্য ও চিবানোর শক্তি নষ্ট করে।",
     },
     bullets: {
       en: ["Dental Implants", "Crowns & Bridges", "Dentures (Full & Partial)", "Veneers", "Smile Makeover"],
-      bn: ["ডেন্টাল ইমপ্লান্ট", "ক্রাউন ও ব্রিজ", "ডেনচার (সম্পূর্ণ ও আংশিক)", "ভিনিয়ার", "স্মাইল মেকওভার"],
+      bn: ["ডেন্টাল ইমপ্ল্যান্ট", "ক্রাউন ও ব্রিজ", "ডেনচার (সম্পূর্ণ ও আংশিক বাঁধাই দাঁত)", "পোরসেলিন ভিনিয়ার্স", "স্মাইল মেকওভার"],
     },
     differential: {
       en: "A missing tooth, difficulty chewing, shifting of neighboring teeth, or feeling self-conscious about your smile — a Prosthodontist solves exactly this.",
-      bn: "দাঁত পড়ে যাওয়া, চিবাতে কষ্ট হওয়া, পাশের দাঁত সরে যাওয়া, বা হাসতে গিয়ে সংকোচ বোধ করা — এসব সমস্যায় প্রস্থোডন্টিস্টই সমাধান দিতে পারেন।",
+      bn: "দাঁত পড়ে যাওয়া, চিবানোর কষ্ট, পাশের দাঁত হেলে পড়া বা হাসতে দ্বিধাবোধ — এসব জটিলতায় প্রস্থোডন্টিস্ট দেন স্থায়ী সমাধান।",
     },
-    callout: { en: "Implant", bn: "ইমপ্লান্ট" },
+    callout: { en: "Implant", bn: "ডেন্টাল ইমপ্ল্যান্ট" },
   },
   {
     image: "/images/hero/stage-5-ortho.webp",
     position: "left",
     mainText: {
       en: "Crooked or crowded teeth affect more than your smile.",
-      bn: "আঁকাবাঁকা বা একসাথে ভিড় করে থাকা দাঁত শুধু হাসির সৌন্দর্যই নষ্ট করে না।",
+      bn: "আঁকাবাঁকা বা গাদাগাদি দাঁত শুধু হাসির সৌন্দর্যই নষ্ট করে না, পরিষ্কার রাখাও কঠিন করে তোলে।",
     },
     bullets: {
       en: ["Metal & Ceramic Braces", "Clear Aligners", "Retainers", "Bite Correction", "Space Maintainers (for kids)"],
-      bn: ["মেটাল ও সিরামিক ব্রেসেস", "ক্লিয়ার অ্যালাইনার", "রিটেইনার", "কামড় সংশোধন", "স্পেস মেইনটেইনার (শিশুদের জন্য)"],
+      bn: ["মেটাল ও সিরামিক ব্রেসেস", "ক্লিয়ার অ্যালাইনার (অদৃশ্য ব্রেসেস)", "রিটেইনার", "বাইট কারেকশন (কামড়ের অসঙ্গতি দূরীকরণ)", "শিশুদের স্পেস মেইনটেইনার"],
     },
     differential: {
       en: "Crooked teeth, a misaligned jaw, hesitating to smile freely, jaw pain, difficulty speaking or chewing, or food constantly getting stuck between teeth — these call for an Orthodontist.",
-      bn: "দাঁত আঁকাবাঁকা থাকা, চোয়াল আঁকাবাঁকা হয়ে যাওয়া, প্রাণ খুলে হাসতে না পারা, চোয়ালে ব্যথা, কথা বলতে বা চিবাতে সমস্যা, কিংবা দাঁতে খাবার আটকে থাকা — এসব হলে অর্থোডন্টিস্টের পরামর্শ প্রয়োজন।",
+      bn: "দাঁত অতিরিক্ত গাদাগাদি বা আঁকাবাঁকা, কামড়ে অসঙ্গতি, হাসতে সংকোচ, চিবানোর কষ্ট কিংবা বারবার খাবার আটকে থাকা — এসব ক্ষেত্রে অর্থোডন্টিস্টের পরামর্শ প্রয়োজন।",
     },
-    callout: { en: "Crowding", bn: "দাঁতের ভিড়" },
+    callout: { en: "Crowding", bn: "গাদাগাদি দাঁত" },
   },
   {
     image: "/images/hero/stage-6-perio.webp",
     position: "right",
     mainText: {
       en: "When the gums pull back, the tooth loses its foundation.",
-      bn: "মাড়ি সরে গেলে দাঁত তার ভিত্তি হারায়।",
+      bn: "মাড়ি সরে গেলে দাঁত ধীরে ধীরে তার মূল ভিত্তি হারায়।",
     },
     bullets: {
       en: ["Scaling & Root Planing (Deep Cleaning)", "Gum Surgery", "Gum Grafting", "Treatment of Gum Recession", "Crown Lengthening"],
-      bn: ["স্কেলিং ও রুট প্ল্যানিং (ডিপ ক্লিনিং)", "মাড়ির সার্জারি", "গাম গ্রাফটিং", "মাড়ি সরে যাওয়ার চিকিৎসা", "ক্রাউন লেংদেনিং"],
+      bn: ["স্কেলিং ও রুট প্ল্যানিং (ডিপ ক্লিনিং)", "মাড়ির ফ্ল্যাপ সার্জারি", "গাম গ্রাফটিং", "মাড়ি সরে যাওয়ার চিকিৎসা", "ক্রাউন লেংথেনিং"],
     },
     differential: {
       en: "Exposed tooth roots, sensitivity to hot and cold, bleeding gums, or loose teeth — see a Periodontist.",
-      bn: "দাঁতের গোড়া বেরিয়ে আসা, ঠান্ডা-গরমে শিরশির করা, মাড়ি থেকে রক্ত পড়া, বা দাঁত নড়বড়ে হয়ে যাওয়া — এসব লক্ষণে পেরিওডন্টিস্ট দেখানো জরুরি।",
+      bn: "দাঁতের গোড়া উন্মুক্ত হওয়া, ঠান্ডা-গরমে তীব্র শিরশিরানি, মাড়ি থেকে রক্ত পড়া বা দাঁত নড়বড়ে হওয়া — এসব লক্ষণে পেরিওডন্টিস্টের পরামর্শ নেওয়া জরুরি।",
     },
     callout: { en: "Gum Recession", bn: "মাড়ি সরে যাওয়া" },
   },
@@ -120,15 +120,15 @@ const STAGES: StageContent[] = [
     position: "center",
     mainText: {
       en: "Unusual patches or sores in the mouth are never just ‘nothing’.",
-      bn: "মুখের ভেতরের অস্বাভাবিক দাগ বা ঘা কখনোই সাধারণ কিছু নয়।",
+      bn: "মুখের ভেতরে দীর্ঘস্থায়ী অস্বাভাবিক দাগ বা ঘা কখনোই অবহেলা করার মতো নয়।",
     },
     bullets: {
       en: ["Oral Lesion & Ulcer Diagnosis", "Oral & Dental Cancer Screening", "Tumor & Growth Evaluation", "Management of Oral Lichen Planus", "Treatment of Habit-Related Damage", "Dry Mouth & Burning Mouth Treatment"],
-      bn: ["মুখের ঘা ও দাগ নির্ণয়", "ওরাল ও দাঁতের ক্যান্সার স্ক্রিনিং", "টিউমার ও অস্বাভাবিক বৃদ্ধি পরীক্ষা", "ওরাল লাইকেন প্ল্যানাসের চিকিৎসা", "পান-জর্দা/তামাকজনিত ক্ষতির চিকিৎসা", "মুখ শুকিয়ে যাওয়া ও জ্বালাপোড়ার চিকিৎসা"],
+      bn: ["মুখের ঘা ও ক্ষতের সঠিক নির্ণয়", "ওরাল ও ডেন্টাল ক্যান্সার স্ক্রিনিং", "টিউমার ও সিস্ট মূল্যায়ন", "ওরাল লাইকেন প্ল্যানাসের চিকিৎসা", "তামাক ও জর্দাজনিত ক্ষতের নিরাময়", "মুখ শুকিয়ে যাওয়া ও জ্বালাপোড়ার চিকিৎসা"],
     },
     differential: {
       en: "White or red patches, a sore that won't heal for over two weeks, an unusual lump or tumor, difficulty opening the mouth, or a persistent burning sensation — see an Oral Medicine specialist without delay.",
-      bn: "মুখের ভেতরে সাদা বা লালচে দাগ, দুই সপ্তাহের বেশি সময় ধরে না শুকানো ঘা, মুখের ভেতরে অস্বাভাবিক চাকা বা টিউমার, মুখ খুলতে কষ্ট হওয়া, বা মুখ জ্বালাপোড়া করা — এসব হলে দেরি না করে ওরাল মেডিসিন বিশেষজ্ঞের কাছে যান।",
+      bn: "মুখে সাদা বা লালচে ছোপ, দুই সপ্তাহের বেশি স্থায়ী ঘা, মাংসপিণ্ড বা ফোলাভাব, মুখ খুলতে কষ্ট বা তীব্র জ্বালাপোড়া — কালক্ষেপণ না করে ওরাল মেডিসিন বিশেষজ্ঞের শরণাপন্ন হোন।",
     },
     callout: { en: "Oral Lesion", bn: "মুখের ক্ষত" },
   },

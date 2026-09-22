@@ -1474,7 +1474,7 @@ export const DEFAULT_WHY_CHOOSE_CARDS: WhyChooseCard[] = [
     protocolTitle: { en: "Specialist-Led Clinical Protocol", bn: "বিশেষজ্ঞ পরিচালিত চিকিৎসা প্রোটোকল" },
     protocolSubtitle: {
       en: "Every dental department at KGH is led exclusively by qualified specialist surgeons (FCPS, MS, PhD) who focus 100% on their specialized discipline.",
-      bn: "কেজিএইচ ডেন্টালের প্রতিটি বিভাগ শুধুমাত্র উচ্চশিক্ষিত ও সার্টিফায়েড বিশেষজ্ঞ ডাক্তারদের (FCPS, MS, PhD) তত্ত্বাবধানে পরিচালিত হয়।",
+      bn: "কেজিএইচ ডেন্টালের প্রতিটি বিভাগ সরাসরি উচ্চশিক্ষিত ও সার্টিফায়েড বিশেষজ্ঞ চিকিৎসকদের (FCPS, MS, PhD) তত্ত্বাবধানে পরিচালিত হয়।",
     },
     protocolSteps: [
       {

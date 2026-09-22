@@ -22,7 +22,7 @@ function AppointmentContent() {
           </h1>
           <p className="text-sm sm:text-base text-zinc-600 mt-3 max-w-2xl mx-auto">
             {isBn
-              ? "প্রথমে আপনার সুবিধাজনক তারিখ নির্বাচন করুন, এরপর ওই তারিখে উপলব্ধ বিশেষজ্ঞ ডাক্তার ও ৩০ মিনিটের সময় বেছে নিন।"
+              ? "প্রথমে আপনার সুবিধাজনক তারিখ নির্বাচন করুন, এরপর ওই তারিখে চেম্বারে উপস্থিত বিশেষজ্ঞ ডাক্তার ও ৩০ মিনিটের সময় বেছে নিন।"
               : "Pick your preferred date first to view available specialists and select your dedicated 30-minute consultation slot."}
           </p>
 

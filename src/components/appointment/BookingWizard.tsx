@@ -393,7 +393,7 @@ export function BookingWizard() {
               </h3>
               <p className="text-xs sm:text-sm text-zinc-600 mt-1">
                 {isBn
-                  ? "প্রথমে ক্যালেন্ডার থেকে আপনার সুবিধাজনক তারিখ নির্বাচন করুন। ওই তারিখে চেম্বারে উপলব্ধ ডাক্তারদের তালিকা ও সময়সূচি স্বয়ংক্রিয়ভাবে ডানপাশে দেখা যাবে।"
+                  ? "প্রথমে ক্যালেন্ডার থেকে আপনার সুবিধাজনক তারিখ নির্বাচন করুন। ওই তারিখে চেম্বারে উপস্থিত বিশেষজ্ঞ ডাক্তারদের তালিকা ও সময়সূচি স্বয়ংক্রিয়ভাবে ডানপাশে দেখা যাবে।"
                   : "Pick your preferred date on the calendar first. Specialists available on that day and their 30-minute time slots will appear on the right."}
               </p>
             </div>
@@ -408,7 +408,7 @@ export function BookingWizard() {
                     {isBn ? "চেম্বারের ক্যালেন্ডার" : "Chamber Calendar"}
                   </span>
                   <span className="text-[11px] text-zinc-500">
-                    {isBn ? "আগামী ৩ মাস উপলব্ধ" : "Next 3 months open"}
+                    {isBn ? "আগামী ৩ মাসের সময়সূচি উন্মুক্ত" : "Next 3 months open"}
                   </span>
                 </div>
 
@@ -456,7 +456,7 @@ export function BookingWizard() {
                   <div className="flex items-center justify-between">
                     <span className="text-xs font-bold uppercase tracking-wider text-zinc-800 flex items-center gap-1.5">
                       <Stethoscope className="w-4 h-4 text-zinc-900" />
-                      {isBn ? "উপলব্ধ বিশেষজ্ঞ ডাক্তারবৃন্দ" : "Specialists Available on this Date"}
+                      {isBn ? "চেম্বারে উপস্থিত বিশেষজ্ঞ ডাক্তারবৃন্দ" : "Specialists Available on this Date"}
                     </span>
                     <span className="text-xs font-bold text-zinc-600">
                       {selectedDateFormatted.split(",")[0]}

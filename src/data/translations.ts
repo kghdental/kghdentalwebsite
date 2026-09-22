@@ -223,7 +223,7 @@ export const UI_STRINGS = {
     pills: [
       { en: "100% Class-B Sterilization", bn: "১০০% ক্লাস-বি স্টেরিলাইজেশন" },
       { en: "Low-Radiation Digital Scans", bn: "লো-রেডিয়েশন ডিজিটাল স্ক্যান" },
-      { en: "Painless Anesthesia Protocol", bn: "ব্যথামুক্ত এনেস্থেশিয়া প্রোটোকল" },
+      { en: "Painless Anesthesia Protocol", bn: "ব্যথাহীন অ্যানেস্থেসিয়া প্রোটোকল" },
       { en: "Transparent Written Estimates", bn: "স্বচ্ছ লিখিত খরচের হিসাব" },
     ],
     ctaPrimary: {
@@ -238,7 +238,7 @@ export const UI_STRINGS = {
   doctorsSection: {
     title: {
       en: "Meet the Specialists",
-      bn: "আমাদের বিশেষজ্ঞদের সাথে পরিচিত হোন",
+      bn: "আমাদের বিশেষজ্ঞদের সাথে পরিচিত হন",
     },
     subtitle: {
       en: "Seven specialists, one shared commitment to your smile.",
@@ -286,11 +286,11 @@ export const UI_STRINGS = {
   ctaBand: {
     headline: {
       en: "Ready to Take the First Step?",
-      bn: "প্রথম পদক্ষেপটা নিতে প্রস্তুত?",
+      bn: "সুস্থ ও আত্মবিশ্বাসী হাসির পথে শুরু করুন আজই",
     },
     subtext: {
       en: "Book your appointment with the right specialist today.",
-      bn: "আজই বুক করুন সঠিক বিশেষজ্ঞের সাথে আপনার অ্যাপয়েন্টমেন্ট।",
+      bn: "আজই সংশ্লিষ্ট বিশেষজ্ঞের সাথে আপনার অ্যাপয়েন্টমেন্ট নিশ্চিত করুন।",
     },
     button: {
       en: "Book Now",
@@ -319,14 +319,14 @@ export const UI_STRINGS = {
     labels: {
       chooseDoctor: { en: "Select Doctor or Department", bn: "ডাক্তার বা বিভাগ নির্বাচন করুন" },
       selectDate: { en: "Select Date", bn: "তারিখ নির্বাচন করুন" },
-      availableDaysNote: { en: "Available on:", bn: "উপলব্ধ দিনসমূহ:" },
+      availableDaysNote: { en: "Available on:", bn: "চেম্বারের দিনসমূহ:" },
       selectSlot: { en: "Select Time Slot", bn: "সময় নির্বাচন করুন" },
       fullName: { en: "Full Name", bn: "রোগীর পূর্ণ নাম" },
       phone: { en: "Mobile Phone Number", bn: "মোবাইল নম্বর" },
       email: { en: "Email Address (Optional)", bn: "ইমেইল অ্যাড্রেস (ঐচ্ছিক)" },
       reason: { en: "Reason for Visit / Symptoms (Optional)", bn: "সমস্যা বা ভিজিটের কারণ (ঐচ্ছিক)" },
       confirmButton: { en: "Confirm Appointment", bn: "অ্যাপয়েন্টমেন্ট নিশ্চিত করুন" },
-      backButton: { en: "Back", bn: "পেছনে" },
+      backButton: { en: "Back", bn: "পূর্ববর্তী ধাপ" },
       nextButton: { en: "Continue", bn: "পরবর্তী ধাপ" },
     },
     confirmation: {
@@ -373,7 +373,7 @@ export const UI_STRINGS = {
     workingHours: { en: "Chamber Hours", bn: "চেম্বারের সময়সূচি" },
     emergencyNotice: {
       en: "For acute dental emergencies or severe facial trauma, call our helpline immediately.",
-      bn: "তীব্র দাঁতে ব্যথা বা মুখের আঘাতে জরুরি চিকিৎসার জন্য অবিলম্বে হেল্পলাইনে ফোন করুন।",
+      bn: "দাঁতে তীব্র ব্যথা বা মুখে আঘাতজনিত জরুরি পরিস্থিতিতে অবিলম্বে আমাদের হেল্পলাইনে কল করুন।",
     },
     rights: {
       en: "All rights reserved. KGH Dental Clinic.",

@@ -455,7 +455,7 @@ export default function AdminDoctorsPage() {
                         schedule: { ...formData.schedule, availableDaysBn: e.target.value },
                       })
                     }
-                    placeholder="উদা: শুধুমাত্র শনিবার"
+                    placeholder="উদা: প্রতি শনিবার / প্রতি মঙ্গলবার"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm"
                   />
                 </div>
