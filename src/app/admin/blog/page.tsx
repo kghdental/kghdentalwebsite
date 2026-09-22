@@ -61,9 +61,9 @@ export default function AdminBlogPage() {
     readTime: "5 min read",
     date: "Updated 2026",
     targetKeyword: "dental care",
-    authorName: { en: "Dr. Diean Dental Specialists", bn: "ডাঃ দিয়েন ডেন্টাল বিশেষজ্ঞ টিম" },
-    authorRole: { en: "Consultant Dental Surgeon", bn: "কনসালটেন্ট ডেন্টাল সার্জন" },
-    authorPhotoUrl: "/images/doctors/dr-diean.jpg",
+    authorName: { en: "Admin", bn: "এডমিন" },
+    authorRole: { en: "Admin", bn: "এডমিন" },
+    authorPhotoUrl: "",
     tags: ["dental", "kgh dental"],
     contentHtml: { en: "", bn: "" },
   });
@@ -82,9 +82,9 @@ export default function AdminBlogPage() {
       readTime: "5 min read",
       date: "September 2026",
       targetKeyword: "dental clinic Dhaka",
-      authorName: { en: "Dr. Diean Dental Specialists", bn: "ডাঃ দিয়েন ডেন্টাল বিশেষজ্ঞ টিম" },
-      authorRole: { en: "Consultant Dental Surgeon", bn: "কনসালটেন্ট ডেন্টাল সার্জন" },
-      authorPhotoUrl: "/images/doctors/dr-diean.jpg",
+      authorName: { en: "Admin", bn: "এডমিন" },
+      authorRole: { en: "Admin", bn: "এডমিন" },
+      authorPhotoUrl: "",
       contentHtml: {
         en: `<h2>Understanding Your Dental Health</h2><p>Start typing your clinical guidance here. You can select any text to make it Bold, Italic, a Heading, or a Bullet List using the toolbar above.</p>`,
         bn: `<h2>দাঁতের স্বাস্থ্য ও প্রাথমিক তথ্য</h2><p>এখানে বাংলায় আপনার চিকিৎসাগত পরামর্শ লিখুন। ওপরের টুলবার ব্যবহার করে যেকোনো লেখাকে বোল্ড, হেডিং বা লিস্ট আকারে সাজাতে পারেন।</p>`,
@@ -496,18 +496,18 @@ ${
                   </label>
                   <input
                     type="text"
-                    value={formData.authorName?.en || "Dr. Diean Dental Specialists"}
+                    value={formData.authorName?.en || "Admin"}
                     onChange={(e) =>
                       setFormData({
                         ...formData,
                         authorName: {
                           en: e.target.value,
-                          bn: formData.authorName?.bn || e.target.value,
+                          bn: formData.authorName?.bn || (e.target.value === "Admin" ? "এডমিন" : e.target.value),
                         },
                       })
                     }
                     className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs"
-                    placeholder="e.g. Dr. Diean & Specialists"
+                    placeholder="e.g. Admin"
                   />
                 </div>
               </div>

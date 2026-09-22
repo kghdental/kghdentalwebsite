@@ -1967,9 +1967,9 @@ export const ENRICHED_BLOG_POSTS: BlogPost[] = BLOG_POSTS.map((post, idx) => {
   return {
     ...post,
     coverImage: post.coverImage || covers[idx % covers.length] || "/images/departments/consultation-cta.jpg",
-    authorName: post.authorName || { en: "Dr. Diean Dental Specialists", bn: "ডাঃ দিয়েন ডেন্টাল বিশেষজ্ঞ টিম" },
-    authorRole: post.authorRole || { en: "Consultant Dental Surgeon", bn: "কনসালটেন্ট ডেন্টাল সার্জন" },
-    authorPhotoUrl: post.authorPhotoUrl || "/images/doctors/dr-diean.jpg",
+    authorName: post.authorName || { en: "Admin", bn: "এডমিন" },
+    authorRole: post.authorRole || { en: "Admin", bn: "এডমিন" },
+    authorPhotoUrl: post.authorPhotoUrl || "",
     tags: post.tags || [post.departmentSlug, "dental health", "kgh dental"],
   };
 });
@@ -1982,7 +1982,14 @@ export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed;
+          return parsed.map((p: BlogPost) => {
+            const staticPost = ENRICHED_BLOG_POSTS.find((s) => s.id === p.id || s.slug === p.slug);
+            return {
+              ...staticPost,
+              ...p,
+              contentHtml: (p.contentHtml && (p.contentHtml.en || p.contentHtml.bn)) ? p.contentHtml : staticPost?.contentHtml,
+            };
+          });
         }
       }
     } catch (e) {
@@ -2002,35 +2009,38 @@ export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
       return ENRICHED_BLOG_POSTS;
     }
 
-    const livePosts: BlogPost[] = data.map((d: any) => ({
-      id: d.id,
-      slug: d.slug,
-      title: { en: d.title_en, bn: d.title_bn },
-      excerpt: { en: d.excerpt_en || "", bn: d.excerpt_bn || "" },
-      coverImage: d.cover_image || "/images/departments/consultation-cta.jpg",
-      departmentSlug: d.department_slug || "general-consultation",
-      departmentName: {
-        en: d.department_name_en || "General Consultation",
-        bn: d.department_name_bn || "সাধারণ পরামর্শ",
-      },
-      readTime: d.read_time || "5 min read",
-      date: d.date_str || "Updated 2026",
-      targetKeyword: d.target_keyword || "",
-      authorName: d.author_name_en
-        ? { en: d.author_name_en, bn: d.author_name_bn || d.author_name_en }
-        : { en: "KGH Clinical Specialists", bn: "কেজিএইচ ক্লিনিক্যাল বিশেষজ্ঞ টিম" },
-      authorRole: {
-        en: d.author_role_en || "Consultant Dental Surgeon",
-        bn: d.author_role_bn || "কনসালটেন্ট ডেন্টাল সার্জন",
-      },
-      authorPhotoUrl: d.author_photo_url || "/images/doctors/dr-diean.jpg",
-      tags: d.tags || [],
-      contentHtml: {
-        en: d.content_html_en || "",
-        bn: d.content_html_bn || "",
-      },
-      content: d.legacy_content || undefined,
-    }));
+    const livePosts: BlogPost[] = data.map((d: any) => {
+      const staticPost = ENRICHED_BLOG_POSTS.find((s) => s.slug === d.slug || s.id === d.id);
+      return {
+        id: d.id,
+        slug: d.slug,
+        title: { en: d.title_en || staticPost?.title.en, bn: d.title_bn || staticPost?.title.bn },
+        excerpt: { en: d.excerpt_en || staticPost?.excerpt.en || "", bn: d.excerpt_bn || staticPost?.excerpt.bn || "" },
+        coverImage: d.cover_image || staticPost?.coverImage || "/images/departments/consultation-cta.jpg",
+        departmentSlug: d.department_slug || staticPost?.departmentSlug || "general-consultation",
+        departmentName: {
+          en: d.department_name_en || staticPost?.departmentName.en || "General Consultation",
+          bn: d.department_name_bn || staticPost?.departmentName.bn || "সাধারণ পরামর্শ",
+        },
+        readTime: d.read_time || staticPost?.readTime || "8 min read",
+        date: d.date_str || "Updated 2026",
+        targetKeyword: d.target_keyword || staticPost?.targetKeyword || "",
+        authorName: d.author_name_en
+          ? { en: d.author_name_en, bn: d.author_name_bn || d.author_name_en }
+          : { en: "Admin", bn: "এডমিন" },
+        authorRole: {
+          en: d.author_role_en || "Admin",
+          bn: d.author_role_bn || "এডমিন",
+        },
+        authorPhotoUrl: d.author_photo_url || "",
+        tags: d.tags || staticPost?.tags || [],
+        contentHtml: {
+          en: d.content_html_en || staticPost?.contentHtml?.en || "",
+          bn: d.content_html_bn || staticPost?.contentHtml?.bn || "",
+        },
+        content: d.legacy_content || staticPost?.content || undefined,
+      };
+    });
 
     if (typeof window !== "undefined") {
       try {
@@ -2088,11 +2098,11 @@ export async function saveLiveBlogPost(
       read_time: post.readTime,
       date_str: post.date,
       target_keyword: post.targetKeyword,
-      author_name_en: post.authorName?.en || "KGH Specialist",
-      author_name_bn: post.authorName?.bn || "কেজিএইচ বিশেষজ্ঞ",
-      author_role_en: post.authorRole?.en || "Dental Surgeon",
-      author_role_bn: post.authorRole?.bn || "ডেন্টাল সার্জন",
-      author_photo_url: post.authorPhotoUrl || "/images/doctors/dr-diean.jpg",
+      author_name_en: post.authorName?.en || "Admin",
+      author_name_bn: post.authorName?.bn || "এডমিন",
+      author_role_en: post.authorRole?.en || "Admin",
+      author_role_bn: post.authorRole?.bn || "এডমিন",
+      author_photo_url: post.authorPhotoUrl || "",
       tags: post.tags || [],
       content_html_en: post.contentHtml?.en || "",
       content_html_bn: post.contentHtml?.bn || "",

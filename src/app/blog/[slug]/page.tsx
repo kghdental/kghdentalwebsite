@@ -16,6 +16,7 @@ import {
   Phone,
   Sparkles,
   ArrowRight,
+  User,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CtaBanner } from "@/components/home/CtaBanner";
@@ -129,24 +130,12 @@ export default function BlogPostPage() {
             {isBn ? currentPost.excerpt.bn : currentPost.excerpt.en}
           </p>
 
-          {/* Doctor / Author Info */}
+          {/* Author Info */}
           <div className="pt-4 border-t border-zinc-100 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-full overflow-hidden bg-zinc-200 border-2 border-white shadow-sm shrink-0">
-                <img
-                  src={currentPost.authorPhotoUrl || "/images/doctors/dr-diean.jpg"}
-                  alt="Doctor"
-                  className="w-full h-full object-cover"
-                />
-              </div>
-              <div>
-                <p className="text-xs sm:text-sm font-bold text-zinc-950">
-                  {isBn ? currentPost.authorName?.bn : currentPost.authorName?.en}
-                </p>
-                <p className="text-[11px] text-zinc-500">
-                  {isBn ? currentPost.authorRole?.bn : currentPost.authorRole?.en}
-                </p>
-              </div>
+            <div className="flex items-center gap-2 text-xs sm:text-sm text-zinc-600 font-medium">
+              <User className="w-4 h-4 text-zinc-400" />
+              <span>{isBn ? "পোস্ট করেছেন: " : "Posted by: "}</span>
+              <span className="font-bold text-zinc-900">{isBn ? "এডমিন" : "Admin"}</span>
             </div>
 
             <div className="hidden sm:flex items-center gap-1 text-[11px] text-zinc-500 bg-zinc-50 px-3 py-1.5 rounded-xl border border-zinc-200">
