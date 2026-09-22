@@ -2030,14 +2030,19 @@ export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
           };
         });
 
+        const missingStatic = ENRICHED_BLOG_POSTS.filter(
+          (s) => !livePosts.some((l) => l.slug === s.slug || l.id === s.id)
+        );
+        const combined = [...livePosts, ...missingStatic];
+
         if (typeof window !== "undefined") {
           try {
-            localStorage.setItem("kgh_blog_posts", JSON.stringify(livePosts));
+            localStorage.setItem("kgh_blog_posts", JSON.stringify(combined));
           } catch (e) {
             // ignore
           }
         }
-        return livePosts;
+        return combined;
       }
     } catch (err) {
       console.warn("fetchLiveBlogPosts Supabase query error, falling back:", err);
@@ -2051,14 +2056,19 @@ export async function fetchLiveBlogPosts(): Promise<BlogPost[]> {
       if (cached) {
         const parsed = JSON.parse(cached);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed.map((p: BlogPost) => {
+          const mapped = parsed.map((p: BlogPost) => {
             const staticPost = ENRICHED_BLOG_POSTS.find((s) => s.id === p.id || s.slug === p.slug);
             return {
               ...staticPost,
               ...p,
+              departmentName: p.departmentName || staticPost?.departmentName || { en: "General Consultation", bn: "সাধারণ পরামর্শ" },
               contentHtml: (p.contentHtml && (p.contentHtml.en || p.contentHtml.bn)) ? p.contentHtml : staticPost?.contentHtml,
             };
           });
+          const missingStatic = ENRICHED_BLOG_POSTS.filter(
+            (s) => !mapped.some((m) => m.slug === s.slug || m.id === s.id)
+          );
+          return [...mapped, ...missingStatic];
         }
       }
     } catch (e) {

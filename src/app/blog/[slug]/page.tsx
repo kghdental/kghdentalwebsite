@@ -23,31 +23,79 @@ import { CtaBanner } from "@/components/home/CtaBanner";
 import { fetchLiveBlogPosts, ENRICHED_BLOG_POSTS } from "@/lib/api/db";
 import { BlogPost } from "@/types";
 
+import { BookOpen } from "lucide-react";
+
 export default function BlogPostPage() {
   const params = useParams();
   const slug = params?.slug as string;
   const { isBn } = useLanguage();
 
   const [posts, setPosts] = useState<BlogPost[]>(ENRICHED_BLOG_POSTS);
-  const [post, setPost] = useState<BlogPost | null | undefined>(() =>
-    slug ? ENRICHED_BLOG_POSTS.find((p) => p.slug === slug) || null : undefined
-  );
+
+  // 1. Initial state: check static posts and client-side localStorage synchronously
+  const [post, setPost] = useState<BlogPost | null | undefined>(() => {
+    if (!slug) return undefined;
+    const staticFound = ENRICHED_BLOG_POSTS.find((p) => p.slug === slug);
+    if (staticFound) return staticFound;
+
+    if (typeof window !== "undefined") {
+      try {
+        const cached = localStorage.getItem("kgh_blog_posts");
+        if (cached) {
+          const list: BlogPost[] = JSON.parse(cached);
+          const cachedFound = list.find((p) => p.slug === slug);
+          if (cachedFound) return cachedFound;
+        }
+      } catch (e) {
+        // ignore
+      }
+    }
+    // Return undefined so we do NOT trigger notFound() before async fetch completes!
+    return undefined;
+  });
+
   const [isCopied, setIsCopied] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
-    const load = () => {
-      fetchLiveBlogPosts().then((livePosts) => {
+    let isCancelled = false;
+
+    const load = async () => {
+      try {
+        const livePosts = await fetchLiveBlogPosts();
+        if (isCancelled) return;
         const all = livePosts && livePosts.length > 0 ? livePosts : ENRICHED_BLOG_POSTS;
         setPosts(all);
         const found = all.find((p) => p.slug === slug);
-        setPost(found || null);
-      });
+        if (found) {
+          setPost(found);
+        } else {
+          // Double check directly in client storage cache in case of edge cases
+          let localFound: BlogPost | null = null;
+          if (typeof window !== "undefined") {
+            try {
+              const cached = localStorage.getItem("kgh_blog_posts");
+              if (cached) {
+                const list: BlogPost[] = JSON.parse(cached);
+                localFound = list.find((p) => p.slug === slug) || null;
+              }
+            } catch (e) {}
+          }
+          setPost(localFound);
+        }
+      } catch (err) {
+        console.warn("Error loading blog post:", err);
+        if (!isCancelled) {
+          setPost(null);
+        }
+      }
     };
+
     load();
     window.addEventListener("kgh_blogs_updated", load);
     window.addEventListener("storage", load);
     return () => {
+      isCancelled = true;
       window.removeEventListener("kgh_blogs_updated", load);
       window.removeEventListener("storage", load);
     };
@@ -55,14 +103,38 @@ export default function BlogPostPage() {
 
   if (post === undefined) {
     return (
-      <div className="min-h-screen bg-[#f7f6f2] flex items-center justify-center py-24">
+      <div className="min-h-screen bg-[#f7f6f2] flex flex-col items-center justify-center py-24 gap-3">
         <div className="w-8 h-8 rounded-full border-2 border-zinc-300 border-t-zinc-900 animate-spin" />
+        <span className="text-xs text-zinc-500 font-medium">
+          {isBn ? "ডেন্টাল গাইড লোড হচ্ছে..." : "Loading dental guide..."}
+        </span>
       </div>
     );
   }
 
   if (post === null) {
-    notFound();
+    return (
+      <div className="min-h-[75vh] bg-[#f7f6f2] flex flex-col items-center justify-center py-20 px-4 text-center">
+        <div className="w-16 h-16 rounded-full bg-amber-100 text-amber-700 flex items-center justify-center mb-4 shadow-xs">
+          <BookOpen className="w-8 h-8" />
+        </div>
+        <h1 className="text-2xl sm:text-3xl font-extrabold text-zinc-900 mb-2">
+          {isBn ? "ডেন্টাল গাইডটি পাওয়া যায়নি" : "Dental Guide Not Found"}
+        </h1>
+        <p className="text-sm text-zinc-600 max-w-md mb-6 leading-relaxed">
+          {isBn
+            ? "দুঃখিত, আপনি যে আর্টিকেলটি খুঁজছেন তা মুছে ফেলা হয়েছে অথবা লিঙ্কটি ভুল। আমাদের অন্যান্য ক্লিনিক্যাল গাইড দেখতে নিচের বাটনে ক্লিক করুন।"
+            : "The clinical article you are looking for may have been removed or the link is incorrect. Please browse our dental guides library."}
+        </p>
+        <Link
+          href="/blog"
+          className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[#1c362b] hover:bg-[#14261e] text-white text-xs font-bold transition-all shadow-sm"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          <span>{isBn ? "সকল ডেন্টাল গাইডে ফিরে যান" : "Browse All Guides"}</span>
+        </Link>
+      </div>
+    );
   }
 
   const currentPost = post;
@@ -118,25 +190,29 @@ export default function BlogPostPage() {
           <div className="flex flex-wrap items-center gap-3">
             <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-bold bg-emerald-50 text-emerald-800 border border-emerald-200">
               <Tag className="w-3 h-3 text-emerald-700" />
-              <span>{isBn ? currentPost.departmentName.bn : currentPost.departmentName.en}</span>
+              <span>
+                {isBn
+                  ? currentPost.departmentName?.bn || currentPost.departmentName?.en || "সাধারণ পরামর্শ"
+                  : currentPost.departmentName?.en || "General Consultation"}
+              </span>
             </span>
 
             <span className="flex items-center gap-1 text-xs text-zinc-500 font-medium">
               <Clock className="w-3.5 h-3.5 text-zinc-400" />
-              <span>{currentPost.readTime}</span>
+              <span>{currentPost.readTime || "5 min read"}</span>
             </span>
 
-            <span className="text-xs text-zinc-400">• {currentPost.date}</span>
+            <span className="text-xs text-zinc-400">• {currentPost.date || "Updated 2026"}</span>
           </div>
 
           {/* Title */}
           <h1 className="text-2xl sm:text-4xl lg:text-5xl font-extrabold text-[#1a2f23] tracking-tight leading-tight">
-            {isBn ? currentPost.title.bn : currentPost.title.en}
+            {isBn ? currentPost.title?.bn || currentPost.title?.en : currentPost.title?.en}
           </h1>
 
           {/* Excerpt */}
           <p className="text-base sm:text-lg text-zinc-600 leading-relaxed font-normal">
-            {isBn ? currentPost.excerpt.bn : currentPost.excerpt.en}
+            {isBn ? currentPost.excerpt?.bn || currentPost.excerpt?.en : currentPost.excerpt?.en}
           </p>
 
           {/* Author Info */}
@@ -285,13 +361,13 @@ export default function BlogPostPage() {
                     className="p-5 rounded-2xl bg-white border border-zinc-200 hover:shadow-md transition-all block group"
                   >
                     <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-800 bg-emerald-50 px-2 py-0.5 rounded">
-                      {isBn ? r.departmentName.bn : r.departmentName.en}
+                      {isBn ? r.departmentName?.bn || r.departmentName?.en : r.departmentName?.en}
                     </span>
                     <h4 className="text-sm font-bold text-zinc-900 group-hover:text-[#1c362b] mt-2 line-clamp-2">
-                      {isBn ? r.title.bn : r.title.en}
+                      {isBn ? r.title?.bn || r.title?.en : r.title?.en}
                     </h4>
                     <p className="text-xs text-zinc-500 line-clamp-2 mt-1">
-                      {isBn ? r.excerpt.bn : r.excerpt.en}
+                      {isBn ? r.excerpt?.bn || r.excerpt?.en : r.excerpt?.en}
                     </p>
                   </Link>
                 ))}
