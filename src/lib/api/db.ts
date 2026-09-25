@@ -23,7 +23,7 @@ import { notifyAppointmentsUpdated } from "@/lib/appointment-utils";
 // 1. DOCTORS API
 // ==============================================================================
 
-export async function fetchLiveDoctors(): Promise<Doctor[]> {
+export async function fetchLiveDoctors(includePrivate: boolean = false): Promise<Doctor[]> {
   if (!isSupabaseConfigured) return DOCTORS;
 
   try {
@@ -52,7 +52,7 @@ export async function fetchLiveDoctors(): Promise<Doctor[]> {
         bio: { en: d.bio_en, bn: d.bio_bn },
         photoUrl: d.photo_url || staticDoc?.photoUrl || "/images/doctors/dr-diean.jpg",
         bmdcReg: d.bmdc_reg || staticDoc?.bmdcReg || "",
-        email: d.email || staticDoc?.email || "",
+        email: includePrivate ? (d.email || staticDoc?.email || "") : undefined,
         isConfirmed: true,
         isActive: d.is_active ?? true,
       };

@@ -306,7 +306,6 @@ export function BookingWizard() {
           patient_gender: patientGender || undefined,
           doctor_id: activeDoctor?.id,
           doctor_name: activeDoctor ? activeDoctor.name.en : "Specialist Doctor",
-          doctor_email: activeDoctor?.email || undefined,
           department_name: activeDoctor ? activeDoctor.specialty.en : "Specialist Consultation",
           appointment_date: selectedDate,
           time_slot: selectedTimeSlot,

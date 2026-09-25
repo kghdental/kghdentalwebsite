@@ -55,7 +55,7 @@ export default function AdminDoctorsPage() {
 
   // Load from Supabase on mount
   useEffect(() => {
-    fetchLiveDoctors().then((docs) => {
+    fetchLiveDoctors(true).then((docs) => {
       if (docs && docs.length > 0) {
         setDoctorsList(docs);
       }

@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     let resolvedDoctorEmail = doctor_email;
     if (!resolvedDoctorEmail && doctor_id) {
       try {
-        const doctors = await fetchLiveDoctors();
+        const doctors = await fetchLiveDoctors(true);
         const doc = doctors.find(
           (d) =>
             d.id.toLowerCase() === doctor_id.toLowerCase() ||
