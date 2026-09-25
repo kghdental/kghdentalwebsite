@@ -48,6 +48,7 @@ export interface Doctor {
   designation?: BilingualText;
   institution?: BilingualText;
   bmdcReg?: string;
+  email?: string;
   bio: BilingualText;
   photoUrl: string;
   experience?: BilingualText;
@@ -96,6 +97,8 @@ export interface AppointmentRecord {
   patient_name: string;
   patient_phone: string;
   patient_email?: string;
+  patient_age?: string;
+  patient_gender?: string;
   doctor_id?: string;
   doctor_name: string;
   department_id?: string;
@@ -126,6 +129,8 @@ export interface AppointmentBooking {
   patientName: string;
   patientPhone: string;
   patientEmail?: string;
+  patientAge?: string;
+  patientGender?: string;
   notes?: string;
   createdAt?: string;
 }

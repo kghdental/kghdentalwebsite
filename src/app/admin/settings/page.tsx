@@ -119,6 +119,9 @@ export default function AdminSettingsPage() {
                   }
                   className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 font-mono text-sm"
                 />
+                <p className="text-[11px] text-zinc-500 mt-1">
+                  Primary clinic notification email. Receives copies of new online bookings and serves as the notification destination if an individual doctor email is not configured.
+                </p>
               </div>
             </div>
 

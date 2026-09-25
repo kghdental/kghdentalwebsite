@@ -13,6 +13,8 @@ export interface AppointmentPrintSlipProps {
   patientName: string;
   patientPhone: string;
   patientEmail?: string;
+  patientAge?: string;
+  patientGender?: string;
   symptoms?: string;
   bookingStatus?: string;
   paymentStatus?: "UNPAID" | "PAID";
@@ -27,6 +29,8 @@ export function AppointmentPrintSlip({
   patientName,
   patientPhone,
   patientEmail,
+  patientAge,
+  patientGender,
   symptoms,
   paymentStatus = "UNPAID",
 }: AppointmentPrintSlipProps) {
@@ -107,6 +111,14 @@ export function AppointmentPrintSlip({
                 <td className="text-zinc-500 font-medium py-0.5">Phone Number:</td>
                 <td className="font-bold text-zinc-900 font-mono py-0.5">{patientPhone || "—"}</td>
               </tr>
+              {(patientAge || patientGender) && (
+                <tr className="py-1">
+                  <td className="text-zinc-500 font-medium py-0.5">Demographics:</td>
+                  <td className="text-zinc-800 py-0.5">
+                    {[patientAge ? `${patientAge} yrs` : null, patientGender].filter(Boolean).join(" • ")}
+                  </td>
+                </tr>
+              )}
               {patientEmail && (
                 <tr className="py-1">
                   <td className="text-zinc-500 font-medium py-0.5">Email:</td>

@@ -14,6 +14,7 @@ import {
   X,
   Search,
   Check,
+  Mail,
 } from "lucide-react";
 import { DOCTORS } from "@/data/doctors";
 import { Doctor } from "@/types";
@@ -47,6 +48,7 @@ export default function AdminDoctorsPage() {
     bio: { en: "", bn: "" },
     photoUrl: "/images/doctors/dr-diean.jpg",
     bmdcReg: "",
+    email: "",
     isConfirmed: true,
     isActive: true,
   });
@@ -80,6 +82,7 @@ export default function AdminDoctorsPage() {
       bio: { en: "", bn: "" },
       photoUrl: "/images/doctors/dr-diean.jpg",
       bmdcReg: "",
+      email: "",
       isConfirmed: true,
       isActive: true,
     });
@@ -88,7 +91,10 @@ export default function AdminDoctorsPage() {
 
   const handleOpenEdit = (doc: Doctor) => {
     setEditingDoctor(doc);
-    setFormData(doc);
+    setFormData({
+      ...doc,
+      email: doc.email || "",
+    });
     setIsModalOpen(true);
   };
 
@@ -192,6 +198,17 @@ export default function AdminDoctorsPage() {
                   {doc.bmdcReg && (
                     <span className="text-[10px] font-mono text-zinc-400 block mt-0.5">
                       BMDC: {doc.bmdcReg}
+                    </span>
+                  )}
+                  {doc.email ? (
+                    <span className="inline-flex items-center gap-1 text-[11px] text-emerald-700 font-medium mt-1">
+                      <Mail className="w-3 h-3 text-emerald-600" />
+                      <span className="truncate max-w-[150px]">{doc.email}</span>
+                    </span>
+                  ) : (
+                    <span className="inline-flex items-center gap-1 text-[10px] text-zinc-400 mt-1 italic">
+                      <Mail className="w-3 h-3 text-zinc-300" />
+                      <span>No email configured</span>
                     </span>
                   )}
                 </div>
@@ -407,18 +424,39 @@ export default function AdminDoctorsPage() {
                 </div>
               </div>
 
-              {/* BMDC Reg Number */}
-              <div>
-                <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
-                  BMDC Registration Number
-                </label>
-                <input
-                  type="text"
-                  value={formData.bmdcReg || ""}
-                  onChange={(e) => setFormData({ ...formData, bmdcReg: e.target.value })}
-                  placeholder="e.g. 6150"
-                  className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm"
-                />
+              {/* BMDC Reg Number & Doctor Email Address */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                    Doctor Email Address (For Appointment Notifications)
+                  </label>
+                  <input
+                    type="email"
+                    value={formData.email || ""}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    placeholder="e.g. doctor@kghdental.com"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-zinc-950"
+                  />
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    Direct notification alert when a patient books this doctor.
+                  </p>
+                </div>
+
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-700 mb-1">
+                    BMDC Registration Number
+                  </label>
+                  <input
+                    type="text"
+                    value={formData.bmdcReg || ""}
+                    onChange={(e) => setFormData({ ...formData, bmdcReg: e.target.value })}
+                    placeholder="e.g. 6150"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-zinc-300 text-xs sm:text-sm focus:outline-hidden focus:ring-2 focus:ring-zinc-950"
+                  />
+                  <p className="text-[11px] text-zinc-500 mt-1">
+                    Official Bangladesh Medical & Dental Council registration.
+                  </p>
+                </div>
               </div>
 
               {/* Schedule Days */}

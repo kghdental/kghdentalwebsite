@@ -115,6 +115,8 @@ export function BookingWizard() {
   const [patientName, setPatientName] = useState<string>("");
   const [patientPhone, setPatientPhone] = useState<string>("");
   const [patientEmail, setPatientEmail] = useState<string>("");
+  const [patientAge, setPatientAge] = useState<string>("");
+  const [patientGender, setPatientGender] = useState<string>("");
   const [visitReason, setVisitReason] = useState<string>(
     preSelectedTreatment ? `Consultation for ${preSelectedTreatment}` : ""
   );
@@ -279,6 +281,8 @@ export function BookingWizard() {
         patient_name: patientName,
         patient_phone: patientPhone,
         patient_email: patientEmail || undefined,
+        patient_age: patientAge || undefined,
+        patient_gender: patientGender || undefined,
         doctor_id: activeDoctor?.id,
         doctor_name: activeDoctor ? activeDoctor.name.en : "Specialist Doctor",
         department_id: activeDoctor?.departmentId,
@@ -287,6 +291,29 @@ export function BookingWizard() {
         time_slot: selectedTimeSlot,
         symptoms: visitReason || undefined,
         status: "confirmed",
+      });
+
+      // Dispatch automated email notification in background (non-blocking for smooth UX)
+      fetch("/api/send-appointment-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          reference_code: ref,
+          patient_name: patientName,
+          patient_phone: patientPhone,
+          patient_email: patientEmail || undefined,
+          patient_age: patientAge || undefined,
+          patient_gender: patientGender || undefined,
+          doctor_id: activeDoctor?.id,
+          doctor_name: activeDoctor ? activeDoctor.name.en : "Specialist Doctor",
+          doctor_email: activeDoctor?.email || undefined,
+          department_name: activeDoctor ? activeDoctor.specialty.en : "Specialist Consultation",
+          appointment_date: selectedDate,
+          time_slot: selectedTimeSlot,
+          symptoms: visitReason || undefined,
+        }),
+      }).catch((emailErr) => {
+        console.warn("Background doctor email dispatch notification (non-fatal):", emailErr);
       });
 
       setIsSubmitted(true);
@@ -313,6 +340,8 @@ export function BookingWizard() {
     setPatientName("");
     setPatientPhone("");
     setPatientEmail("");
+    setPatientAge("");
+    setPatientGender("");
     setVisitReason("");
     setIsSubmitted(false);
     setShowSlipPreview(true);
@@ -819,6 +848,43 @@ export function BookingWizard() {
                 )}
               </div>
 
+              {/* Age and Gender (2 columns) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {/* Age */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 mb-1.5">
+                    {isBn ? "রোগীর বয়স (ঐচ্ছিক)" : "Patient Age (Optional)"}
+                  </label>
+                  <div className="relative">
+                    <input
+                      type="text"
+                      value={patientAge}
+                      onChange={(e) => setPatientAge(e.target.value)}
+                      placeholder={isBn ? "উদা: ৩২ বছর" : "e.g., 32 yrs"}
+                      className="w-full px-4 py-3 rounded-xl border border-zinc-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-zinc-950 focus:border-zinc-950 transition-all"
+                    />
+                  </div>
+                </div>
+
+                {/* Gender */}
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 mb-1.5">
+                    {isBn ? "জেন্ডার / লিঙ্গ (ঐচ্ছিক)" : "Gender (Optional)"}
+                  </label>
+                  <select
+                    value={patientGender}
+                    onChange={(e) => setPatientGender(e.target.value)}
+                    className="w-full px-4 py-3 rounded-xl border border-zinc-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-zinc-950 focus:border-zinc-950 transition-all bg-white"
+                  >
+                    <option value="">{isBn ? "-- নির্বাচন করুন --" : "-- Select Gender --"}</option>
+                    <option value="Male">{isBn ? "পুরুষ (Male)" : "Male"}</option>
+                    <option value="Female">{isBn ? "মহিলা (Female)" : "Female"}</option>
+                    <option value="Child">{isBn ? "শিশু (Child)" : "Child"}</option>
+                    <option value="Other">{isBn ? "অন্যান্য (Other)" : "Other"}</option>
+                  </select>
+                </div>
+              </div>
+
               {/* Email */}
               <div>
                 <label className="block text-xs font-bold uppercase tracking-wider text-zinc-800 mb-1.5">
@@ -1102,6 +1168,8 @@ export function BookingWizard() {
                       patientName={patientName}
                       patientPhone={patientPhone}
                       patientEmail={patientEmail}
+                      patientAge={patientAge}
+                      patientGender={patientGender}
                       symptoms={visitReason}
                     />
                   </div>
@@ -1119,6 +1187,8 @@ export function BookingWizard() {
                   patientName={patientName}
                   patientPhone={patientPhone}
                   patientEmail={patientEmail}
+                  patientAge={patientAge}
+                  patientGender={patientGender}
                   symptoms={visitReason}
                 />
               </div>

@@ -52,6 +52,7 @@ export async function fetchLiveDoctors(): Promise<Doctor[]> {
         bio: { en: d.bio_en, bn: d.bio_bn },
         photoUrl: d.photo_url || staticDoc?.photoUrl || "/images/doctors/dr-diean.jpg",
         bmdcReg: d.bmdc_reg || staticDoc?.bmdcReg || "",
+        email: d.email || staticDoc?.email || "",
         isConfirmed: true,
         isActive: d.is_active ?? true,
       };
@@ -91,6 +92,7 @@ export async function saveLiveDoctor(doc: Doctor): Promise<{ success: boolean; e
       bio_bn: doc.bio.bn,
       photo_url: doc.photoUrl,
       bmdc_reg: doc.bmdcReg || null,
+      email: doc.email || null,
       is_active: doc.isActive ?? true,
       updated_at: new Date().toISOString(),
     };
@@ -322,6 +324,8 @@ export async function fetchLiveAppointments(): Promise<any[]> {
       patient_name: a.patient_name,
       patient_phone: a.patient_phone,
       patient_email: a.patient_email || "",
+      patient_age: a.patient_age || "",
+      patient_gender: a.patient_gender || "",
       doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
       department_name: resolveDepartmentDisplayName(a.department_name || a.department_id, a.doctor_name || a.doctor_id),
       appointment_date: a.appointment_date,
@@ -434,6 +438,8 @@ export async function createLiveAppointment(record: {
   patient_name: string;
   patient_phone: string;
   patient_email?: string;
+  patient_age?: string;
+  patient_gender?: string;
   doctor_id?: string;
   doctor_name: string;
   department_id?: string;
@@ -454,6 +460,8 @@ export async function createLiveAppointment(record: {
         patient_name: record.patient_name,
         patient_phone: record.patient_phone,
         patient_email: record.patient_email || "",
+        patient_age: record.patient_age || "",
+        patient_gender: record.patient_gender || "",
         doctor_id: record.doctor_id || "",
         doctor_name: resolvedDoc,
         department_id: record.department_id || "",
@@ -478,11 +486,13 @@ export async function createLiveAppointment(record: {
   if (!isSupabaseConfigured) return { success: true };
 
   try {
-    const payload = {
+    const payload: any = {
       reference_code: record.reference_code,
       patient_name: record.patient_name,
       patient_phone: record.patient_phone,
       patient_email: record.patient_email || null,
+      patient_age: record.patient_age || null,
+      patient_gender: record.patient_gender || null,
       doctor_id: record.doctor_id || record.doctor_name,
       department_id: record.department_id || record.department_name,
       appointment_date: record.appointment_date,
@@ -491,7 +501,14 @@ export async function createLiveAppointment(record: {
       status: record.status || "confirmed",
     };
 
-    const { error } = await supabase.from("appointments").insert(payload);
+    let { error } = await supabase.from("appointments").insert(payload);
+    // Graceful fallback if patient_age / patient_gender columns are not yet added to Supabase table
+    if (error && (error.message?.includes("patient_age") || error.message?.includes("patient_gender") || error.code === "PGRST204")) {
+      delete payload.patient_age;
+      delete payload.patient_gender;
+      const retry = await supabase.from("appointments").insert(payload);
+      error = retry.error;
+    }
     if (error) throw error;
     return { success: true };
   } catch (err: any) {

@@ -616,11 +616,16 @@ export default function AdminAppointmentsPage() {
                         <div
                           className={
                             isUnread
-                              ? "font-extrabold text-zinc-950"
-                              : "font-bold text-zinc-900"
+                              ? "font-extrabold text-zinc-950 flex items-center gap-1.5"
+                              : "font-bold text-zinc-900 flex items-center gap-1.5"
                           }
                         >
-                          {app.patient_name}
+                          <span>{app.patient_name}</span>
+                          {(app.patient_age || app.patient_gender) && (
+                            <span className="text-[10px] font-normal text-zinc-500 bg-zinc-100 px-1.5 py-0.5 rounded-md">
+                              {[app.patient_age ? `${app.patient_age}y` : null, app.patient_gender].filter(Boolean).join(", ")}
+                            </span>
+                          )}
                         </div>
                         <div className="flex items-center gap-2 text-zinc-500 text-[11px] mt-0.5">
                           <a
@@ -846,6 +851,14 @@ export default function AdminAppointmentsPage() {
                     {selectedApp.patient_phone}
                   </a>
                 </div>
+                {(selectedApp.patient_age || selectedApp.patient_gender) && (
+                  <div className="flex justify-between">
+                    <span className="text-zinc-500">Demographics:</span>
+                    <span className="text-zinc-800 font-medium">
+                      {[selectedApp.patient_age ? `${selectedApp.patient_age} yrs` : null, selectedApp.patient_gender].filter(Boolean).join(" • ")}
+                    </span>
+                  </div>
+                )}
                 {selectedApp.patient_email && (
                   <div className="flex justify-between">
                     <span className="text-zinc-500">Email:</span>
