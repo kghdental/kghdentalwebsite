@@ -5,6 +5,7 @@ import { ClinicalPhilosophyBanner } from "@/components/home/ClinicalPhilosophyBa
 import { DoctorPreview } from "@/components/home/DoctorPreview";
 import { GoogleReviews } from "@/components/home/GoogleReviews";
 import { BlogSection } from "@/components/home/BlogSection";
+import { GalleryPreview } from "@/components/home/GalleryPreview";
 import { CtaBanner } from "@/components/home/CtaBanner";
 
 export default function HomePage() {
@@ -16,6 +17,7 @@ export default function HomePage() {
       <WhyChooseUs />
       <ClinicalPhilosophyBanner />
       <BlogSection />
+      <GalleryPreview />
       <GoogleReviews />
       <CtaBanner />
     </div>

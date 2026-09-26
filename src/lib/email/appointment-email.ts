@@ -26,11 +26,12 @@ export function getSmtpConfig() {
     process.env.GMAIL_USER ||
     process.env.SMTP_USER ||
     "";
-  const pass =
+  const rawPass =
     process.env.SMTP_PASSWORD ||
     process.env.GMAIL_APP_PASSWORD ||
     process.env.SMTP_PASS ||
     "";
+  const pass = rawPass.replace(/\s+/g, "");
   const host = process.env.SMTP_HOST || "smtp.gmail.com";
   const port = parseInt(process.env.SMTP_PORT || "465", 10);
   const secure =
@@ -42,7 +43,8 @@ export function getSmtpConfig() {
   const fallbackEmail =
     process.env.NOTIFICATION_FALLBACK_EMAIL ||
     process.env.ADMIN_EMAIL ||
-    "care@kghdental.com";
+    user ||
+    "kghdentalbanani@gmail.com";
   const siteUrl = process.env.NEXT_PUBLIC_SITE_URL || "https://kghdental.com";
 
   const isConfigured = Boolean(user && pass);
@@ -547,11 +549,12 @@ export async function sendDoctorAppointmentEmail(data: EmailAppointmentPayload):
       messageId: info.messageId,
       recipient,
     };
-  } catch (err: any) {
+  } catch (err: unknown) {
     console.error("sendDoctorAppointmentEmail error:", err);
+    const errorMessage = err instanceof Error ? err.message : "Failed to dispatch email notification";
     return {
       success: false,
-      error: err.message || "Failed to dispatch email notification",
+      error: errorMessage,
     };
   }
 }
