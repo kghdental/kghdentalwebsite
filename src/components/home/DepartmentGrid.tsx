@@ -271,6 +271,36 @@ export function DepartmentGrid() {
     handleSelectDepartment(nextIdx);
   };
 
+  const categoryPill = (
+    <div className="flex items-center justify-between sm:justify-start gap-2">
+      <div className="inline-flex items-center bg-white/80 hover:bg-white border border-zinc-300/80 rounded-full px-2.5 py-1 transition-colors shadow-2xs">
+        <button
+          type="button"
+          onClick={handlePrev}
+          aria-label="Previous Specialty"
+          className="p-1 rounded-full text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 transition-all cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+        </button>
+        <span className="px-2.5 text-xs sm:text-sm font-bold text-zinc-900 tracking-wide select-none">
+          {isBn ? showcaseInfo.categoryPill.bn : showcaseInfo.categoryPill.en}
+        </span>
+        <button
+          type="button"
+          onClick={handleNext}
+          aria-label="Next Specialty"
+          className="p-1 rounded-full text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 transition-all cursor-pointer"
+        >
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+
+      <span className="text-xs font-semibold text-zinc-600 whitespace-nowrap shrink-0">
+        {String(activeIndex + 1).padStart(2, "0")} / {String(deptList.length).padStart(2, "0")}
+      </span>
+    </div>
+  );
+
   return (
     <section
       id="specialized-care"
@@ -304,43 +334,24 @@ export function DepartmentGrid() {
         </div>
       </div>
 
-      {/* Main Interactive Showcase: 100% Full-Bleed Edge-to-Edge Layout (NO Nested Card Box!) */}
+      {/* Mobile Only: Specialty Category Pill Above Images */}
+      <div className="w-full px-4 sm:px-8 mb-5 block lg:hidden">
+        {categoryPill}
+      </div>
+
+      {/* Main Interactive Showcase: 100% Full-Bleed Edge-to-Edge Layout */}
       <div className="w-full flex flex-col lg:flex-row items-center lg:items-center justify-between gap-8 lg:gap-0">
         
-        {/* Left Column: Department Information & Actions (Vertically Centered to Right Image & Lifted to Cover Half the Top Gap) */}
+        {/* Left Column (Desktop) / Bottom Column (Mobile): Department Information & Actions */}
         <div
-          className={`w-full lg:w-1/2 xl:w-[48%] flex flex-col justify-center px-4 sm:px-8 lg:pl-12 lg:pr-8 xl:pl-16 xl:pr-12 2xl:pl-24 2xl:pr-16 py-2 lg:py-0 specialized-showcase-lift transition-all duration-300 ${
+          className={`w-full lg:w-1/2 xl:w-[48%] order-2 lg:order-1 flex flex-col justify-center px-4 sm:px-8 lg:pl-12 lg:pr-8 xl:pl-16 xl:pr-12 2xl:pl-24 2xl:pr-16 py-2 lg:py-0 specialized-showcase-lift transition-all duration-300 ${
             isTransitioning ? "opacity-30" : "opacity-100"
           }`}
         >
           <div>
-            {/* Topic / Category Pill with Left/Right Arrows */}
-            <div className="flex items-center gap-2 mb-5 sm:mb-6">
-              <div className="inline-flex items-center bg-white/80 hover:bg-white border border-zinc-300/80 rounded-full px-2.5 py-1 transition-colors shadow-2xs">
-                <button
-                  type="button"
-                  onClick={handlePrev}
-                  aria-label="Previous Specialty"
-                  className="p-1 rounded-full text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 transition-all cursor-pointer"
-                >
-                  <ChevronLeft className="w-3.5 h-3.5" />
-                </button>
-                <span className="px-2.5 text-xs sm:text-sm font-bold text-zinc-900 tracking-wide select-none">
-                  {isBn ? showcaseInfo.categoryPill.bn : showcaseInfo.categoryPill.en}
-                </span>
-                <button
-                  type="button"
-                  onClick={handleNext}
-                  aria-label="Next Specialty"
-                  className="p-1 rounded-full text-zinc-600 hover:text-zinc-950 hover:bg-zinc-200/60 transition-all cursor-pointer"
-                >
-                  <ChevronRight className="w-3.5 h-3.5" />
-                </button>
-              </div>
-
-              <span className="text-xs font-semibold text-zinc-600">
-                {String(activeIndex + 1).padStart(2, "0")} / {String(deptList.length).padStart(2, "0")}
-              </span>
+            {/* Topic / Category Pill with Left/Right Arrows (Desktop only, mobile has it above image) */}
+            <div className="hidden lg:flex items-center gap-2 mb-5 sm:mb-6">
+              {categoryPill}
             </div>
 
             {/* Bold Headline in High-Contrast Dark Typography */}
@@ -393,8 +404,8 @@ export function DepartmentGrid() {
           </div>
         </div>
 
-        {/* Right Column: Thumbnail Rail + Large Showcase Image */}
-        <div className="w-full lg:w-1/2 xl:w-[52%] flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch px-4 sm:px-8 lg:pl-0 lg:pr-0">
+        {/* Right Column (Desktop) / Top Column (Mobile): Thumbnail Rail + Large Showcase Image */}
+        <div className="w-full lg:w-1/2 xl:w-[52%] order-1 lg:order-2 flex flex-col sm:flex-row gap-3 sm:gap-4 items-stretch px-4 sm:px-8 lg:pl-0 lg:pr-0">
           
           {/* Vertical Thumbnail Strip */}
           <div className="order-2 sm:order-1 flex sm:flex-col gap-2.5 sm:gap-3 overflow-x-auto sm:overflow-y-auto sm:max-h-[560px] xl:max-h-[620px] py-1 px-1 shrink-0 scrollbar-thin">
