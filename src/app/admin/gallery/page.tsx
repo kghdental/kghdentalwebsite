@@ -21,11 +21,9 @@ import {
   fetchLiveGalleryItems,
   saveLiveGalleryItem,
   deleteLiveGalleryItem,
-  INITIAL_GALLERY,
   fetchLiveBeforeAfterItems,
   saveLiveBeforeAfterItem,
   deleteLiveBeforeAfterItem,
-  INITIAL_BEFORE_AFTER,
 } from "@/lib/api/db";
 import { BeforeAfterSlider } from "@/components/gallery/BeforeAfterSlider";
 
@@ -33,14 +31,14 @@ export default function AdminGalleryPage() {
   const [activeTab, setActiveTab] = useState<"chamber" | "beforeAfter">("chamber");
 
   // Chamber & Team items state
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [isGalleryModalOpen, setIsGalleryModalOpen] = useState(false);
   const [editingGalleryItem, setEditingGalleryItem] = useState<GalleryItem | null>(null);
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>("all");
   const [gallerySearchQuery, setGallerySearchQuery] = useState("");
 
   // Before & After cases state
-  const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>(INITIAL_BEFORE_AFTER);
+  const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>([]);
   const [isBAModalOpen, setIsBAModalOpen] = useState(false);
   const [editingBAItem, setEditingBAItem] = useState<BeforeAfterItem | null>(null);
   const [baSearchQuery, setBASearchQuery] = useState("");
@@ -51,15 +49,11 @@ export default function AdminGalleryPage() {
 
   useEffect(() => {
     fetchLiveGalleryItems().then((live) => {
-      if (live && live.length > 0) {
-        setGalleryItems(live);
-      }
+      setGalleryItems(live || []);
     });
 
     fetchLiveBeforeAfterItems().then((liveBA) => {
-      if (liveBA && liveBA.length > 0) {
-        setBeforeAfterItems(liveBA);
-      }
+      setBeforeAfterItems(liveBA || []);
     });
   }, []);
 
@@ -69,7 +63,7 @@ export default function AdminGalleryPage() {
     title: { en: "", bn: "" },
     category: "clinic",
     desc: { en: "", bn: "" },
-    imageUrl: "/images/departments/consultation-cta.jpg",
+    imageUrl: "",
   });
 
   // Form data for Before & After case
@@ -77,8 +71,8 @@ export default function AdminGalleryPage() {
     id: "",
     title: { en: "", bn: "" },
     category: "Periodontics",
-    beforeImageUrl: "/images/gallery/scaling-before.jpg",
-    afterImageUrl: "/images/gallery/scaling-after.jpg",
+    beforeImageUrl: "",
+    afterImageUrl: "",
     desc: { en: "", bn: "" },
     sortOrder: 1,
   });
@@ -93,7 +87,7 @@ export default function AdminGalleryPage() {
       title: { en: "", bn: "" },
       category: "clinic",
       desc: { en: "", bn: "" },
-      imageUrl: "/images/departments/consultation-cta.jpg",
+      imageUrl: "",
     });
     setIsGalleryModalOpen(true);
   };
@@ -121,9 +115,7 @@ export default function AdminGalleryPage() {
     setIsGalleryModalOpen(false);
     await saveLiveGalleryItem(galleryForm);
     const refreshed = await fetchLiveGalleryItems();
-    if (refreshed && refreshed.length > 0) {
-      setGalleryItems(refreshed);
-    }
+    setGalleryItems(refreshed || []);
   };
 
   // --------------------------------------------------------------------------
@@ -135,8 +127,8 @@ export default function AdminGalleryPage() {
       id: `ba-${Date.now()}`,
       title: { en: "", bn: "" },
       category: "Periodontics",
-      beforeImageUrl: "/images/gallery/scaling-before.jpg",
-      afterImageUrl: "/images/gallery/scaling-after.jpg",
+      beforeImageUrl: "",
+      afterImageUrl: "",
       desc: { en: "", bn: "" },
       sortOrder: beforeAfterItems.length + 1,
     });
@@ -166,9 +158,7 @@ export default function AdminGalleryPage() {
     setIsBAModalOpen(false);
     await saveLiveBeforeAfterItem(baForm);
     const refreshed = await fetchLiveBeforeAfterItems();
-    if (refreshed && refreshed.length > 0) {
-      setBeforeAfterItems(refreshed);
-    }
+    setBeforeAfterItems(refreshed || []);
   };
 
   // Media Picker Callback

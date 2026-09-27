@@ -18,8 +18,6 @@ import { CtaBanner } from "@/components/home/CtaBanner";
 import {
   fetchLiveGalleryItems,
   fetchLiveBeforeAfterItems,
-  INITIAL_GALLERY,
-  INITIAL_BEFORE_AFTER,
 } from "@/lib/api/db";
 import { GalleryItem, BeforeAfterItem } from "@/types";
 import { BeforeAfterSlider } from "@/components/gallery/BeforeAfterSlider";
@@ -27,9 +25,9 @@ import { BeforeAfterSlider } from "@/components/gallery/BeforeAfterSlider";
 export default function GalleryPage() {
   const { isBn } = useLanguage();
   const [activeCategory, setActiveCategory] = useState<string>("all");
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY);
-  const [beforeAfterItems, setBeforeAfterItems] =
-    useState<BeforeAfterItem[]>(INITIAL_BEFORE_AFTER);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>([]);
+  const [loading, setLoading] = useState(true);
 
   // Lightbox Modal state
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
@@ -39,17 +37,13 @@ export default function GalleryPage() {
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    fetchLiveGalleryItems().then((items) => {
-      if (items && items.length > 0) {
-        setGalleryItems(items);
+    Promise.all([fetchLiveGalleryItems(), fetchLiveBeforeAfterItems()]).then(
+      ([items, baItems]) => {
+        setGalleryItems(items || []);
+        setBeforeAfterItems(baItems || []);
+        setLoading(false);
       }
-    });
-
-    fetchLiveBeforeAfterItems().then((items) => {
-      if (items && items.length > 0) {
-        setBeforeAfterItems(items);
-      }
-    });
+    );
   }, []);
 
   const categories = [
@@ -122,43 +116,72 @@ export default function GalleryPage() {
             </div>
           </div>
 
-          {/* Cards Grid (4 columns like reference) */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
-            {filteredGallery.map((item) => (
-              <div
-                key={item.id}
-                onClick={() => setSelectedPhoto(item)}
-                className="group rounded-2xl bg-white border border-zinc-200/80 overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col"
-              >
-                {/* Photo Container */}
-                <div className="relative aspect-4/3 w-full bg-zinc-900 overflow-hidden">
-                  <img
-                    src={item.imageUrl}
-                    alt={isBn ? item.title.bn : item.title.en}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                    loading="lazy"
-                  />
-                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
-                    <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm p-2 rounded-full text-zinc-900 shadow-md">
-                      <ZoomIn className="w-4 h-4" />
-                    </span>
+          {/* Cards Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              {[0, 1, 2, 3, 4, 5, 6, 7].map((n) => (
+                <div
+                  key={`gal-skel-${n}`}
+                  className="rounded-2xl bg-white border border-zinc-200/80 overflow-hidden shadow-2xs animate-pulse flex flex-col"
+                >
+                  <div className="aspect-4/3 w-full bg-zinc-200" />
+                  <div className="p-4 space-y-2">
+                    <div className="h-4 bg-zinc-200 rounded w-3/4" />
+                    <div className="h-3 bg-zinc-100 rounded w-1/2" />
                   </div>
                 </div>
+              ))}
+            </div>
+          ) : filteredGallery.length > 0 ? (
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 sm:gap-5">
+              {filteredGallery.map((item) => (
+                <div
+                  key={item.id}
+                  onClick={() => setSelectedPhoto(item)}
+                  className="group rounded-2xl bg-white border border-zinc-200/80 overflow-hidden shadow-2xs hover:shadow-lg transition-all duration-300 cursor-pointer flex flex-col"
+                >
+                  {/* Photo Container */}
+                  <div className="relative aspect-4/3 w-full bg-zinc-900 overflow-hidden">
+                    <img
+                      src={item.imageUrl}
+                      alt={isBn ? item.title.bn : item.title.en}
+                      className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                      loading="lazy"
+                    />
+                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors flex items-center justify-center">
+                      <span className="opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-sm p-2 rounded-full text-zinc-900 shadow-md">
+                        <ZoomIn className="w-4 h-4" />
+                      </span>
+                    </div>
+                  </div>
 
-                {/* Caption Bar */}
-                <div className="p-3.5 sm:p-4 bg-white flex-1 flex flex-col justify-center">
-                  <h3 className="text-xs sm:text-sm font-bold text-zinc-900 line-clamp-1 group-hover:text-[#1c362b] transition-colors">
-                    {isBn ? item.title.bn : item.title.en}
-                  </h3>
-                  {item.desc && (
-                    <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">
-                      {isBn ? item.desc.bn : item.desc.en}
-                    </p>
-                  )}
+                  {/* Caption Bar */}
+                  <div className="p-3.5 sm:p-4 bg-white flex-1 flex flex-col justify-center">
+                    <h3 className="text-xs sm:text-sm font-bold text-zinc-900 line-clamp-1 group-hover:text-[#1c362b] transition-colors">
+                      {isBn ? item.title.bn : item.title.en}
+                    </h3>
+                    {item.desc && (
+                      <p className="text-[11px] text-zinc-500 line-clamp-1 mt-0.5">
+                        {isBn ? item.desc.bn : item.desc.en}
+                      </p>
+                    )}
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-16 px-4 text-center rounded-2xl bg-white border border-dashed border-zinc-200">
+              <ImageIcon className="w-12 h-12 text-zinc-300 mx-auto mb-3" />
+              <h3 className="text-base font-bold text-zinc-700">
+                {isBn ? "কোনো ছবি পাওয়া যায়নি" : "No Photos Found"}
+              </h3>
+              <p className="text-xs text-zinc-400 mt-1">
+                {isBn
+                  ? "নতুন ছবি শীঘ্রই যুক্ত করা হবে।"
+                  : "New photos will be uploaded soon."}
+              </p>
+            </div>
+          )}
         </div>
       </section>
 
@@ -203,24 +226,42 @@ export default function GalleryPage() {
           </div>
 
           {/* Draggable / Scrollable Carousel Container */}
-          <div
-            ref={carouselRef}
-            className="flex gap-6 overflow-x-auto pb-6 scrollbar-none snap-x snap-mandatory"
-            style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
-          >
-            {beforeAfterItems.map((item) => (
-              <div
-                key={item.id}
-                className="w-[300px] sm:w-[380px] lg:w-[420px] shrink-0 snap-start"
-              >
-                <BeforeAfterSlider
-                  item={item}
-                  isBn={isBn}
-                  onViewDetails={(caseItem) => setSelectedCase(caseItem)}
+          {loading ? (
+            <div className="flex gap-6 overflow-hidden pb-6">
+              {[0, 1, 2].map((n) => (
+                <div
+                  key={`ba-skel-${n}`}
+                  className="w-[300px] sm:w-[380px] lg:w-[420px] shrink-0 h-[280px] bg-zinc-200/80 rounded-2xl animate-pulse"
                 />
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          ) : beforeAfterItems.length > 0 ? (
+            <div
+              ref={carouselRef}
+              className="flex gap-6 overflow-x-auto pb-6 scrollbar-none snap-x snap-mandatory"
+              style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
+            >
+              {beforeAfterItems.map((item) => (
+                <div
+                  key={item.id}
+                  className="w-[300px] sm:w-[380px] lg:w-[420px] shrink-0 snap-start"
+                >
+                  <BeforeAfterSlider
+                    item={item}
+                    isBn={isBn}
+                    onViewDetails={(caseItem) => setSelectedCase(caseItem)}
+                  />
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="py-12 px-6 text-center rounded-2xl bg-white/70 border border-dashed border-zinc-300">
+              <Sparkles className="w-10 h-10 text-zinc-400 mx-auto mb-2" />
+              <p className="text-sm font-semibold text-zinc-600">
+                {isBn ? "কোনো ফলাফল পাওয়া যায়নি" : "No Before & After cases found"}
+              </p>
+            </div>
+          )}
 
           {/* Clinical Assurance Note */}
           <div className="mt-8 flex flex-wrap items-center justify-between gap-4 p-4 sm:p-5 rounded-2xl bg-white/70 backdrop-blur-md border border-zinc-200/80 text-zinc-700 text-xs sm:text-sm">

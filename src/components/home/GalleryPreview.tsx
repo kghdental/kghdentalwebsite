@@ -12,35 +12,25 @@ import {
   ShieldCheck,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
-import { fetchLiveGalleryItems, INITIAL_GALLERY } from "@/lib/api/db";
+import { fetchLiveGalleryItems } from "@/lib/api/db";
 import { GalleryItem } from "@/types";
 
 export function GalleryPreview() {
   const { isBn } = useLanguage();
-  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>(INITIAL_GALLERY);
+  const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
+  const [loading, setLoading] = useState(true);
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
 
   useEffect(() => {
     fetchLiveGalleryItems().then((items) => {
-      if (items && items.length > 0) {
-        setGalleryItems(items);
-      }
+      setGalleryItems(items || []);
+      setLoading(false);
     });
   }, []);
 
-  // Always ensure at least 4 items by merging live database items with initial clinic items
+  // Display only real database items (up to 4 on home preview)
   const displayItems = React.useMemo(() => {
-    const list = [...galleryItems];
-    for (const fallback of INITIAL_GALLERY) {
-      if (list.length >= 4) break;
-      const alreadyIncluded = list.some(
-        (it) => it.id === fallback.id || it.imageUrl === fallback.imageUrl
-      );
-      if (!alreadyIncluded) {
-        list.push(fallback);
-      }
-    }
-    return list.slice(0, 4);
+    return galleryItems.slice(0, 4);
   }, [galleryItems]);
 
   return (
@@ -88,89 +78,121 @@ export function GalleryPreview() {
         {/* ========================================================================= */}
         {/* 4-COLUMN COMPACT GALLERY GRID                                             */}
         {/* ========================================================================= */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
-          {displayItems.map((item, index) => (
-            <div
-              key={item.id}
-              onClick={() => setSelectedPhoto(item)}
-              className="group relative bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 hover:border-[#1c362b]/40 overflow-hidden shadow-2xs hover:shadow-[0_20px_35px_-12px_rgba(28,54,43,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col"
-            >
-              {/* Image Container */}
-              <div className="relative aspect-4/3 w-full bg-zinc-950 overflow-hidden">
-                <img
-                  src={item.imageUrl}
-                  alt={isBn ? item.title.bn : item.title.en}
-                  className="w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-108"
-                  loading="lazy"
-                />
-
-                {/* Subtle dark gradient overlay */}
-                <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
-
-                {/* Top Badge: Category */}
-                <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/95 text-[#1c362b] backdrop-blur-md shadow-xs border border-white/60">
-                  {item.category === "clinic"
-                    ? isBn
-                      ? "চেম্বার"
-                      : "Chamber"
-                    : isBn
-                    ? "ট্রিটমেন্ট কেস"
-                    : "Clinical Case"}
-                </span>
-
-                {/* Top Right: Zoom Indicator */}
-                <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md p-1.5 rounded-full text-zinc-900 shadow-md">
-                  <ZoomIn className="w-3.5 h-3.5 text-[#1c362b]" />
+        {loading ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {[0, 1, 2, 3].map((n) => (
+              <div
+                key={`skel-${n}`}
+                className="bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 overflow-hidden shadow-2xs animate-pulse flex flex-col"
+              >
+                <div className="aspect-4/3 w-full bg-zinc-200" />
+                <div className="p-4 bg-white flex-1 space-y-3">
+                  <div className="h-4 bg-zinc-200 rounded w-3/4" />
+                  <div className="h-3 bg-zinc-100 rounded w-1/2" />
                 </div>
-
-                {/* Bottom Left on image: Photo Number */}
-                <span className="absolute bottom-3 left-3 text-[10px] font-bold text-white/80 font-mono">
-                  0{index + 1} / 04
-                </span>
               </div>
+            ))}
+          </div>
+        ) : displayItems.length > 0 ? (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5 sm:gap-6">
+            {displayItems.map((item, index) => (
+              <div
+                key={item.id}
+                onClick={() => setSelectedPhoto(item)}
+                className="group relative bg-white rounded-2xl sm:rounded-3xl border border-zinc-200/80 hover:border-[#1c362b]/40 overflow-hidden shadow-2xs hover:shadow-[0_20px_35px_-12px_rgba(28,54,43,0.15)] hover:-translate-y-1.5 transition-all duration-300 cursor-pointer flex flex-col"
+              >
+                {/* Image Container */}
+                <div className="relative aspect-4/3 w-full bg-zinc-950 overflow-hidden">
+                  <img
+                    src={item.imageUrl}
+                    alt={isBn ? item.title.bn : item.title.en}
+                    className="w-full h-full object-cover transition-transform duration-600 ease-out group-hover:scale-108"
+                    loading="lazy"
+                  />
 
-              {/* Card Footer / Caption */}
-              <div className="p-4 bg-white flex-1 flex flex-col justify-between">
-                <div>
-                  <h3 className="text-sm font-bold text-zinc-900 line-clamp-1 group-hover:text-[#1c362b] transition-colors">
-                    {isBn ? item.title.bn : item.title.en}
-                  </h3>
-                  {item.desc && (
-                    <p className="text-xs text-zinc-500 line-clamp-2 mt-1 leading-relaxed">
-                      {isBn ? item.desc.bn : item.desc.en}
-                    </p>
-                  )}
-                </div>
+                  {/* Subtle dark gradient overlay */}
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/10 to-transparent pointer-events-none" />
 
-                <div className="pt-3 mt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] font-bold text-[#1c362b]">
-                  <span className="group-hover:underline">
-                    {isBn ? "বড় করে দেখুন" : "View Photo"}
+                  {/* Top Badge: Category */}
+                  <span className="absolute top-3 left-3 text-[10px] font-bold uppercase tracking-wider px-2.5 py-1 rounded-full bg-white/95 text-[#1c362b] backdrop-blur-md shadow-xs border border-white/60">
+                    {item.category === "clinic"
+                      ? isBn
+                        ? "চেম্বার"
+                        : "Chamber"
+                      : isBn
+                      ? "ট্রিটমেন্ট কেস"
+                      : "Clinical Case"}
                   </span>
-                  <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+
+                  {/* Top Right: Zoom Indicator */}
+                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity bg-white/90 backdrop-blur-md p-1.5 rounded-full text-zinc-900 shadow-md">
+                    <ZoomIn className="w-3.5 h-3.5 text-[#1c362b]" />
+                  </div>
+
+                  {/* Bottom Left on image: Photo Number */}
+                  <span className="absolute bottom-3 left-3 text-[10px] font-bold text-white/80 font-mono">
+                    0{index + 1} / 0{Math.max(displayItems.length, 4)}
+                  </span>
+                </div>
+
+                {/* Card Footer / Caption */}
+                <div className="p-4 bg-white flex-1 flex flex-col justify-between">
+                  <div>
+                    <h3 className="text-sm font-bold text-zinc-900 line-clamp-1 group-hover:text-[#1c362b] transition-colors">
+                      {isBn ? item.title.bn : item.title.en}
+                    </h3>
+                    {item.desc && (
+                      <p className="text-xs text-zinc-500 line-clamp-2 mt-1 leading-relaxed">
+                        {isBn ? item.desc.bn : item.desc.en}
+                      </p>
+                    )}
+                  </div>
+
+                  <div className="pt-3 mt-3 border-t border-zinc-100 flex items-center justify-between text-[11px] font-bold text-[#1c362b]">
+                    <span className="group-hover:underline">
+                      {isBn ? "বড় করে দেখুন" : "View Photo"}
+                    </span>
+                    <ArrowRight className="w-3.5 h-3.5 group-hover:translate-x-1 transition-transform" />
+                  </div>
                 </div>
               </div>
-            </div>
-          ))}
+            ))}
 
-          {/* Fallback Sketch / Placeholder Card if less than 4 items */}
-          {Array.from({ length: Math.max(0, 4 - displayItems.length) }).map((_, idx) => (
-            <Link
-              key={`placeholder-${idx}`}
-              href="/gallery"
-              className="group relative rounded-2xl sm:rounded-3xl border-2 border-dashed border-zinc-300 hover:border-[#1c362b]/50 bg-zinc-100/50 hover:bg-zinc-100/80 p-6 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[260px] shadow-2xs"
-            >
-              <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-[#1c362b] group-hover:scale-110 transition-all mb-3">
-                <ImageIcon className="w-6 h-6" />
-              </div>
-              <span className="text-xs font-bold text-zinc-700 group-hover:text-[#1c362b] transition-colors">
-                {isBn ? "আরও ক্লিনিক্যাল ফটো আসছে..." : "More Photos Coming Soon"}
-              </span>
-              <span className="text-[11px] text-zinc-500 mt-1">
-                {isBn ? "গ্যালারি পেইজ ঘুরে দেখুন" : "Browse Full Gallery"}
-              </span>
-            </Link>
-          ))}
-        </div>
+            {/* Empty slots indicator if fewer than 4 items */}
+            {displayItems.length < 4 &&
+              Array.from({ length: 4 - displayItems.length }).map((_, idx) => (
+                <Link
+                  key={`placeholder-${idx}`}
+                  href="/gallery"
+                  className="group relative rounded-2xl sm:rounded-3xl border-2 border-dashed border-zinc-300 hover:border-[#1c362b]/50 bg-zinc-100/50 hover:bg-zinc-100/80 p-6 flex flex-col items-center justify-center text-center transition-all duration-300 min-h-[260px] shadow-2xs"
+                >
+                  <div className="w-12 h-12 rounded-2xl bg-white shadow-xs border border-zinc-200 flex items-center justify-center text-zinc-400 group-hover:text-[#1c362b] group-hover:scale-110 transition-all mb-3">
+                    <ImageIcon className="w-6 h-6" />
+                  </div>
+                  <span className="text-xs font-bold text-zinc-700 group-hover:text-[#1c362b] transition-colors">
+                    {isBn ? "আরও ক্লিনিক্যাল ফটো আসছে..." : "More Photos Coming Soon"}
+                  </span>
+                  <span className="text-[11px] text-zinc-500 mt-1">
+                    {isBn ? "গ্যালারি পেইজ ঘুরে দেখুন" : "Browse Full Gallery"}
+                  </span>
+                </Link>
+              ))}
+          </div>
+        ) : (
+          <div className="py-14 px-6 rounded-2xl sm:rounded-3xl border-2 border-dashed border-zinc-300 bg-white/60 flex flex-col items-center justify-center text-center">
+            <div className="w-12 h-12 rounded-2xl bg-zinc-100 flex items-center justify-center text-zinc-400 mb-3">
+              <ImageIcon className="w-6 h-6" />
+            </div>
+            <p className="text-sm font-bold text-zinc-700">
+              {isBn ? "বর্তমানে কোনো ছবি নেই" : "No gallery photos yet"}
+            </p>
+            <p className="text-xs text-zinc-500 mt-1">
+              {isBn
+                ? "অ্যাডমিন প্যানেল থেকে ছবি আপলোড করলে এখানে প্রদর্শিত হবে।"
+                : "Photos uploaded from the admin panel will appear here."}
+            </p>
+          </div>
+        )}
 
       </div>
 
