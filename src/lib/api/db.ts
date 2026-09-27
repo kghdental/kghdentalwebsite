@@ -308,36 +308,72 @@ export function resolveDepartmentDisplayName(deptIdOrName: string | undefined, d
 }
 
 export async function fetchLiveAppointments(): Promise<any[]> {
-  if (!isSupabaseConfigured) return [];
+  if (isSupabaseConfigured) {
+    try {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("*")
+        .order("created_at", { ascending: false });
 
-  try {
-    const { data, error } = await supabase
-      .from("appointments")
-      .select("*")
-      .order("created_at", { ascending: false });
+      if (!error && data) {
+        const items = data.map((a: any) => ({
+          id: a.id,
+          reference_code: a.reference_code,
+          patient_name: a.patient_name,
+          patient_phone: a.patient_phone,
+          patient_email: a.patient_email || "",
+          patient_age: a.patient_age || "",
+          patient_gender: a.patient_gender || "",
+          doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
+          department_name: resolveDepartmentDisplayName(a.department_name || a.department_id, a.doctor_name || a.doctor_id),
+          appointment_date: a.appointment_date,
+          time_slot: a.time_slot,
+          symptoms: a.symptoms || "",
+          status: a.status || "confirmed",
+          created_at: a.created_at ? a.created_at.substring(0, 16).replace("T", " ") : "",
+        }));
 
-    if (error || !data) return [];
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("kgh_admin_appointments", JSON.stringify(items));
+          } catch (e) {
+            // ignore
+          }
+        }
 
-    return data.map((a: any) => ({
-      id: a.id,
-      reference_code: a.reference_code,
-      patient_name: a.patient_name,
-      patient_phone: a.patient_phone,
-      patient_email: a.patient_email || "",
-      patient_age: a.patient_age || "",
-      patient_gender: a.patient_gender || "",
-      doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
-      department_name: resolveDepartmentDisplayName(a.department_name || a.department_id, a.doctor_name || a.doctor_id),
-      appointment_date: a.appointment_date,
-      time_slot: a.time_slot,
-      symptoms: a.symptoms || "",
-      status: a.status || "confirmed",
-      created_at: a.created_at ? a.created_at.substring(0, 16).replace("T", " ") : "",
-    }));
-  } catch (err) {
-    console.error("fetchLiveAppointments error:", err);
-    return [];
+        return items;
+      }
+    } catch (err) {
+      console.error("fetchLiveAppointments error:", err);
+    }
   }
+
+  // Fallback to local storage only if offline/unreachable
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_admin_appointments");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          return parsed.filter(
+            (a: any) =>
+              !a.id?.startsWith("app-1") &&
+              !a.id?.startsWith("app-2") &&
+              !a.id?.startsWith("app-3") &&
+              !a.id?.startsWith("app-4") &&
+              !a.reference_code?.startsWith("KGH-ADS202606Sep-001") &&
+              !a.reference_code?.startsWith("KGH-FTM202608Sep-002") &&
+              !a.reference_code?.startsWith("KGH-SMH202605Sep-003") &&
+              !a.reference_code?.startsWith("KGH-ADS202604Sep-004")
+          );
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  return [];
 }
 
 export async function updateLiveAppointmentStatus(

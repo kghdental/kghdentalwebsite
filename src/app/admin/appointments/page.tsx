@@ -24,6 +24,7 @@ import {
   Mail,
   MailOpen,
   CheckCheck,
+  Loader2,
 } from "lucide-react";
 import {
   fetchLiveAppointments,
@@ -46,64 +47,9 @@ import {
   markAllAppointmentsAsRead,
 } from "@/lib/appointment-utils";
 
-const INITIAL_APPOINTMENTS: AppointmentRecord[] = [
-  {
-    id: "app-1",
-    reference_code: "KGH-ADS202606Sep-001",
-    patient_name: "Rafiqul Islam",
-    patient_phone: "01712345678",
-    patient_email: "rafiqul@example.com",
-    doctor_name: "Dr. Ahamed Diean Sammir",
-    department_name: "Prosthodontics",
-    appointment_date: "2026-09-06",
-    time_slot: "05:30 PM",
-    symptoms: "Upper molar tooth replacement and crown inquiry.",
-    status: "confirmed",
-    created_at: "2026-09-02 18:30",
-  },
-  {
-    id: "app-2",
-    reference_code: "KGH-FTM202608Sep-002",
-    patient_name: "Farhana Akter",
-    patient_phone: "01898765432",
-    doctor_name: "Dr. Fatema Tasrin Madhubi",
-    department_name: "Orthodontics",
-    appointment_date: "2026-09-08",
-    time_slot: "06:00 PM",
-    symptoms: "Mild tooth crowding, interested in clear aligners.",
-    status: "confirmed",
-    created_at: "2026-09-01 15:20",
-  },
-  {
-    id: "app-3",
-    reference_code: "KGH-SMH202605Sep-003",
-    patient_name: "Kamal Hossain",
-    patient_phone: "01911223344",
-    doctor_name: "Dr. Md. Sanwar Hossain",
-    department_name: "Oral & Maxillofacial Surgery",
-    appointment_date: "2026-09-05",
-    time_slot: "07:00 PM",
-    symptoms: "Lower impacted wisdom tooth severe pain.",
-    status: "confirmed",
-    created_at: "2026-09-01 11:10",
-  },
-  {
-    id: "app-4",
-    reference_code: "KGH-ADS202604Sep-004",
-    patient_name: "Nusrat Jahan",
-    patient_phone: "01677889900",
-    doctor_name: "Dr. Ahamed Diean Sammir",
-    department_name: "Conservative Dentistry",
-    appointment_date: "2026-09-04",
-    time_slot: "06:30 PM",
-    symptoms: "Tooth sensitivity to cold water, needs filling.",
-    status: "confirmed",
-    created_at: "2026-08-30 14:00",
-  },
-];
-
 export default function AdminAppointmentsPage() {
-  const [appointments, setAppointments] = useState<AppointmentRecord[]>(INITIAL_APPOINTMENTS);
+  const [appointments, setAppointments] = useState<AppointmentRecord[]>([]);
+  const [loading, setLoading] = useState(true);
   const [readRefs, setReadRefs] = useState<string[]>([]);
   const [filterStatus, setFilterStatus] = useState<string>("all");
   const [timeHorizon, setTimeHorizon] = useState<"all" | "today" | "week" | "month">("all");
@@ -121,29 +67,10 @@ export default function AdminAppointmentsPage() {
 
   // Load appointments and read state on mount
   useEffect(() => {
-    // Read cached/live appointments
-    if (typeof window !== "undefined") {
-      const cached = localStorage.getItem("kgh_admin_appointments");
-      if (cached) {
-        try {
-          const list = JSON.parse(cached);
-          if (Array.isArray(list) && list.length > 0) {
-            setAppointments(
-              list.map((a) => ({
-                ...a,
-                status: a.status === "cancelled" ? "cancelled" : "confirmed",
-              }))
-            );
-          }
-        } catch {
-          // ignore
-        }
-      }
-    }
-
-    fetchLiveAppointments().then((liveApps) => {
-      if (liveApps && liveApps.length > 0) {
-        const normalized = liveApps.map((a) => ({
+    const loadAppointments = async () => {
+      try {
+        const liveApps = await fetchLiveAppointments();
+        const normalized = (liveApps || []).map((a) => ({
           ...a,
           doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
           department_name: resolveDepartmentDisplayName(
@@ -153,8 +80,14 @@ export default function AdminAppointmentsPage() {
           status: a.status === "cancelled" ? "cancelled" : "confirmed",
         }));
         setAppointments(normalized);
+      } catch (err) {
+        console.error("Error loading appointments:", err);
+      } finally {
+        setLoading(false);
       }
-    });
+    };
+
+    loadAppointments();
 
     fetchDoctorBlockedDates().then((blks) => {
       if (blks) setBlockedDates(blks);
@@ -164,24 +97,7 @@ export default function AdminAppointmentsPage() {
 
     const handleSync = () => {
       setReadRefs(getReadAppointmentRefs());
-      if (typeof window !== "undefined") {
-        const cached = localStorage.getItem("kgh_admin_appointments");
-        if (cached) {
-          try {
-            const list = JSON.parse(cached);
-            if (Array.isArray(list) && list.length > 0) {
-              setAppointments(
-                list.map((a) => ({
-                  ...a,
-                  status: a.status === "cancelled" ? "cancelled" : "confirmed",
-                }))
-              );
-            }
-          } catch {
-            // ignore
-          }
-        }
-      }
+      loadAppointments();
     };
 
     window.addEventListener("kgh_appointments_updated", handleSync);
@@ -569,7 +485,14 @@ export default function AdminAppointmentsPage() {
               </tr>
             </thead>
             <tbody className="divide-y divide-zinc-200">
-              {filteredAppointments.length === 0 ? (
+              {loading ? (
+                <tr>
+                  <td colSpan={6} className="py-12 text-center text-zinc-500 text-xs">
+                    <Loader2 className="w-5 h-5 animate-spin mx-auto mb-2 text-zinc-400" />
+                    Loading live appointments from database...
+                  </td>
+                </tr>
+              ) : filteredAppointments.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="py-12 text-center text-zinc-500 text-xs">
                     No appointments found matching your filters.

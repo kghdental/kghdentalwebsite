@@ -35,19 +35,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     const computeUnread = async () => {
       try {
         const readRefs = getReadAppointmentRefs();
-        let allApps: any[] = [];
-        if (typeof window !== "undefined") {
-          const cached = localStorage.getItem("kgh_admin_appointments");
-          if (cached) {
-            allApps = JSON.parse(cached);
-          }
-        }
-        if (allApps.length === 0) {
-          const live = await fetchLiveAppointments();
-          if (live && live.length > 0) {
-            allApps = live;
-          }
-        }
+        const live = await fetchLiveAppointments();
+        const allApps = live || [];
         const unread = allApps.filter(
           (a) => !readRefs.includes(a.reference_code) && !readRefs.includes(a.id)
         ).length;

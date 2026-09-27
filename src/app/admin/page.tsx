@@ -18,16 +18,31 @@ import { DOCTORS } from "@/data/doctors";
 import { DEPARTMENTS } from "@/data/departments";
 import { BLOG_POSTS } from "@/data/blog";
 import { REVIEWS } from "@/data/reviews";
-import { fetchLiveReviews } from "@/lib/api/db";
+import { fetchLiveReviews, fetchLiveAppointments, fetchLiveDoctors } from "@/lib/api/db";
 
 export default function AdminDashboardPage() {
-  const [appointmentsCount, setAppointmentsCount] = useState(14);
-  const [pendingCount, setPendingCount] = useState(3);
+  const [appointmentsCount, setAppointmentsCount] = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
   const [reviewsCount, setReviewsCount] = useState(REVIEWS.length);
+  const [doctorsCount, setDoctorsCount] = useState(DOCTORS.length);
 
   useEffect(() => {
+    fetchLiveAppointments().then((apps) => {
+      if (apps) {
+        setAppointmentsCount(apps.length);
+        const pending = apps.filter(
+          (a: any) => (a.status || "").toLowerCase() === "pending"
+        ).length;
+        setPendingCount(pending);
+      }
+    });
+
     fetchLiveReviews().then((revs) => {
       if (revs && revs.length > 0) setReviewsCount(revs.length);
+    });
+
+    fetchLiveDoctors().then((docs) => {
+      if (docs && docs.length > 0) setDoctorsCount(docs.length);
     });
   }, []);
 
@@ -77,8 +92,14 @@ export default function AdminDashboardPage() {
             <div className="p-3 rounded-xl bg-zinc-100 group-hover:bg-zinc-950 group-hover:text-white transition-colors text-zinc-900">
               <CalendarCheck className="w-5 h-5" />
             </div>
-            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-amber-50 text-amber-700 border border-amber-200">
-              {pendingCount} Pending
+            <span
+              className={`text-[11px] font-bold px-2 py-0.5 rounded-full border ${
+                pendingCount > 0
+                  ? "bg-amber-50 text-amber-700 border-amber-200"
+                  : "bg-emerald-50 text-emerald-700 border-emerald-200"
+              }`}
+            >
+              {pendingCount > 0 ? `${pendingCount} Pending` : "All Confirmed"}
             </span>
           </div>
           <div className="text-2xl font-extrabold text-zinc-950">{appointmentsCount}</div>
@@ -99,9 +120,9 @@ export default function AdminDashboardPage() {
               Active
             </span>
           </div>
-          <div className="text-2xl font-extrabold text-zinc-950">{DOCTORS.length}</div>
+          <div className="text-2xl font-extrabold text-zinc-950">{doctorsCount}</div>
           <div className="text-xs font-bold text-zinc-700 mt-1">Specialist Doctors</div>
-          <div className="text-[11px] text-zinc-500 mt-0.5">3 Confirmed + 3 Placeholder</div>
+          <div className="text-[11px] text-zinc-500 mt-0.5">Verified Medical Faculty</div>
         </Link>
 
         {/* Departments Card */}
