@@ -39,13 +39,26 @@ export function CtaBanner() {
             <span>{isBn ? UI_STRINGS.ctaBand.button.bn : UI_STRINGS.ctaBand.button.en}</span>
           </Link>
 
-          <a
-            href={`tel:${settings.phoneNumbers[0]}`}
-            className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 sm:px-9 py-4 bg-white/80 hover:bg-white border border-zinc-300/80 text-zinc-900 text-sm sm:text-base font-semibold rounded-xl transition-colors shadow-2xs"
-          >
-            <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-700" />
-            <span>{settings.phoneNumbers[0]}</span>
-          </a>
+          {settings.phoneNumbers && settings.phoneNumbers.length > 0 ? (
+            settings.phoneNumbers.map((phone, idx) => (
+              <a
+                key={idx}
+                href={`tel:${phone.replace(/\s+/g, "")}`}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-6 sm:px-8 py-4 bg-white/80 hover:bg-white border border-zinc-300/80 text-zinc-900 text-sm sm:text-base font-semibold rounded-xl transition-colors shadow-2xs font-mono"
+              >
+                <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-700" />
+                <span>{phone}</span>
+              </a>
+            ))
+          ) : (
+            <a
+              href={`tel:${settings.emergencyPhone.replace(/\s+/g, "")}`}
+              className="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 px-7 sm:px-9 py-4 bg-white/80 hover:bg-white border border-zinc-300/80 text-zinc-900 text-sm sm:text-base font-semibold rounded-xl transition-colors shadow-2xs font-mono"
+            >
+              <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-zinc-700" />
+              <span>{settings.emergencyPhone}</span>
+            </a>
+          )}
         </div>
 
         <p className="text-xs sm:text-sm text-zinc-600 pt-2">

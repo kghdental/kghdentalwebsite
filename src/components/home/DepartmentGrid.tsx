@@ -45,8 +45,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["ট্রেডিশনাল ব্রেসেস", "ক্লিয়ার অদৃশ্য অ্যালাইনার", "ডিজিটাল স্মাইল ডিজাইন", "রিটেইনার কেয়ার"],
     },
     specialistBadge: {
-      en: "Lead Specialist: Dr. Fatema Tuz Johora (FCPS)",
-      bn: "প্রধান বিশেষজ্ঞ: ডাঃ ফাতেমা তুজ জোহরা (এফসিপিএস)",
+      en: "Orthodontics & Dentofacial Alignment",
+      bn: "অর্থোডন্টিক্স ও ডেন্টোফেসিয়াল অ্যালাইনমেন্ট",
     },
   },
   "oral-surgery": {
@@ -67,8 +67,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["উইজডম টুথ সার্জারি", "স্থায়ী ডেন্টাল ইমপ্ল্যান্ট", "ফেসিয়াল ফ্র্যাকচার চিকিৎসা", "টিএমজে জয়েন্ট থেরাপি"],
     },
     specialistBadge: {
-      en: "Lead Surgeon: Dr. Md. Sanwar Hossain (FCPS)",
-      bn: "প্রধান সার্জন: ডাঃ মোঃ সানোয়ার হোসেন (এফসিপিএস)",
+      en: "Oral & Maxillofacial Surgery",
+      bn: "ওরাল অ্যান্ড ম্যাক্সিলোফেসিয়াল সার্জারি",
     },
   },
   endodontics: {
@@ -89,8 +89,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["রোটারি রুট ক্যানেল (RCT)", "দাঁতের রঙের ফিলিং", "রি-রুট ক্যানেল চিকিৎসা", "ইনলে ও অনলে রিস্টোরেশন"],
     },
     specialistBadge: {
-      en: "Endodontic & Restorative Specialists",
-      bn: "এন্ডোডন্টিক ও রিস্টোরেটিভ বিশেষজ্ঞ দল",
+      en: "Conservative Dentistry & Endodontics",
+      bn: "কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্স",
     },
   },
   prosthodontics: {
@@ -111,8 +111,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["জিরকোনিয়া ও সিরামিক ক্রাউন", "ফিক্সড ডেন্টাল ব্রিজ", "সম্পূর্ণ ও আংশিক ডেনচার", "ইমপ্ল্যান্ট-সাপোর্টেড ডেনচার"],
     },
     specialistBadge: {
-      en: "Prosthetic Rehabilitation Specialists",
-      bn: "প্রস্থোডন্টিক রিহ্যাবিলিটেশন বিশেষজ্ঞ দল",
+      en: "Prosthodontics & Tooth Replacement",
+      bn: "প্রস্থোডন্টিক্স ও দাঁত প্রতিস্থাপন",
     },
   },
   pediatric: {
@@ -133,8 +133,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["শিশুদের রুট ক্যানেল (পালপোটমি)", "ক্যাভিটি প্রিভেন্টিভ সিল্যান্ট", "স্পেস মেইনটেইনার", "ক্ষতিকর অভ্যাস দূরীকরণ"],
     },
     specialistBadge: {
-      en: "Child-Centric Dental Specialists",
-      bn: "শিশু দন্ত বিশেষজ্ঞ চিকিৎসক দল",
+      en: "Pediatric Dentistry & Child Oral Health",
+      bn: "শিশু দন্ত চিকিৎসা বিভাগ",
     },
   },
   periodontics: {
@@ -155,8 +155,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["আল্ট্রাসনিক স্কেলিং ও পলিশিং", "ডিপ রুট প্ল্যানিং চিকিৎসা", "গামি স্মাইল কারেকশন", "নড়ে যাওয়া দাঁতের স্প্লিন্টিং"],
     },
     specialistBadge: {
-      en: "Periodontal Care Specialists",
-      bn: "মাড়ি রোগ বিশেষজ্ঞ চিকিৎসক দল",
+      en: "Periodontics & Gum Disease Therapy",
+      bn: "পেরিওডন্টিক্স ও মাড়ির চিকিৎসা",
     },
   },
   "oral-medicine": {
@@ -177,8 +177,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["ওরাল ক্যান্সার স্ক্রিনিং", "প্রিক্যান্সারাস ক্ষত চিকিৎসা", "ওএসএমএফ ও আলসার কেয়ার", "ওরাল বায়োপসি কনসালটেশন"],
     },
     specialistBadge: {
-      en: "Lead Consultant: Dr. Rifat Rahman (PhD, MSc)",
-      bn: "প্রধান বিশেষজ্ঞ: ডা. রিফাত রহমান (পিএইচডি, এমএসসি)",
+      en: "Oral Medicine & Clinical Diagnosis",
+      bn: "ওরাল মেডিসিন ও ক্লিনিক্যাল ডায়াগনোসিস",
     },
   },
   "general-consultation": {
@@ -199,8 +199,8 @@ const DEPARTMENT_DETAILS: Record<string, ShowcaseDetails> = {
       bn: ["সার্বিক মুখ ও দাঁত পরীক্ষা", "ডিজিটাল ওপিজি এক্স-রে", "ইন্ট্রাওরাল ৩ডি স্ক্যান", "জরুরি ব্যথা নিরসন কনসালটেশন"],
     },
     specialistBadge: {
-      en: "Comprehensive Clinical Diagnostic Team",
-      bn: "সার্বিক ক্লিনিক্যাল ডায়াগনস্টিক টিম",
+      en: "General Dentistry & Digital Diagnostics",
+      bn: "জেনারেল ডেন্টিস্ট্রি ও ডিজিটাল ডায়াগনস্টিকস",
     },
   },
 };
@@ -245,8 +245,8 @@ export function DepartmentGrid() {
           bn: activeDept.subServices.slice(0, 4).map((s) => s.name.bn),
         },
         specialistBadge: {
-          en: "KGH Dental Specialized Team",
-          bn: "কেজিএইচ ডেন্টাল বিশেষজ্ঞ টিম",
+          en: t(activeDept.name),
+          bn: t(activeDept.name),
         },
       }
     );

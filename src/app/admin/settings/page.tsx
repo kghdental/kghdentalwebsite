@@ -32,7 +32,15 @@ export default function AdminSettingsPage() {
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSaving(true);
-    const success = await updateSettings(settings);
+    const cleanedPhones = (settings.phoneNumbers || [])
+      .map((p) => p.trim())
+      .filter((p) => p.length > 0);
+    const finalSettings: ClinicSettings = {
+      ...settings,
+      phoneNumbers: cleanedPhones.length > 0 ? cleanedPhones : [settings.emergencyPhone || "+8801712794120"],
+    };
+    setSettings(finalSettings);
+    const success = await updateSettings(finalSettings);
     setIsSaving(false);
     if (success) {
       setSavedSuccess(true);
@@ -43,12 +51,12 @@ export default function AdminSettingsPage() {
   const handleAddPhone = () => {
     setSettings({
       ...settings,
-      phoneNumbers: [...settings.phoneNumbers, "+880 1700-000000"],
+      phoneNumbers: [...(settings.phoneNumbers || []), ""],
     });
   };
 
   const handleRemovePhone = (index: number) => {
-    const updated = settings.phoneNumbers.filter((_, i) => i !== index);
+    const updated = (settings.phoneNumbers || []).filter((_, i) => i !== index);
     setSettings({ ...settings, phoneNumbers: updated });
   };
 
@@ -146,6 +154,7 @@ export default function AdminSettingsPage() {
                     <input
                       type="text"
                       value={phone}
+                      placeholder="e.g. +8801712794120"
                       onChange={(e) => {
                         const updated = [...settings.phoneNumbers];
                         updated[idx] = e.target.value;

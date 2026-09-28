@@ -90,14 +90,28 @@ export function Footer() {
                   {t(settings.address)}
                 </a>
               </div>
-              <div className="flex items-center gap-2.5">
-                <Phone className="w-4 h-4 text-zinc-400 shrink-0" />
-                <a
-                  href={`tel:${settings.phoneNumbers[0]}`}
-                  className="hover:text-white transition-colors"
-                >
-                  {settings.phoneNumbers[0]}
-                </a>
+              <div className="flex items-start gap-2.5">
+                <Phone className="w-4 h-4 text-zinc-400 shrink-0 mt-0.5" />
+                <div className="flex flex-col gap-1">
+                  {settings.phoneNumbers && settings.phoneNumbers.length > 0 ? (
+                    settings.phoneNumbers.map((phone, idx) => (
+                      <a
+                        key={idx}
+                        href={`tel:${phone.replace(/\s+/g, "")}`}
+                        className="hover:text-white transition-colors"
+                      >
+                        {phone}
+                      </a>
+                    ))
+                  ) : (
+                    <a
+                      href={`tel:${settings.emergencyPhone.replace(/\s+/g, "")}`}
+                      className="hover:text-white transition-colors"
+                    >
+                      {settings.emergencyPhone}
+                    </a>
+                  )}
+                </div>
               </div>
               <div className="flex items-center gap-2.5">
                 <Mail className="w-4 h-4 text-zinc-400 shrink-0" />

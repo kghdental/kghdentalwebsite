@@ -180,13 +180,28 @@ export function MobileNav({ isOpen, onClose }: MobileNavProps) {
             <span>{isBn ? "সিরিয়াল বুক করুন" : "Book Appointment"}</span>
           </Link>
 
-          <a
-            href={`tel:${settings.phoneNumbers[0]}`}
-            className="w-full flex items-center justify-center gap-2 py-2.5 px-4 bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-100 text-xs font-semibold rounded-xl"
-          >
-            <Phone className="w-4 h-4 text-zinc-600" />
-            <span>{settings.phoneNumbers[0]}</span>
-          </a>
+          <div className="space-y-1.5">
+            {settings.phoneNumbers && settings.phoneNumbers.length > 0 ? (
+              settings.phoneNumbers.map((phone, idx) => (
+                <a
+                  key={idx}
+                  href={`tel:${phone.replace(/\s+/g, "")}`}
+                  className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-100 text-xs font-semibold rounded-xl transition-colors font-mono"
+                >
+                  <Phone className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                  <span>{phone}</span>
+                </a>
+              ))
+            ) : (
+              <a
+                href={`tel:${settings.emergencyPhone.replace(/\s+/g, "")}`}
+                className="w-full flex items-center justify-center gap-2 py-2 px-3 bg-white border border-zinc-300 text-zinc-800 hover:bg-zinc-100 text-xs font-semibold rounded-xl transition-colors font-mono"
+              >
+                <Phone className="w-3.5 h-3.5 text-zinc-600 shrink-0" />
+                <span>{settings.emergencyPhone}</span>
+              </a>
+            )}
+          </div>
         </div>
       </div>
     </div>

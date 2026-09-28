@@ -837,20 +837,24 @@ export async function fetchLiveClinicSettings(): Promise<ClinicSettings> {
 
     const merged: ClinicSettings = {
       ...CLINIC_SETTINGS,
-      ...(cached || {}),
-      name: data.name || cached?.name || CLINIC_SETTINGS.name,
-      email: data.email || cached?.email || CLINIC_SETTINGS.email,
-      phoneNumbers: data.phone_numbers || cached?.phoneNumbers || CLINIC_SETTINGS.phoneNumbers,
-      emergencyPhone: data.emergency_phone || cached?.emergencyPhone || CLINIC_SETTINGS.emergencyPhone,
-      workingHours: data.working_hours || cached?.workingHours || CLINIC_SETTINGS.workingHours,
+      name: data.name ?? cached?.name ?? CLINIC_SETTINGS.name,
+      email: data.email ?? cached?.email ?? CLINIC_SETTINGS.email,
+      phoneNumbers:
+        Array.isArray(data.phone_numbers) && data.phone_numbers.length > 0
+          ? data.phone_numbers
+          : cached?.phoneNumbers && cached.phoneNumbers.length > 0
+          ? cached.phoneNumbers
+          : CLINIC_SETTINGS.phoneNumbers,
+      emergencyPhone: data.emergency_phone ?? cached?.emergencyPhone ?? CLINIC_SETTINGS.emergencyPhone,
+      workingHours: data.working_hours ?? cached?.workingHours ?? CLINIC_SETTINGS.workingHours,
       address: {
-        en: data.address_en || cached?.address?.en || CLINIC_SETTINGS.address.en,
-        bn: data.address_bn || cached?.address?.bn || CLINIC_SETTINGS.address.bn,
+        en: data.address_en ?? cached?.address?.en ?? CLINIC_SETTINGS.address.en,
+        bn: data.address_bn ?? cached?.address?.bn ?? CLINIC_SETTINGS.address.bn,
       },
       isAddressPlaceholder: data.is_address_placeholder ?? cached?.isAddressPlaceholder ?? false,
-      googleMapUrl: data.google_map_url || cached?.googleMapUrl || CLINIC_SETTINGS.googleMapUrl,
-      googleReviewUrl: data.google_review_url || cached?.googleReviewUrl || CLINIC_SETTINGS.googleReviewUrl,
-      socialLinks: data.social_links || cached?.socialLinks || CLINIC_SETTINGS.socialLinks,
+      googleMapUrl: data.google_map_url ?? cached?.googleMapUrl ?? CLINIC_SETTINGS.googleMapUrl,
+      googleReviewUrl: data.google_review_url ?? cached?.googleReviewUrl ?? CLINIC_SETTINGS.googleReviewUrl,
+      socialLinks: data.social_links ?? cached?.socialLinks ?? CLINIC_SETTINGS.socialLinks,
     };
 
     if (typeof window !== "undefined") {
@@ -869,11 +873,21 @@ export async function fetchLiveClinicSettings(): Promise<ClinicSettings> {
 }
 
 export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<{ success: boolean; error?: string }> {
+  const cleanedPhoneNumbers = (settings.phoneNumbers || [])
+    .map((p) => p.trim())
+    .filter((p) => p.length > 0);
+  const finalPhoneNumbers = cleanedPhoneNumbers.length > 0 ? cleanedPhoneNumbers : [settings.emergencyPhone || "+880 1700-000000"];
+
+  const sanitizedSettings: ClinicSettings = {
+    ...settings,
+    phoneNumbers: finalPhoneNumbers,
+  };
+
   if (typeof window !== "undefined") {
     try {
-      localStorage.setItem("kgh_live_clinic_settings", JSON.stringify(settings));
+      localStorage.setItem("kgh_live_clinic_settings", JSON.stringify(sanitizedSettings));
       // Dispatch custom event for instant cross-component sync on same page & storage event for cross-tabs
-      window.dispatchEvent(new CustomEvent("kgh_settings_updated", { detail: settings }));
+      window.dispatchEvent(new CustomEvent("kgh_settings_updated", { detail: sanitizedSettings }));
       window.dispatchEvent(new Event("storage"));
     } catch {
       // ignore
@@ -885,28 +899,29 @@ export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<
   try {
     const payload = {
       id: 1,
-      name: settings.name || "KGH Dental",
-      email: settings.email || "care@kghdental.com",
-      phone_numbers: settings.phoneNumbers,
-      emergency_phone: settings.emergencyPhone,
-      working_hours: settings.workingHours,
-      address_en: settings.address.en,
-      address_bn: settings.address.bn,
-      is_address_placeholder: settings.isAddressPlaceholder,
-      google_map_url: settings.googleMapUrl,
-      google_review_url: settings.googleReviewUrl,
-      social_links: settings.socialLinks,
+      name: sanitizedSettings.name || "KGH Dental",
+      email: sanitizedSettings.email || "care@kghdental.com",
+      phone_numbers: sanitizedSettings.phoneNumbers,
+      emergency_phone: sanitizedSettings.emergencyPhone,
+      working_hours: sanitizedSettings.workingHours,
+      address_en: sanitizedSettings.address.en,
+      address_bn: sanitizedSettings.address.bn,
+      is_address_placeholder: sanitizedSettings.isAddressPlaceholder,
+      google_map_url: sanitizedSettings.googleMapUrl,
+      google_review_url: sanitizedSettings.googleReviewUrl,
+      social_links: sanitizedSettings.socialLinks,
       updated_at: new Date().toISOString(),
     };
 
     const { error } = await supabase.from("clinic_settings").upsert(payload, { onConflict: "id" });
     if (error) {
       console.warn("Supabase upsert warning for clinic_settings:", error.message);
+      return { success: false, error: error.message };
     }
     return { success: true };
   } catch (err: any) {
     console.error("saveLiveClinicSettings error:", err);
-    return { success: true };
+    return { success: false, error: err.message };
   }
 }
 
