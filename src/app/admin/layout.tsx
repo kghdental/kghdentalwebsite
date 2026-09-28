@@ -20,6 +20,7 @@ import {
   ShieldAlert,
   Star,
   Layers,
+  Video,
 } from "lucide-react";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
 import { fetchLiveAppointments } from "@/lib/api/db";
@@ -99,6 +100,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: "/admin/homepage", label: "Homepage Sections", icon: Layers },
     { href: "/admin/blog", label: "Blog Articles (10)", icon: BookOpen },
     { href: "/admin/gallery", label: "Gallery Showcase", icon: ImageIcon },
+    { href: "/admin/videos", label: "Video Showcase", icon: Video },
     { href: "/admin/media", label: "Media Library", icon: FolderOpen },
     { href: "/admin/settings", label: "Clinic Settings", icon: Settings },
   ];

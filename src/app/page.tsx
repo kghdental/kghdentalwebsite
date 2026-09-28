@@ -6,6 +6,7 @@ import { DoctorPreview } from "@/components/home/DoctorPreview";
 import { GoogleReviews } from "@/components/home/GoogleReviews";
 import { BlogSection } from "@/components/home/BlogSection";
 import { GalleryPreview } from "@/components/home/GalleryPreview";
+import { VideoShowcase } from "@/components/home/VideoShowcase";
 import { CtaBanner } from "@/components/home/CtaBanner";
 
 export default function HomePage() {
@@ -18,6 +19,7 @@ export default function HomePage() {
       <ClinicalPhilosophyBanner />
       <BlogSection />
       <GalleryPreview />
+      <VideoShowcase />
       <GoogleReviews />
       <CtaBanner />
     </div>

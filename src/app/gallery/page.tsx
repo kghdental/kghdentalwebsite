@@ -12,14 +12,18 @@ import {
   MoveHorizontal,
   ArrowRight,
   ShieldCheck,
+  Video,
+  ExternalLink,
+  Film,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { CtaBanner } from "@/components/home/CtaBanner";
 import {
   fetchLiveGalleryItems,
   fetchLiveBeforeAfterItems,
+  fetchLiveVideos,
 } from "@/lib/api/db";
-import { GalleryItem, BeforeAfterItem } from "@/types";
+import { GalleryItem, BeforeAfterItem, FeaturedVideo } from "@/types";
 import { BeforeAfterSlider } from "@/components/gallery/BeforeAfterSlider";
 
 export default function GalleryPage() {
@@ -27,23 +31,29 @@ export default function GalleryPage() {
   const [activeCategory, setActiveCategory] = useState<string>("all");
   const [galleryItems, setGalleryItems] = useState<GalleryItem[]>([]);
   const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>([]);
+  const [videoItems, setVideoItems] = useState<FeaturedVideo[]>([]);
+  const [videoCategory, setVideoCategory] = useState<string>("all");
   const [loading, setLoading] = useState(true);
 
   // Lightbox Modal state
   const [selectedPhoto, setSelectedPhoto] = useState<GalleryItem | null>(null);
   const [selectedCase, setSelectedCase] = useState<BeforeAfterItem | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<FeaturedVideo | null>(null);
 
   // Carousel ref for Before & After
   const carouselRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    Promise.all([fetchLiveGalleryItems(), fetchLiveBeforeAfterItems()]).then(
-      ([items, baItems]) => {
-        setGalleryItems(items || []);
-        setBeforeAfterItems(baItems || []);
-        setLoading(false);
-      }
-    );
+    Promise.all([
+      fetchLiveGalleryItems(),
+      fetchLiveBeforeAfterItems(),
+      fetchLiveVideos(false),
+    ]).then(([items, baItems, videos]) => {
+      setGalleryItems(items || []);
+      setBeforeAfterItems(baItems || []);
+      setVideoItems(videos || []);
+      setLoading(false);
+    });
   }, []);
 
   const categories = [
@@ -285,37 +295,235 @@ export default function GalleryPage() {
       </section>
 
       {/* ============================================================================== */}
-      {/* SECTION 3: VIDEO WALKTHROUGH & SOCIAL HIGHLIGHTS */}
+      {/* SECTION 3: ALL CLINICAL VIDEOS & REELS SHOWCASE */}
       {/* ============================================================================== */}
-      <section className="py-12 bg-white border-t border-zinc-200">
+      <section id="videos" className="py-16 sm:py-20 bg-zinc-50 border-t border-zinc-200">
         <div className="w-full max-w-[2000px] mx-auto px-4 sm:px-8 lg:px-12 xl:px-16 2xl:px-20">
-          <div className="p-8 sm:p-10 rounded-3xl bg-[#1c362b] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
-            <div className="space-y-2 text-center md:text-left">
-              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-emerald-200">
-                <Play className="w-3.5 h-3.5 fill-current" />
-                <span>{isBn ? "ভিডিও সফর" : "Video Walkthrough"}</span>
-              </span>
-              <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+          
+          {/* Header */}
+          <div className="flex flex-col md:flex-row md:items-end justify-between gap-6 mb-10">
+            <div className="space-y-3 max-w-3xl">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 text-xs font-black tracking-widest uppercase shadow-2xs">
+                <Video className="w-3.5 h-3.5 text-emerald-600" />
+                <span>{isBn ? "ভিডিও গ্যালারি ও রিলস" : "CLINICAL VIDEOS & REELS"}</span>
+              </div>
+
+              <h2 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold text-zinc-950 tracking-tight leading-[1.15]">
                 {isBn
-                  ? "কেজিএইচ ডেন্টালের ভিডিও ট্যুর ও কেস স্টাডিজ"
-                  : "Chamber Video Tour & Patient Stories"}
-              </h3>
-              <p className="text-xs sm:text-sm text-zinc-300 max-w-xl">
+                  ? "আমাদের সকল চিকিৎসা ভিডিও, রিলস ও কেস স্টাডিজ"
+                  : "All Clinical Procedures, Walkthroughs & Doctor Reels"}
+              </h2>
+
+              <p className="text-sm sm:text-base text-zinc-600 font-normal leading-relaxed">
                 {isBn
-                  ? "আমাদের অফিসিয়াল ফেসবুক ও ইউটিউব চ্যানেলে চেম্বারের ভিডিও, চিকিৎসা পদ্ধতি ও ওরাল হেলথ টিপস দেখুন।"
-                  : "Watch detailed procedure explanations, patient recovery journeys, and clinic walk-throughs on our official social channel."}
+                  ? "চিকিৎসা পদ্ধতি, ব্যথামুক্ত আধুনিক প্রযুক্তি ও চিকিৎসকদের পরামর্শমূলক ভিডিও দেখুন। নিয়মিত আপডেট পেতে আমাদের ইউটিউব ও ফেসবুক ফলো করুন।"
+                  : "Watch detailed procedure explanations, patient recovery journeys, and clinic walk-throughs recorded directly at KGH Dental Banani."}
               </p>
             </div>
 
-            <a
-              href="https://facebook.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-6 py-3.5 bg-white hover:bg-zinc-100 text-zinc-950 text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors shrink-0"
-            >
-              <Play className="w-4 h-4 fill-zinc-950" />
-              <span>{isBn ? "ফেসবুকে ভিডিও দেখুন" : "Watch Videos on Facebook"}</span>
-            </a>
+            {/* Platform Badges */}
+            <div className="flex items-center gap-2.5 shrink-0">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-700 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-red-600" />
+                <span>YouTube Guides</span>
+              </span>
+              <span className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-white border border-zinc-200 text-xs font-bold text-zinc-700 shadow-2xs">
+                <span className="w-2 h-2 rounded-full bg-blue-600" />
+                <span>Facebook Reels</span>
+              </span>
+            </div>
+          </div>
+
+          {/* Video Category Filter Tabs */}
+          <div className="flex items-center gap-2 overflow-x-auto pb-3 mb-8 scrollbar-none">
+            {[
+              { id: "all", en: "All Videos", bn: "সকল ভিডিও" },
+              { id: "treatment_guide", en: "Procedures & Guides", bn: "চিকিৎসা ও গাইড" },
+              { id: "doctor_advice", en: "Doctor Advice & Reels", bn: "ডাক্তারের পরামর্শ ও রিলস" },
+              { id: "patient_story", en: "Patient Journeys", bn: "রোগীর অভিজ্ঞতা" },
+              { id: "clinic_tour", en: "Chamber Tour", bn: "চেম্বার সফর" },
+            ].map((cat) => {
+              const isActive = videoCategory === cat.id;
+              return (
+                <button
+                  key={cat.id}
+                  type="button"
+                  onClick={() => setVideoCategory(cat.id)}
+                  className={`px-4 py-2 rounded-xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-200 cursor-pointer ${
+                    isActive
+                      ? "bg-zinc-950 text-white shadow-md scale-[1.02]"
+                      : "bg-white hover:bg-zinc-100 text-zinc-600 hover:text-zinc-900 border border-zinc-200 shadow-2xs"
+                  }`}
+                >
+                  {isBn ? cat.bn : cat.en}
+                </button>
+              );
+            })}
+          </div>
+
+          {/* Videos Grid */}
+          {loading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[1, 2, 3].map((n) => (
+                <div key={n} className="h-64 rounded-3xl bg-zinc-200 animate-pulse" />
+              ))}
+            </div>
+          ) : videoItems.filter((v) => videoCategory === "all" || v.category === videoCategory).length === 0 ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {[1, 2, 3].map((frameIdx) => (
+                <div
+                  key={frameIdx}
+                  className="rounded-3xl p-6 sm:p-8 border-2 border-dashed border-zinc-300/80 bg-gradient-to-b from-white/90 via-zinc-50/70 to-zinc-100/60 shadow-lg shadow-zinc-200/40 backdrop-blur-xs flex flex-col justify-between items-center text-center relative overflow-hidden group hover:border-emerald-400/60 transition-all duration-300"
+                  style={{ minHeight: "300px" }}
+                >
+                  <div className="w-full flex justify-between items-center text-zinc-400">
+                    <span className="text-[11px] font-mono uppercase tracking-widest text-zinc-400">
+                      {isBn ? `ফ্রেম 0${frameIdx}` : `FRAME 0${frameIdx}`}
+                    </span>
+                    <span className="w-2 h-2 rounded-full bg-zinc-300 group-hover:bg-emerald-500 transition-colors" />
+                  </div>
+
+                  <div className="my-auto py-4 flex flex-col items-center">
+                    <div className="w-16 h-16 rounded-2xl bg-zinc-100 border border-zinc-200 shadow-inner flex items-center justify-center text-zinc-400 group-hover:text-emerald-600 group-hover:scale-105 group-hover:bg-emerald-50 group-hover:border-emerald-200 transition-all duration-300 mb-4">
+                      <Film className="w-7 h-7" />
+                    </div>
+                    <h4 className="text-sm sm:text-base font-bold text-zinc-800 mb-1.5">
+                      {isBn ? "কোনো ভিডিও পাওয়া যায়নি" : "No Videos in This Category"}
+                    </h4>
+                    <p className="text-xs text-zinc-500 max-w-[240px] leading-relaxed">
+                      {isBn
+                        ? "এই ক্যাটাগরিতে নতুন ভিডিও আপলোড করা হলে এখানে ফ্রেমটিতে স্বয়ংক্রিয়ভাবে প্রদর্শিত হবে"
+                        : "Videos uploaded in this category will automatically populate this frame"}
+                    </p>
+                  </div>
+
+                  <div className="w-full pt-3 border-t border-zinc-200/60 flex items-center justify-center">
+                    <span className="text-[11px] font-semibold text-zinc-400 group-hover:text-emerald-700 transition-colors">
+                      {isBn ? "ভিডিও ফ্রেম সক্রিয়" : "Video Frame Active"}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+              {videoItems
+                .filter((v) => videoCategory === "all" || v.category === videoCategory)
+                .map((video) => {
+                  const isVertical = video.aspectRatio === "9:16";
+                  const isYouTube = video.platform === "youtube";
+                  const titleText = isBn ? video.title.bn : video.title.en;
+
+                  return (
+                    <div
+                      key={video.id}
+                      onClick={() => setSelectedVideo(video)}
+                      role="button"
+                      tabIndex={0}
+                      className="group relative rounded-3xl overflow-hidden bg-zinc-900 border border-zinc-200/90 shadow-md hover:shadow-2xl transition-all duration-300 cursor-pointer flex flex-col justify-between"
+                      style={{ minHeight: "300px" }}
+                    >
+                      {/* Thumbnail Image */}
+                      <div className="absolute inset-0 overflow-hidden">
+                        {video.thumbnailUrl ? (
+                          <img
+                            src={video.thumbnailUrl}
+                            alt={titleText}
+                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500 ease-out"
+                            loading="lazy"
+                          />
+                        ) : (
+                          <div className="w-full h-full bg-gradient-to-br from-[#121c16] via-[#1a2e24] to-[#0a120e] flex items-center justify-center">
+                            <Video className="w-16 h-16 text-emerald-400/20" />
+                          </div>
+                        )}
+                        <div className="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/30 group-hover:via-black/30 transition-colors" />
+                      </div>
+
+                      {/* Top Bar Badges */}
+                      <div className="relative z-10 p-4 sm:p-5 flex items-center justify-between gap-2">
+                        <span className="px-3 py-1 rounded-full bg-black/60 backdrop-blur-md text-white text-[11px] font-bold border border-white/20 shadow-sm">
+                          {video.category.replace("_", " ").toUpperCase()}
+                        </span>
+
+                        <span
+                          className={`px-3 py-1 rounded-full text-[11px] font-extrabold text-white shadow-sm border ${
+                            isYouTube ? "bg-red-600 border-red-400/30" : "bg-blue-600 border-blue-400/30"
+                          }`}
+                        >
+                          {isYouTube ? (isVertical ? "Shorts" : "YouTube") : (isVertical ? "Reel" : "Facebook")}
+                        </span>
+                      </div>
+
+                      {/* Center Play Button */}
+                      <div className="relative z-10 my-auto flex items-center justify-center py-6">
+                        <div className="w-16 h-16 rounded-full bg-white/90 group-hover:bg-white text-zinc-950 flex items-center justify-center shadow-xl group-hover:scale-110 transition-all duration-300 border-2 border-white/40">
+                          <Play className="w-7 h-7 fill-zinc-950 translate-x-0.5" />
+                        </div>
+                      </div>
+
+                      {/* Bottom Title Bar */}
+                      <div className="relative z-10 p-5 bg-gradient-to-t from-black/95 via-black/75 to-transparent">
+                        <h3 className="text-sm sm:text-base font-bold text-white line-clamp-2 leading-snug group-hover:text-emerald-300 transition-colors">
+                          {titleText}
+                        </h3>
+                        <div className="mt-2 flex items-center justify-between text-xs text-zinc-300 font-semibold">
+                          <span className="text-emerald-400 group-hover:underline">
+                            {isBn ? "ভিডিও দেখুন →" : "Watch Video →"}
+                          </span>
+                          {isVertical && (
+                            <span className="px-2 py-0.5 rounded-md bg-white/10 text-zinc-300 text-[10px] font-mono">
+                              9:16 Reel
+                            </span>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+            </div>
+          )}
+
+          {/* Social Channels Callout */}
+          <div className="mt-12 p-8 sm:p-10 rounded-3xl bg-[#1c362b] text-white flex flex-col md:flex-row items-center justify-between gap-6 shadow-xl">
+            <div className="space-y-2 text-center md:text-left">
+              <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 backdrop-blur-md text-xs font-bold text-emerald-200">
+                <Play className="w-3.5 h-3.5 fill-current" />
+                <span>{isBn ? "সোশ্যাল চ্যানেল" : "Official Channels"}</span>
+              </span>
+              <h3 className="text-xl sm:text-2xl font-extrabold text-white">
+                {isBn
+                  ? "আরও ভিডিও ও ওরাল হেলথ টিপস পেতে যুক্ত থাকুন"
+                  : "Subscribe for More Smile Makeovers & Dental Advice"}
+              </h3>
+              <p className="text-xs sm:text-sm text-zinc-300 max-w-xl">
+                {isBn
+                  ? "আমাদের অফিসিয়াল ফেসবুক পেজ ও ইউটিউব চ্যানেলে নতুন ভিডিও ও রিলস নিয়মিত প্রকাশ করা হয়।"
+                  : "Follow our verified YouTube and Facebook channels for regular smile tips and behind-the-scenes clinic reels."}
+              </p>
+            </div>
+
+            <div className="flex flex-wrap items-center gap-3 shrink-0">
+              <a
+                href="https://facebook.com/kghdental"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-blue-600 hover:bg-blue-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors"
+              >
+                <span>Facebook</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+
+              <a
+                href="https://youtube.com"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 px-5 py-3 bg-red-600 hover:bg-red-700 text-white text-xs sm:text-sm font-bold rounded-xl shadow-md transition-colors"
+              >
+                <span>YouTube</span>
+                <ExternalLink className="w-3.5 h-3.5" />
+              </a>
+            </div>
           </div>
         </div>
       </section>
@@ -427,6 +635,77 @@ export default function GalleryPage() {
               >
                 {isBn ? "বন্ধ করুন" : "Close"}
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ============================================================================== */}
+      {/* VIDEO LIGHTBOX MODAL */}
+      {/* ============================================================================== */}
+      {selectedVideo && (
+        <div
+          role="dialog"
+          aria-modal="true"
+          className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 bg-black/90 backdrop-blur-xl animate-in fade-in duration-200"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setSelectedVideo(null);
+            }
+          }}
+        >
+          <div
+            className={`relative w-full rounded-3xl overflow-hidden bg-zinc-950 border border-zinc-800 shadow-2xl flex flex-col ${
+              selectedVideo.aspectRatio === "9:16"
+                ? "max-w-md sm:max-w-lg h-[85vh] max-h-[800px]"
+                : "max-w-4xl lg:max-w-5xl aspect-video max-h-[90vh]"
+            }`}
+          >
+            {/* Top Bar inside modal */}
+            <div className="p-3.5 sm:p-4 bg-zinc-900/90 border-b border-zinc-800/80 flex items-center justify-between gap-3 shrink-0">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <span
+                  className={`w-2.5 h-2.5 rounded-full ${
+                    selectedVideo.platform === "youtube" ? "bg-red-500" : "bg-blue-500"
+                  }`}
+                />
+                <h4 className="text-xs sm:text-sm font-bold text-white truncate">
+                  {isBn ? selectedVideo.title.bn : selectedVideo.title.en}
+                </h4>
+              </div>
+
+              <div className="flex items-center gap-2 shrink-0">
+                <a
+                  href={selectedVideo.videoUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="p-2 rounded-xl text-zinc-400 hover:text-white hover:bg-zinc-800 transition-colors"
+                  title={isBn ? "মূল লিংকে দেখুন" : "Open Original Link"}
+                >
+                  <ExternalLink className="w-4 h-4" />
+                </a>
+
+                <button
+                  type="button"
+                  onClick={() => setSelectedVideo(null)}
+                  className="p-2 rounded-xl bg-zinc-800 hover:bg-zinc-700 text-white transition-colors cursor-pointer"
+                  title="Close (Esc)"
+                  aria-label="Close video player"
+                >
+                  <X className="w-4 h-4" />
+                </button>
+              </div>
+            </div>
+
+            {/* Video Iframe Container */}
+            <div className="flex-1 w-full h-full relative bg-black">
+              <iframe
+                src={selectedVideo.embedUrl}
+                title={isBn ? selectedVideo.title.bn : selectedVideo.title.en}
+                className="w-full h-full border-0 absolute inset-0"
+                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                allowFullScreen
+              />
             </div>
           </div>
         </div>

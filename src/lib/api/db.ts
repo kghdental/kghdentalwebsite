@@ -16,6 +16,7 @@ import {
   WhyChooseCard,
   ClinicalCreedData,
   CreedQuoteItem,
+  FeaturedVideo,
 } from "@/types";
 import { notifyAppointmentsUpdated } from "@/lib/appointment-utils";
 
@@ -2154,5 +2155,238 @@ export async function deleteLiveBlogPost(
     return { success: true };
   }
 }
+
+// ==============================================================================
+// 11. FEATURED VIDEOS API (YOUTUBE & FACEBOOK REELS)
+// ==============================================================================
+
+export function parseVideoUrl(url: string): {
+  isValid: boolean;
+  platform: "youtube" | "facebook";
+  embedUrl: string;
+  thumbnailUrl: string;
+  aspectRatio: "16:9" | "9:16";
+  error?: string;
+} {
+  const trimmed = (url || "").trim();
+  if (!trimmed) {
+    return {
+      isValid: false,
+      platform: "youtube",
+      embedUrl: "",
+      thumbnailUrl: "",
+      aspectRatio: "16:9",
+      error: "Please enter a video URL",
+    };
+  }
+
+  // 1. YouTube Detection
+  // Matches: youtube.com/watch?v=xxx, youtu.be/xxx, youtube.com/shorts/xxx, youtube.com/embed/xxx
+  const ytMatch = trimmed.match(
+    /(?:youtu\.be\/|youtube\.com\/(?:embed\/|v\/|watch\?v=|shorts\/|watch\?.+&v=))([\w-]{11})/i
+  );
+  if (ytMatch && ytMatch[1]) {
+    const videoId = ytMatch[1];
+    const isShort = trimmed.toLowerCase().includes("/shorts/");
+    return {
+      isValid: true,
+      platform: "youtube",
+      embedUrl: `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0`,
+      thumbnailUrl: `https://img.youtube.com/vi/${videoId}/hqdefault.jpg`,
+      aspectRatio: isShort ? "9:16" : "16:9",
+    };
+  }
+
+  // 2. Facebook Detection
+  // Matches: facebook.com/reel/xxx, facebook.com/.../videos/xxx, fb.watch/xxx, facebook.com/watch/?v=xxx
+  const isFb = /facebook\.com|fb\.watch/i.test(trimmed);
+  if (isFb) {
+    const isReel = /reel|fb\.watch/i.test(trimmed);
+    return {
+      isValid: true,
+      platform: "facebook",
+      embedUrl: `https://www.facebook.com/plugins/video.php?href=${encodeURIComponent(
+        trimmed
+      )}&show_text=false&autoplay=true`,
+      thumbnailUrl: "",
+      aspectRatio: isReel ? "9:16" : "16:9",
+    };
+  }
+
+  return {
+    isValid: false,
+    platform: "youtube",
+    embedUrl: "",
+    thumbnailUrl: "",
+    aspectRatio: "16:9",
+    error: "Supported formats: YouTube (video, Shorts) or Facebook (Reels, video posts)",
+  };
+}
+
+export const INITIAL_FEATURED_VIDEOS: FeaturedVideo[] = [];
+
+export async function fetchLiveVideos(includeInactive: boolean = false): Promise<FeaturedVideo[]> {
+  // 1. Try fetching from Supabase (100% dynamic from database)
+  if (isSupabaseConfigured) {
+    try {
+      let query = supabase
+        .from("featured_videos")
+        .select("*")
+        .order("sort_order", { ascending: true })
+        .order("created_at", { ascending: false });
+
+      if (!includeInactive) {
+        query = query.eq("is_active", true);
+      }
+
+      const { data, error } = await query;
+      if (!error && data) {
+        const items: FeaturedVideo[] = data.map((d: any) => ({
+          id: d.id,
+          title: {
+            en: d.title_en || "Video Showcase",
+            bn: d.title_bn || "ভিডিও উপস্থাপনা",
+          },
+          videoUrl: d.video_url,
+          embedUrl: d.embed_url,
+          platform: d.platform as "youtube" | "facebook",
+          aspectRatio: (d.aspect_ratio || "16:9") as "16:9" | "9:16",
+          thumbnailUrl: d.thumbnail_url || "",
+          category: d.category || "treatment_guide",
+          isActive: d.is_active ?? true,
+          sortOrder: d.sort_order ?? 0,
+          createdAt: d.created_at,
+        }));
+
+        if (typeof window !== "undefined") {
+          try {
+            localStorage.setItem("kgh_featured_videos", JSON.stringify(items));
+          } catch (e) {
+            // ignore
+          }
+        }
+
+        return items;
+      }
+    } catch (err) {
+      // ignore
+    }
+  }
+
+  // 2. Fallback to localStorage cache only
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_featured_videos");
+      if (cached) {
+        const parsed = JSON.parse(cached);
+        if (Array.isArray(parsed)) {
+          return includeInactive ? parsed : parsed.filter((v: FeaturedVideo) => v.isActive);
+        }
+      }
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  return [];
+}
+
+export async function saveLiveVideo(
+  video: FeaturedVideo
+): Promise<{ success: boolean; data?: FeaturedVideo; error?: string }> {
+  // 1. Update localStorage cache first for zero latency
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_featured_videos");
+      let list: FeaturedVideo[] = cached ? JSON.parse(cached) : [...INITIAL_FEATURED_VIDEOS];
+      const existingIdx = list.findIndex((v) => v.id === video.id);
+      if (existingIdx >= 0) {
+        list[existingIdx] = video;
+      } else {
+        list.push(video);
+      }
+      localStorage.setItem("kgh_featured_videos", JSON.stringify(list));
+      window.dispatchEvent(new CustomEvent("kgh_videos_updated", { detail: video }));
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  // 2. Sync to Supabase
+  if (!isSupabaseConfigured) return { success: true, data: video };
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(video.id);
+    const payload: any = {
+      title_en: video.title.en,
+      title_bn: video.title.bn,
+      video_url: video.videoUrl,
+      embed_url: video.embedUrl,
+      platform: video.platform,
+      aspect_ratio: video.aspectRatio,
+      thumbnail_url: video.thumbnailUrl || "",
+      category: video.category,
+      is_active: video.isActive,
+      sort_order: video.sortOrder,
+      updated_at: new Date().toISOString(),
+    };
+
+    if (isUuid) {
+      payload.id = video.id;
+    }
+
+    const { data, error } = await supabase
+      .from("featured_videos")
+      .upsert(payload)
+      .select()
+      .single();
+
+    if (error) {
+      console.warn("Supabase upsert warning for featured_videos:", error.message);
+      return { success: true, data: video };
+    }
+
+    return {
+      success: true,
+      data: {
+        ...video,
+        id: data.id,
+      },
+    };
+  } catch (err: any) {
+    console.error("saveLiveVideo error:", err);
+    return { success: true, data: video };
+  }
+}
+
+export async function deleteLiveVideo(id: string): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const cached = localStorage.getItem("kgh_featured_videos");
+      let list: FeaturedVideo[] = cached ? JSON.parse(cached) : [...INITIAL_FEATURED_VIDEOS];
+      list = list.filter((v) => v.id !== id);
+      localStorage.setItem("kgh_featured_videos", JSON.stringify(list));
+      window.dispatchEvent(new CustomEvent("kgh_videos_updated", { detail: { id, deleted: true } }));
+      window.dispatchEvent(new Event("storage"));
+    } catch (e) {
+      // ignore
+    }
+  }
+
+  if (!isSupabaseConfigured) return { success: true };
+
+  try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+    if (isUuid) {
+      await supabase.from("featured_videos").delete().eq("id", id);
+    }
+    return { success: true };
+  } catch (err: any) {
+    console.warn("deleteLiveVideo warning:", err);
+    return { success: true };
+  }
+}
+
 
 

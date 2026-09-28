@@ -223,4 +223,20 @@ export interface ClinicalCreedData {
   quotes?: CreedQuoteItem[];
 }
 
+export type VideoPlatform = "youtube" | "facebook";
+export type VideoAspectRatio = "16:9" | "9:16";
+export type VideoCategory = "patient_story" | "treatment_guide" | "doctor_advice" | "clinic_tour";
 
+export interface FeaturedVideo {
+  id: string;
+  title: BilingualText;
+  videoUrl: string;
+  embedUrl: string;
+  platform: VideoPlatform;
+  aspectRatio: VideoAspectRatio;
+  thumbnailUrl?: string;
+  category: VideoCategory;
+  isActive: boolean;
+  sortOrder: number;
+  createdAt?: string;
+}
