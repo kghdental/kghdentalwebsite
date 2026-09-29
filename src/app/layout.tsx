@@ -104,7 +104,9 @@ export const metadata: Metadata = {
     },
   },
   verification: {
-    google: process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION,
+    google:
+      process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ||
+      "L35Xp44PZrJWv3rWaa7c44UBapNH-dS70Nl-vdDJZ-M",
   },
   category: "health",
 };
