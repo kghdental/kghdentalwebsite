@@ -151,11 +151,11 @@ export const metadata: Metadata = {
 | ৫. গ্লোবাল মেটাডাটা, OpenGraph ও Twitter কার্ড | ✅ সম্পন্ন | `src/app/layout.tsx` |
 | ৬. পেজ-নির্দিষ্ট এসইও লেআউট | ✅ সম্পন্ন | `appointment`, `doctors`, `services`, `contact`, `blog`, `gallery` |
 | ৭. প্রজেক্ট বিল্ড ও টাইপ ভ্যালিডেশন | ✅ সম্পন্ন | `npm run build` (0 Errors) |
-| ৮. গিট পুশ ও ভার্সেল অটো-ডিপ্লয়মেন্ট | ⏳ বাকি আছে | GitHub / Vercel |
-| ৯. Search Console-এ Sitemap সাবমিট | ⏳ বাকি আছে | Google Search Console |
-| ১০. হোমপেজ ও সার্ভিস পেজের তাৎক্ষণিক ইনডেক্স রিকোয়েস্ট | ⏳ বাকি আছে | GSC URL Inspection |
-| ১১. Google Business Profile তৈরি ও ভিডিও ভেরিফিকেশন | ⏳ বাকি আছে | Google Maps / GBP |
-| ১২. অ্যাডমিন সেটিংস-এ লাইভ Google Review URL বসানো | ⏳ বাকি আছে | KGH Dental Admin (`/admin/settings`) |
+| ৮. গিট পুশ ও ভার্সেল অটো-ডিপ্লয়মেন্ট | ✅ সম্পন্ন | GitHub / Vercel |
+| ৯. Search Console-এ Sitemap সাবমিট | ✅ সম্পন্ন | Google Search Console |
+| ১০. হোমপেজ ও সার্ভিস পেজের তাৎক্ষণিক ইনডেক্স রিকোয়েস্ট | ✅ সম্পন্ন | GSC URL Inspection |
+| ১১. Google Business Profile তৈরি ও ভিডিও ভেরিফিকেশন | ⏳ পরবর্তী ধাপ | Google Maps / GBP |
+| ১২. অ্যাডমিন সেটিংস-এ লাইভ Google Review URL বসানো | ⏳ পরবর্তী ধাপ | KGH Dental Admin (`/admin/settings`) |
 
 ---
 
