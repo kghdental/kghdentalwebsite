@@ -103,6 +103,18 @@ export const metadata: Metadata = {
       "max-snippet": -1,
     },
   },
+  icons: {
+    icon: [
+      { url: "/favicon.ico", sizes: "any" },
+      { url: "/images/logos/favicon-32x32.png", type: "image/png", sizes: "32x32" },
+      { url: "/images/logos/favicon-16x16.png", type: "image/png", sizes: "16x16" },
+      { url: "/images/logos/kgh-favicon-512.png", type: "image/png", sizes: "512x512" },
+    ],
+    apple: [
+      { url: "/images/logos/apple-touch-icon.png", sizes: "180x180", type: "image/png" },
+    ],
+    shortcut: "/favicon.ico",
+  },
   verification: {
     google:
       process.env.NEXT_PUBLIC_GOOGLE_VERIFICATION ||
