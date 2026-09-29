@@ -1,9 +1,10 @@
 import { MetadataRoute } from "next";
 
 export default function robots(): MetadataRoute.Robots {
+  const rawUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
-      ? process.env.NEXT_PUBLIC_SITE_URL
+    rawUrl && !rawUrl.includes("localhost")
+      ? rawUrl.replace(/^http:\/\//i, "https://").replace(/\/+$/, "")
       : "https://kghdental.com";
 
   return {

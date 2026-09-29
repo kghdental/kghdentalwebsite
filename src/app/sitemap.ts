@@ -3,9 +3,10 @@ import { DEPARTMENTS } from "@/data/departments";
 import { BLOG_POSTS } from "@/data/blog";
 
 export default function sitemap(): MetadataRoute.Sitemap {
+  const rawUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
   const baseUrl =
-    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
-      ? process.env.NEXT_PUBLIC_SITE_URL
+    rawUrl && !rawUrl.includes("localhost")
+      ? rawUrl.replace(/^http:\/\//i, "https://").replace(/\/+$/, "")
       : "https://kghdental.com";
 
   const staticRoutes: MetadataRoute.Sitemap = [

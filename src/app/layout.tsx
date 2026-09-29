@@ -26,12 +26,14 @@ export const viewport: Viewport = {
   maximumScale: 5,
 };
 
+const siteUrl = process.env.NEXT_PUBLIC_SITE_URL?.trim();
+const resolvedBaseUrl =
+  siteUrl && !siteUrl.includes("localhost")
+    ? siteUrl.replace(/^http:\/\//i, "https://").replace(/\/+$/, "")
+    : "https://kghdental.com";
+
 export const metadata: Metadata = {
-  metadataBase: new URL(
-    process.env.NEXT_PUBLIC_SITE_URL && !process.env.NEXT_PUBLIC_SITE_URL.includes("localhost")
-      ? process.env.NEXT_PUBLIC_SITE_URL
-      : "https://kghdental.com"
-  ),
+  metadataBase: new URL(resolvedBaseUrl),
   title: {
     default: "KGH Dental — Multi-Specialty Dental Clinic in Banani, Dhaka",
     template: "%s | KGH Dental",
