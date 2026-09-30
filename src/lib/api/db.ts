@@ -49,13 +49,40 @@ export async function fetchLiveDoctors(includePrivate: boolean = false): Promise
         slug: staticDoc?.slug || d.id,
         name: { en: d.name_en, bn: d.name_bn },
         specialty: { en: d.specialty_en, bn: d.specialty_bn },
-        degrees: { en: d.degrees_en, bn: d.degrees_bn },
+        degrees: (() => {
+          if (d.id === "dr-rafia" && staticDoc?.degrees) {
+            return staticDoc.degrees;
+          }
+          return d.degrees_en ? { en: d.degrees_en, bn: d.degrees_bn } : staticDoc?.degrees;
+        })(),
         designation: d.designation_en ? { en: d.designation_en, bn: d.designation_bn } : staticDoc?.designation,
-        institution: d.institution_en ? { en: d.institution_en, bn: d.institution_bn } : staticDoc?.institution,
-        experience: d.experience_en ? { en: d.experience_en, bn: d.experience_bn } : staticDoc?.experience,
+        institution: (() => {
+          if (d.id === "dr-rafia" && staticDoc?.institution) {
+            return staticDoc.institution;
+          }
+          const inst = d.institution_en ? { en: d.institution_en, bn: d.institution_bn } : staticDoc?.institution;
+          if (d.id === "dr-rifat" && inst) {
+            return {
+              en: inst.en.replace(/&?\s*Oncology\s*/gi, "").trim(),
+              bn: inst.bn.replace(/ও?\s*অনকোলজি\s*/g, "").trim(),
+            };
+          }
+          return inst;
+        })(),
+        experience: (() => {
+          if (d.id === "dr-rafia" && staticDoc?.experience) {
+            return staticDoc.experience;
+          }
+          return d.experience_en ? { en: d.experience_en, bn: d.experience_bn } : staticDoc?.experience;
+        })(),
         departmentId: d.department_id || staticDoc?.departmentId,
         schedule: d.schedule,
-        bio: { en: d.bio_en, bn: d.bio_bn },
+        bio: (() => {
+          if (d.id === "dr-rafia" && staticDoc?.bio) {
+            return staticDoc.bio;
+          }
+          return { en: d.bio_en, bn: d.bio_bn };
+        })(),
         photoUrl: d.photo_url || staticDoc?.photoUrl || "/images/doctors/dr-diean.jpg",
         bmdcReg: d.bmdc_reg || staticDoc?.bmdcReg || "",
         email: includePrivate ? (d.email || staticDoc?.email || "") : undefined,

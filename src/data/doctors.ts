@@ -259,8 +259,8 @@ export const DOCTORS: Doctor[] = [
       bn: "ওরাল মেডিসিন কনসালটেন্ট ও ডেন্টাল সার্জন",
     },
     institution: {
-      en: "Oral Medicine & Oncology Specialist",
-      bn: "ওরাল মেডিসিন ও অনকোলজি বিশেষজ্ঞ",
+      en: "Oral Medicine Specialist",
+      bn: "ওরাল মেডিসিন বিশেষজ্ঞ",
     },
     bmdcReg: "4564",
     photoUrl: "/images/doctors/Dr Rifat Rahman.png",
@@ -299,25 +299,25 @@ export const DOCTORS: Doctor[] = [
     },
     departmentId: "endodontics",
     degrees: {
-      en: "BDS, FCPS (Conservative Dentistry & Endodontics)",
-      bn: "বিডিএস, এফসিপিএস (কনজারভেটিভ ডেন্টিস্ট্রি অ্যান্ড এন্ডোডন্টিক্স)",
+      en: "BDS, FCPS (Conservative Dentistry & Endodontics), MFD (Royal College of Surgeons in Ireland)",
+      bn: "বিডিএস, এফসিপিএস (কনজারভেটিভ ডেন্টিস্ট্রি অ্যান্ড এন্ডোডন্টিক্স), এমএফডি (রয়্যাল কলেজ অব সার্জনস ইন আয়ারল্যান্ড)",
     },
     designation: {
       en: "Associate Professor & Head, Department of Dental Surgery",
       bn: "সহযোগী অধ্যাপক ও বিভাগীয় প্রধান, ডেন্টাল সার্জারি বিভাগ",
     },
     institution: {
-      en: "BIRDEM General Hospital",
-      bn: "বারডেম জেনারেল হাসপাতাল",
+      en: "BIRDEM General Hospital & IMC Dental Unit",
+      bn: "বারডেম জেনারেল হাসপাতাল ও আইএমসি ডেন্টাল ইউনিট",
     },
     photoUrl: "/images/doctors/dr-rafia-nazneen.png",
     bio: {
-      en: "Dr. Rafia Nazneen is an Associate Professor & Head of the Department of Dental Surgery at BIRDEM General Hospital. Holding a BDS and FCPS in Conservative Dentistry & Endodontics, she specializes in modern painless root canals, cosmetic dental restorations, and advanced microscopic endodontic procedures.",
-      bn: "ডা. রাফিয়া নাজনীন বারডেম জেনারেল হাসপাতালের ডেন্টাল সার্জারি বিভাগের সহযোগী অধ্যাপক ও বিভাগীয় প্রধান। তিনি বিডিএস এবং কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে এফসিপিএস ডিগ্রিধারী। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল চিকিৎসা, নান্দনিক ডেন্টাল রেস্টোরেশন এবং উন্নত মাইক্রোস্কোপিক এন্ডোডন্টিক পদ্ধতিতে বিশেষভাবে অভিজ্ঞ।",
+      en: "Dr. Rafia Nazneen is an Associate Professor & Head of the Department of Dental Surgery at BIRDEM General Hospital & IMC Dental Unit. Holding a BDS, FCPS in Conservative Dentistry & Endodontics, and MFD from the Royal College of Surgeons in Ireland, she specializes in modern painless root canals, cosmetic dental restorations, and advanced microscopic endodontic procedures.",
+      bn: "ডা. রাফিয়া নাজনীন বারডেম জেনারেল হাসপাতাল ও আইএমসি ডেন্টাল ইউনিটের ডেন্টাল সার্জারি বিভাগের সহযোগী অধ্যাপক ও বিভাগীয় প্রধান। তিনি বিডিএস, কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে এফসিপিএস এবং রয়্যাল কলেজ অব সার্জনস ইন আয়ারল্যান্ড থেকে এমএফডি (MFD RCSI) ডিগ্রিধারী। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল চিকিৎসা, নান্দনিক ডেন্টাল রেস্টোরেশন এবং উন্নত মাইক্রোস্কোপিক এন্ডোডন্টিক পদ্ধতিতে বিশেষভাবে অভিজ্ঞ।",
     },
     experience: {
-      en: "Associate Professor & Head at BIRDEM General Hospital • FCPS (Conservative Dentistry & Endodontics)",
-      bn: "সহযোগী অধ্যাপক ও বিভাগীয় প্রধান (বারডেম জেনারেল হাসপাতাল) • এফসিপিএস (কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্স)",
+      en: "Associate Professor & Head at BIRDEM General Hospital & IMC Dental Unit • FCPS (Conservative Dentistry & Endodontics) • MFD (Royal College of Surgeons in Ireland)",
+      bn: "সহযোগী অধ্যাপক ও বিভাগীয় প্রধান (বারডেম জেনারেল হাসপাতাল ও আইএমসি ডেন্টাল ইউনিট) • এফসিপিএস (কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্স) • এমএফডি (রয়্যাল কলেজ অব সার্জনস ইন আয়ারল্যান্ড)",
     },
     schedule: {
       availableDaysEn: "Saturday & Monday",
