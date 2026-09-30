@@ -28,9 +28,14 @@ export async function fetchLiveDoctors(includePrivate: boolean = false): Promise
   if (!isSupabaseConfigured) return DOCTORS;
 
   try {
+    // Only select private email when explicitly requested by an authorized context
+    const columns = includePrivate
+      ? "*"
+      : "id, name_en, name_bn, specialty_en, specialty_bn, degrees_en, degrees_bn, designation_en, designation_bn, institution_en, institution_bn, experience_en, experience_bn, department_id, schedule, bio_en, bio_bn, photo_url, bmdc_reg, is_active";
+
     const { data, error } = await supabase
       .from("doctors")
-      .select("*")
+      .select(columns)
       .order("created_at", { ascending: true });
 
     if (error || !data || data.length === 0) {
@@ -98,6 +103,17 @@ export async function saveLiveDoctor(doc: Doctor): Promise<{ success: boolean; e
       updated_at: new Date().toISOString(),
     };
 
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "upsert", table: "doctors", payload, onConflict: "id" }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save doctor");
+      return { success: true };
+    }
+
     const { error } = await supabase.from("doctors").upsert(payload, { onConflict: "id" });
     if (error) throw error;
 
@@ -112,6 +128,17 @@ export async function deleteLiveDoctor(id: string): Promise<{ success: boolean; 
   if (!isSupabaseConfigured) return { success: true };
 
   try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", table: "doctors", id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to delete doctor");
+      return { success: true };
+    }
+
     const { error } = await supabase.from("doctors").delete().eq("id", id);
     if (error) throw error;
     return { success: true };
@@ -198,6 +225,17 @@ export async function saveLiveDepartment(dept: Department): Promise<{ success: b
       cover_banner_url: dept.coverBannerUrl || null,
     };
 
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "upsert", table: "departments", payload, onConflict: "id" }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save department");
+      return { success: true };
+    }
+
     const { error } = await supabase.from("departments").upsert(payload, { onConflict: "id" });
     if (error) throw error;
     return { success: true };
@@ -211,6 +249,17 @@ export async function deleteLiveDepartment(id: string): Promise<{ success: boole
   if (!isSupabaseConfigured) return { success: true };
 
   try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", table: "departments", id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to delete department");
+      return { success: true };
+    }
+
     // Remove linked sub-services first
     await supabase.from("sub_services").delete().eq("department_id", id);
     const { error } = await supabase.from("departments").delete().eq("id", id);
@@ -244,6 +293,17 @@ export async function saveLiveSubService(
       image_url: sub.imageUrl || null,
     };
 
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "upsert", table: "sub_services", payload, onConflict: "id" }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save sub-service");
+      return { success: true };
+    }
+
     const { error } = await supabase.from("sub_services").upsert(payload, { onConflict: "id" });
     if (error) throw error;
     return { success: true };
@@ -257,6 +317,17 @@ export async function deleteLiveSubService(id: string): Promise<{ success: boole
   if (!isSupabaseConfigured) return { success: true };
 
   try {
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", table: "sub_services", id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to delete sub-service");
+      return { success: true };
+    }
+
     const { error } = await supabase.from("sub_services").delete().eq("id", id);
     if (error) throw error;
     return { success: true };
@@ -309,71 +380,37 @@ export function resolveDepartmentDisplayName(deptIdOrName: string | undefined, d
 }
 
 export async function fetchLiveAppointments(): Promise<any[]> {
-  if (isSupabaseConfigured) {
-    try {
-      const { data, error } = await supabase
-        .from("appointments")
-        .select("*")
-        .order("created_at", { ascending: false });
-
-      if (!error && data) {
-        const items = data.map((a: any) => ({
-          id: a.id,
-          reference_code: a.reference_code,
-          patient_name: a.patient_name,
-          patient_phone: a.patient_phone,
-          patient_email: a.patient_email || "",
-          patient_age: a.patient_age || "",
-          patient_gender: a.patient_gender || "",
-          doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
-          department_name: resolveDepartmentDisplayName(a.department_name || a.department_id, a.doctor_name || a.doctor_id),
-          appointment_date: a.appointment_date,
-          time_slot: a.time_slot,
-          symptoms: a.symptoms || "",
-          status: a.status || "confirmed",
-          created_at: a.created_at ? a.created_at.substring(0, 16).replace("T", " ") : "",
-        }));
-
-        if (typeof window !== "undefined") {
-          try {
-            localStorage.setItem("kgh_admin_appointments", JSON.stringify(items));
-          } catch (e) {
-            // ignore
-          }
-        }
-
-        return items;
-      }
-    } catch (err) {
-      console.error("fetchLiveAppointments error:", err);
-    }
-  }
-
-  // Fallback to local storage only if offline/unreachable
   if (typeof window !== "undefined") {
     try {
-      const cached = localStorage.getItem("kgh_admin_appointments");
-      if (cached) {
-        const parsed = JSON.parse(cached);
-        if (Array.isArray(parsed)) {
-          return parsed.filter(
-            (a: any) =>
-              !a.id?.startsWith("app-1") &&
-              !a.id?.startsWith("app-2") &&
-              !a.id?.startsWith("app-3") &&
-              !a.id?.startsWith("app-4") &&
-              !a.reference_code?.startsWith("KGH-ADS202606Sep-001") &&
-              !a.reference_code?.startsWith("KGH-FTM202608Sep-002") &&
-              !a.reference_code?.startsWith("KGH-SMH202605Sep-003") &&
-              !a.reference_code?.startsWith("KGH-ADS202604Sep-004")
-          );
+      const res = await fetch("/api/admin/appointments");
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.appointments)) {
+          return json.appointments.map((a: any) => ({
+            id: a.id,
+            reference_code: a.reference_code,
+            patient_name: a.patient_name,
+            patient_phone: a.patient_phone,
+            patient_email: a.patient_email || "",
+            patient_age: a.patient_age || "",
+            patient_gender: a.patient_gender || "",
+            doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
+            department_name: resolveDepartmentDisplayName(
+              a.department_name || a.department_id,
+              a.doctor_name || a.doctor_id
+            ),
+            appointment_date: a.appointment_date,
+            time_slot: a.time_slot,
+            symptoms: a.symptoms || "",
+            status: a.status || "confirmed",
+            created_at: a.created_at ? a.created_at.substring(0, 16).replace("T", " ") : "",
+          }));
         }
       }
-    } catch (e) {
-      // ignore
+    } catch (err) {
+      console.error("fetchLiveAppointments API error:", err);
     }
   }
-
   return [];
 }
 
@@ -382,92 +419,46 @@ export async function updateLiveAppointmentStatus(
   status: string,
   referenceCode?: string
 ): Promise<{ success: boolean; error?: string }> {
-  // Update local storage cache first
-  if (typeof window !== "undefined") {
-    try {
-      const existing = localStorage.getItem("kgh_admin_appointments");
-      if (existing) {
-        const list = JSON.parse(existing);
-        const updated = list.map((a: any) =>
-          (a.id === id || (referenceCode && a.reference_code === referenceCode))
-            ? { ...a, status }
-            : a
-        );
-        localStorage.setItem("kgh_admin_appointments", JSON.stringify(updated));
-      }
-    } catch (e) {
-      // ignore
-    }
-  }
-
   if (typeof window !== "undefined") {
     notifyAppointmentsUpdated();
-  }
-
-  if (!isSupabaseConfigured) return { success: true };
-
-  try {
-    let query = supabase
-      .from("appointments")
-      .update({ status, updated_at: new Date().toISOString() });
-
-    if (id && !id.startsWith("app-")) {
-      query = query.eq("id", id);
-    } else if (referenceCode) {
-      query = query.eq("reference_code", referenceCode);
-    } else {
-      query = query.eq("id", id);
+    try {
+      const res = await fetch("/api/admin/appointments", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status, reference_code: referenceCode }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Update appointment failed");
+      return { success: true };
+    } catch (err: any) {
+      console.error("updateLiveAppointmentStatus error:", err);
+      return { success: false, error: err.message };
     }
-
-    const { error } = await query;
-    if (error) throw error;
-    return { success: true };
-  } catch (err: any) {
-    console.error("updateLiveAppointmentStatus error:", err);
-    return { success: false, error: err.message };
   }
+  return { success: true };
 }
 
 export async function deleteLiveAppointment(
   id: string,
   referenceCode?: string
 ): Promise<{ success: boolean; error?: string }> {
-  // Update local storage cache
   if (typeof window !== "undefined") {
+    notifyAppointmentsUpdated();
     try {
-      const existing = localStorage.getItem("kgh_admin_appointments");
-      if (existing) {
-        const list = JSON.parse(existing);
-        const filtered = list.filter(
-          (a: any) => !(a.id === id || (referenceCode && a.reference_code === referenceCode))
-        );
-        localStorage.setItem("kgh_admin_appointments", JSON.stringify(filtered));
-      }
-      notifyAppointmentsUpdated();
-    } catch (e) {
-      // ignore
+      const res = await fetch("/api/admin/appointments", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, reference_code: referenceCode }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Delete appointment failed");
+      return { success: true };
+    } catch (err: any) {
+      console.error("deleteLiveAppointment error:", err);
+      return { success: false, error: err.message };
     }
   }
-
-  if (!isSupabaseConfigured) return { success: true };
-
-  try {
-    let query = supabase.from("appointments").delete();
-    if (id && !id.startsWith("app-")) {
-      query = query.eq("id", id);
-    } else if (referenceCode) {
-      query = query.eq("reference_code", referenceCode);
-    } else {
-      query = query.eq("id", id);
-    }
-
-    const { error } = await query;
-    if (error) throw error;
-    return { success: true };
-  } catch (err: any) {
-    console.error("deleteLiveAppointment error:", err);
-    return { success: false, error: err.message };
-  }
+  return { success: true };
 }
 
 export async function createLiveAppointment(record: {
@@ -559,75 +550,33 @@ export async function createLiveAppointment(record: {
  * Fetches already booked slots for a doctor on a specific date.
  */
 export async function fetchBookedSlots(doctorId: string, date: string, doctorName?: string): Promise<string[]> {
-  const bookedSet = new Set<string>();
-
-  // Check local cache
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("kgh_admin_appointments");
-      if (stored) {
-        const apps = JSON.parse(stored);
-        apps.forEach((a: any) => {
-          const isDocMatch =
-            (a.doctor_id && a.doctor_id === doctorId) ||
-            (a.doctor_name && doctorName && a.doctor_name.toLowerCase() === doctorName.toLowerCase());
-          if (
-            isDocMatch &&
-            a.appointment_date === date &&
-            ["pending", "confirmed"].includes(a.status?.toLowerCase())
-          ) {
-            if (a.time_slot) bookedSet.add(a.time_slot);
-          }
-        });
+      const url = new URL("/api/appointments/booked-slots", window.location.origin);
+      url.searchParams.set("doctorId", doctorId);
+      url.searchParams.set("date", date);
+      if (doctorName) url.searchParams.set("doctorName", doctorName);
+
+      const res = await fetch(url.toString());
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.bookedSlots)) {
+          return json.bookedSlots;
+        }
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      console.warn("fetchBookedSlots API error:", err);
     }
   }
 
-  if (!isSupabaseConfigured) {
-    return Array.from(bookedSet);
-  }
-
-  try {
-    const { data, error } = await supabase
-      .from("appointments")
-      .select("time_slot, status")
-      .or(`doctor_id.eq.${doctorId}${doctorName ? `,doctor_id.eq.${doctorName}` : ""}`)
-      .eq("appointment_date", date)
-      .in("status", ["pending", "confirmed"]);
-
-    if (!error && data) {
-      data.forEach((row: any) => {
-        if (row.time_slot) bookedSet.add(row.time_slot);
-      });
-    }
-  } catch (err) {
-    console.warn("fetchBookedSlots error:", err);
-  }
-
-  return Array.from(bookedSet);
+  return [];
 }
 
 /**
  * Fetch doctor blocked dates (leaves, holidays)
  */
 export async function fetchDoctorBlockedDates(doctorId?: string): Promise<any[]> {
-  let localBlocked: any[] = [];
-  if (typeof window !== "undefined") {
-    try {
-      const stored = localStorage.getItem("kgh_doctor_blocked_dates");
-      if (stored) localBlocked = JSON.parse(stored);
-    } catch {
-      // ignore
-    }
-  }
-
-  if (doctorId) {
-    localBlocked = localBlocked.filter((b) => b.doctor_id === doctorId || b.doctor_id === "all");
-  }
-
-  if (!isSupabaseConfigured) return localBlocked;
+  if (!isSupabaseConfigured) return [];
 
   try {
     let query = supabase.from("doctor_blocked_dates").select("*");
@@ -635,18 +584,10 @@ export async function fetchDoctorBlockedDates(doctorId?: string): Promise<any[]>
       query = query.or(`doctor_id.eq.${doctorId},doctor_id.eq.all`);
     }
     const { data, error } = await query;
-    if (error || !data) return localBlocked;
-
-    // Combine Supabase data with any local additions
-    const combined = [...data];
-    localBlocked.forEach((lb) => {
-      if (!combined.some((c) => c.id === lb.id)) {
-        combined.push(lb);
-      }
-    });
-    return combined;
+    if (error || !data) return [];
+    return data;
   } catch (err) {
-    return localBlocked;
+    return [];
   }
 }
 
@@ -668,25 +609,21 @@ export async function addDoctorBlockedDate(item: {
 
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("kgh_doctor_blocked_dates");
-      const list = stored ? JSON.parse(stored) : [];
-      localStorage.setItem("kgh_doctor_blocked_dates", JSON.stringify([newRecord, ...list]));
-    } catch {
-      // ignore
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "insert", table: "doctor_blocked_dates", payload: newRecord }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to add blocked date");
+      return { success: true, data: json.data || newRecord };
+    } catch (err: any) {
+      console.warn("addDoctorBlockedDate error:", err);
+      return { success: false, error: err.message };
     }
   }
 
-  if (!isSupabaseConfigured) return { success: true, data: newRecord };
-
-  try {
-    const { data, error } = await supabase.from("doctor_blocked_dates").insert(newRecord).select().single();
-    if (error) {
-      console.warn("Supabase doctor_blocked_dates insert warning (using local fallback):", error);
-    }
-    return { success: true, data: data || newRecord };
-  } catch (err: any) {
-    return { success: true, data: newRecord };
-  }
+  return { success: true, data: newRecord };
 }
 
 /**
@@ -695,119 +632,47 @@ export async function addDoctorBlockedDate(item: {
 export async function removeDoctorBlockedDate(id: string): Promise<{ success: boolean; error?: string }> {
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("kgh_doctor_blocked_dates");
-      if (stored) {
-        const list = JSON.parse(stored).filter((b: any) => b.id !== id);
-        localStorage.setItem("kgh_doctor_blocked_dates", JSON.stringify(list));
-      }
-    } catch {
-      // ignore
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", table: "doctor_blocked_dates", id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to remove blocked date");
+      return { success: true };
+    } catch (err: any) {
+      console.warn("removeDoctorBlockedDate error:", err);
+      return { success: false, error: err.message };
     }
   }
 
-  if (!isSupabaseConfigured) return { success: true };
-
-  try {
-    await supabase.from("doctor_blocked_dates").delete().eq("id", id);
-    return { success: true };
-  } catch (err: any) {
-    return { success: true };
-  }
+  return { success: true };
 }
 
 /**
  * Patient tracking: Search appointment by reference code or phone number
  */
 export async function fetchAppointmentsByQuery(query: string): Promise<any[]> {
-  const q = query.trim().toUpperCase();
+  const q = query.trim();
   if (!q) return [];
 
-  const matches: any[] = [];
-
-  // Check local storage first
   if (typeof window !== "undefined") {
     try {
-      const stored = localStorage.getItem("kgh_admin_appointments");
-      if (stored) {
-        const list = JSON.parse(stored);
-
-        // Automatically cleanup any duplicate records previously saved in localStorage
-        const uniqueMap = new Map<string, any>();
-        list.forEach((item: any) => {
-          const key = item.reference_code || item.id;
-          if (key && !uniqueMap.has(key)) {
-            uniqueMap.set(key, item);
-          }
-        });
-        const deduplicatedList = Array.from(uniqueMap.values());
-        if (deduplicatedList.length !== list.length) {
-          localStorage.setItem("kgh_admin_appointments", JSON.stringify(deduplicatedList));
-        }
-
-        deduplicatedList.forEach((item: any) => {
-          const resolvedDoc = resolveDoctorDisplayName(item.doctor_name || item.doctor_id);
-          const resolvedDept = resolveDepartmentDisplayName(item.department_name || item.department_id, item.doctor_name || item.doctor_id);
-          const normalizedItem = {
-            ...item,
-            doctor_name: resolvedDoc,
-            department_name: resolvedDept,
-            status: item.status || "confirmed",
-          };
-          const cleanQ = q.replace(/[\s-]/g, "");
-          const cleanItemRef = (item.reference_code || "").toUpperCase().replace(/[\s-]/g, "");
-          const refMatch =
-            item.reference_code?.toUpperCase().includes(q) ||
-            (cleanQ.length >= 3 && cleanItemRef.includes(cleanQ));
-          const phoneMatch = item.patient_phone?.replace(/[^0-9]/g, "").includes(q.replace(/[^0-9]/g, ""));
-          if (refMatch || phoneMatch) {
-            if (!matches.some((m) => m.reference_code === item.reference_code)) {
-              matches.push(normalizedItem);
-            }
-          }
-        });
-      }
-    } catch {
-      // ignore
-    }
-  }
-
-  if (!isSupabaseConfigured) return matches;
-
-  try {
-    const cleanPhone = query.trim();
-    const cleanQuery = query.trim();
-    const normalizedCode = cleanQuery.replace(/\s+/g, "");
-    const { data, error } = await supabase
-      .from("appointments")
-      .select("*")
-      .or(`reference_code.ilike.%${cleanQuery}%,reference_code.ilike.%${normalizedCode}%,patient_phone.ilike.%${cleanPhone}%`)
-      .order("appointment_date", { ascending: false });
-
-    if (!error && data) {
-      data.forEach((a: any) => {
-        if (!matches.some((m) => m.reference_code === a.reference_code)) {
-          matches.push({
-            id: a.id,
-            reference_code: a.reference_code,
-            patient_name: a.patient_name,
-            patient_phone: a.patient_phone,
-            patient_email: a.patient_email || "",
-            doctor_name: resolveDoctorDisplayName(a.doctor_name || a.doctor_id),
-            department_name: resolveDepartmentDisplayName(a.department_name || a.department_id, a.doctor_name || a.doctor_id),
-            appointment_date: a.appointment_date,
-            time_slot: a.time_slot,
-            symptoms: a.symptoms || "",
-            status: a.status || "confirmed",
-            created_at: a.created_at ? a.created_at.substring(0, 16).replace("T", " ") : "",
-          });
-        }
+      const res = await fetch("/api/appointments/track", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ query: q }),
       });
+      const data = await res.json();
+      if (data && Array.isArray(data.records)) {
+        return data.records;
+      }
+    } catch (e) {
+      console.warn("fetchAppointmentsByQuery API error:", e);
     }
-  } catch (err) {
-    console.warn("fetchAppointmentsByQuery error:", err);
   }
 
-  return matches;
+  return [];
 }
 
 // ==============================================================================
@@ -913,6 +778,17 @@ export async function saveLiveClinicSettings(settings: ClinicSettings): Promise<
       social_links: sanitizedSettings.socialLinks,
       updated_at: new Date().toISOString(),
     };
+
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "upsert", table: "clinic_settings", payload, onConflict: "id" }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save clinic settings");
+      return { success: true };
+    }
 
     const { error } = await supabase.from("clinic_settings").upsert(payload, { onConflict: "id" });
     if (error) {
@@ -2069,8 +1945,23 @@ export async function saveLiveBlogPost(
       updated_at: new Date().toISOString(),
     };
 
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "upsert",
+          table: "blog_posts",
+          payload: isTargetUuid ? { id: targetId, ...payload } : payload,
+          onConflict: isTargetUuid ? "id" : "slug",
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Save blog post failed");
+      return { success: true, data: json.data || postToSave };
+    }
+
     if (isExistingEdit) {
-      // 1. UPDATE EXISTING POST: target specifically by targetId or originalSlug so NO duplicate row is created!
       let query = supabase.from("blog_posts").update(payload as any);
       if (isTargetUuid) {
         query = query.eq("id", targetId);
@@ -2082,7 +1973,6 @@ export async function saveLiveBlogPost(
 
       const { data, error } = await query.select();
       if (error || !data || data.length === 0) {
-        // Fallback upsert if matching row was missing in DB
         const { data: upsertData, error: upsertError } = await supabase
           .from("blog_posts")
           .upsert(
@@ -2096,7 +1986,6 @@ export async function saveLiveBlogPost(
       }
       return { success: true, data: data[0] };
     } else {
-      // 2. INSERT NEW POST
       const insertPayload = isTargetUuid
         ? { id: postToSave.id, ...payload }
         : payload;
@@ -2126,13 +2015,21 @@ export async function deleteLiveBlogPost(
       list = list.filter((p) => p.id !== id && (!slug || p.slug !== slug));
       localStorage.setItem("kgh_blog_posts", JSON.stringify(list));
 
-      // Dispatch custom reactive event for instant update
       window.dispatchEvent(
         new CustomEvent("kgh_blogs_updated", { detail: { id, slug, deleted: true } })
       );
       window.dispatchEvent(new Event("storage"));
+
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "delete", table: "blog_posts", id }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Delete blog post failed");
+      return { success: true };
     } catch (e) {
-      // ignore
+      console.warn("deleteLiveBlogPost warning:", e);
     }
   }
 

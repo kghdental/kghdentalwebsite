@@ -22,7 +22,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { CtaBanner } from "@/components/home/CtaBanner";
 import { fetchLiveBlogPosts, ENRICHED_BLOG_POSTS } from "@/lib/api/db";
 import { BlogPost } from "@/types";
-
+import DOMPurify from "isomorphic-dompurify";
 import { BookOpen } from "lucide-react";
 
 export default function BlogPostPage() {
@@ -152,6 +152,13 @@ export default function BlogPostPage() {
     .slice(0, 2);
 
   const activeContentHtml = isBn ? currentPost.contentHtml?.bn : currentPost.contentHtml?.en;
+  const safeContentHtml = React.useMemo(() => {
+    if (!activeContentHtml) return "";
+    return DOMPurify.sanitize(activeContentHtml, {
+      ADD_TAGS: ["iframe"],
+      ADD_ATTR: ["allow", "allowfullscreen", "frameborder", "target"],
+    });
+  }, [activeContentHtml]);
 
   return (
     <div className="min-h-screen bg-[#f7f6f2] text-zinc-900">
@@ -247,11 +254,11 @@ export default function BlogPostPage() {
       {/* Main Article Body */}
       <article className="py-12 sm:py-16">
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 space-y-10">
-          {/* If rich HTML is provided, render it cleanly */}
-          {activeContentHtml ? (
+          {/* If rich HTML is provided, render it cleanly with XSS sanitization */}
+          {safeContentHtml ? (
             <div
               className="kgh-blog-content bg-white p-6 sm:p-10 rounded-3xl border border-zinc-200/80 shadow-xs leading-relaxed text-zinc-800 text-sm sm:text-base space-y-4"
-              dangerouslySetInnerHTML={{ __html: activeContentHtml }}
+              dangerouslySetInnerHTML={{ __html: safeContentHtml }}
             />
           ) : currentPost.content ? (
             /* Structured Legacy View */

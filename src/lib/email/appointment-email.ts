@@ -87,6 +87,16 @@ export function createEmailTransporter() {
   });
 }
 
+function escapeHtml(str: string | undefined | null): string {
+  if (!str) return "";
+  return String(str)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 /**
  * Generates an executive, responsive, modern HTML email template for doctors & clinic staff.
  */
@@ -95,8 +105,16 @@ export function generateDoctorAppointmentEmailHtml(
   siteUrl: string = "https://kghdental.com"
 ): string {
   const adminAppointmentUrl = `${siteUrl.replace(/\/$/, "")}/admin/appointments`;
-  const sanitizedPhone = data.patient_phone.replace(/[^\d+]/g, "");
+  const sanitizedPhone = (data.patient_phone || "").replace(/[^\d+]/g, "");
   const whatsappUrl = `https://wa.me/88${sanitizedPhone.replace(/^(\+88|88)/, "")}`;
+
+  const safeDoctorName = escapeHtml(data.doctor_name);
+  const safePatientName = escapeHtml(data.patient_name);
+  const safeReferenceCode = escapeHtml(data.reference_code);
+  const safeDepartmentName = escapeHtml(data.department_name);
+  const safeSymptoms = escapeHtml(data.symptoms);
+  const safePatientEmail = escapeHtml(data.patient_email);
+  const safeTimeSlot = escapeHtml(data.time_slot);
 
   const formattedDate = (() => {
     try {
@@ -110,15 +128,15 @@ export function generateDoctorAppointmentEmailHtml(
           year: "numeric",
         });
       }
-      return data.appointment_date;
+      return escapeHtml(data.appointment_date);
     } catch {
-      return data.appointment_date;
+      return escapeHtml(data.appointment_date);
     }
   })();
 
   const ageGenderDisplay = [
-    data.patient_age ? `${data.patient_age} yrs` : null,
-    data.patient_gender || null,
+    data.patient_age ? `${escapeHtml(data.patient_age)} yrs` : null,
+    data.patient_gender ? escapeHtml(data.patient_gender) : null,
   ]
     .filter(Boolean)
     .join(" • ");
@@ -129,7 +147,8 @@ export function generateDoctorAppointmentEmailHtml(
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>New Appointment: ${data.patient_name} - KGH Dental</title>
+  <title>New Appointment: ${safePatientName} - KGH Dental</title>
+
   <style>
     body {
       font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
@@ -348,7 +367,7 @@ export function generateDoctorAppointmentEmailHtml(
       <!-- BODY -->
       <div class="body">
         <p class="greeting">
-          Dear <strong>${data.doctor_name}</strong>,
+          Dear <strong>${safeDoctorName}</strong>,
         </p>
         <p style="font-size: 13px; color: #475569; margin-top: -10px; margin-bottom: 20px;">
           A new patient consultation has just been booked for you through the KGH Dental smart reservation system.
@@ -358,7 +377,7 @@ export function generateDoctorAppointmentEmailHtml(
         <div class="schedule-box">
           <div class="schedule-title">Consultation Schedule</div>
           <div class="schedule-main">${formattedDate}</div>
-          <div class="schedule-slot">Time Slot: ${data.time_slot}</div>
+          <div class="schedule-slot">Time Slot: ${safeTimeSlot}</div>
         </div>
 
         <!-- APPOINTMENT DETAILS TABLE -->
@@ -366,17 +385,17 @@ export function generateDoctorAppointmentEmailHtml(
         <table class="info-table">
           <tr>
             <td class="info-label">Reference ID:</td>
-            <td class="info-val"><span class="ref-code">#${data.reference_code}</span></td>
+            <td class="info-val"><span class="ref-code">#${safeReferenceCode}</span></td>
           </tr>
           <tr>
             <td class="info-label">Patient Name:</td>
-            <td class="info-val">${data.patient_name}</td>
+            <td class="info-val">${safePatientName}</td>
           </tr>
           <tr>
             <td class="info-label">Contact Phone:</td>
             <td class="info-val">
-              <a href="tel:${data.patient_phone}" style="color: #0F172A; text-decoration: none;">
-                ${data.patient_phone}
+              <a href="tel:${sanitizedPhone}" style="color: #0F172A; text-decoration: none;">
+                ${escapeHtml(data.patient_phone)}
               </a>
             </td>
           </tr>
@@ -389,22 +408,22 @@ export function generateDoctorAppointmentEmailHtml(
               : ""
           }
           ${
-            data.patient_email
+            safePatientEmail
               ? `<tr>
             <td class="info-label">Patient Email:</td>
-            <td class="info-val">${data.patient_email}</td>
+            <td class="info-val">${safePatientEmail}</td>
           </tr>`
               : ""
           }
           <tr>
             <td class="info-label">Specialist:</td>
-            <td class="info-val">${data.doctor_name}</td>
+            <td class="info-val">${safeDoctorName}</td>
           </tr>
           ${
-            data.department_name
+            safeDepartmentName
               ? `<tr>
             <td class="info-label">Department:</td>
-            <td class="info-val">${data.department_name}</td>
+            <td class="info-val">${safeDepartmentName}</td>
           </tr>`
               : ""
           }
@@ -412,11 +431,11 @@ export function generateDoctorAppointmentEmailHtml(
 
         <!-- CHIEF COMPLAINT (IF PROVIDED) -->
         ${
-          data.symptoms
+          safeSymptoms
             ? `
         <div class="complaint-box">
           <div class="complaint-title">Reported Dental Concern / Symptoms</div>
-          <p class="complaint-text">"${data.symptoms}"</p>
+          <p class="complaint-text">"${safeSymptoms}"</p>
         </div>
         `
             : ""

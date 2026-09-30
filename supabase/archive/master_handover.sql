@@ -280,75 +280,61 @@ ALTER TABLE public.gallery_items ENABLE ROW LEVEL SECURITY;
 ALTER TABLE public.media_files ENABLE ROW LEVEL SECURITY;
 
 DO $$ BEGIN
-    -- Admin Users
+    -- 1. Admin Users: Strict lockdown (no public select or modifications via anon key)
     DROP POLICY IF EXISTS "Public select active admin_users" ON public.admin_users;
-    CREATE POLICY "Public select active admin_users" ON public.admin_users FOR SELECT USING (is_active = true);
     DROP POLICY IF EXISTS "Admin manage admin_users" ON public.admin_users;
-    CREATE POLICY "Admin manage admin_users" ON public.admin_users FOR ALL USING (true) WITH CHECK (true);
+    DROP POLICY IF EXISTS "Allow select admin_users" ON public.admin_users;
+    REVOKE ALL ON public.admin_users FROM anon;
 
-    -- Public Read Policies
+    -- 2. Public Read Policies for CMS
     DROP POLICY IF EXISTS "Public read departments" ON public.departments;
     CREATE POLICY "Public read departments" ON public.departments FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write departments" ON public.departments;
-    CREATE POLICY "Admin write departments" ON public.departments FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read sub_services" ON public.sub_services;
     CREATE POLICY "Public read sub_services" ON public.sub_services FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write sub_services" ON public.sub_services;
-    CREATE POLICY "Admin write sub_services" ON public.sub_services FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read doctors" ON public.doctors;
-    CREATE POLICY "Public read doctors" ON public.doctors FOR SELECT USING (true);
+    CREATE POLICY "Public read doctors" ON public.doctors FOR SELECT USING (is_active = true OR is_active IS NULL);
     DROP POLICY IF EXISTS "Admin write doctors" ON public.doctors;
-    CREATE POLICY "Admin write doctors" ON public.doctors FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read clinic_settings" ON public.clinic_settings;
     CREATE POLICY "Public read clinic_settings" ON public.clinic_settings FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write clinic_settings" ON public.clinic_settings;
-    CREATE POLICY "Admin write clinic_settings" ON public.clinic_settings FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read reviews" ON public.reviews;
     CREATE POLICY "Public read reviews" ON public.reviews FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write reviews" ON public.reviews;
-    CREATE POLICY "Admin write reviews" ON public.reviews FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read why_choose_cards" ON public.why_choose_cards;
     CREATE POLICY "Public read why_choose_cards" ON public.why_choose_cards FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write why_choose_cards" ON public.why_choose_cards;
-    CREATE POLICY "Admin write why_choose_cards" ON public.why_choose_cards FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read clinical_creed" ON public.clinical_creed;
     CREATE POLICY "Public read clinical_creed" ON public.clinical_creed FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write clinical_creed" ON public.clinical_creed;
-    CREATE POLICY "Admin write clinical_creed" ON public.clinical_creed FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read gallery_items" ON public.gallery_items;
     CREATE POLICY "Public read gallery_items" ON public.gallery_items FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write gallery_items" ON public.gallery_items;
-    CREATE POLICY "Admin write gallery_items" ON public.gallery_items FOR ALL USING (true) WITH CHECK (true);
 
     DROP POLICY IF EXISTS "Public read media_files" ON public.media_files;
     CREATE POLICY "Public read media_files" ON public.media_files FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin write media_files" ON public.media_files;
-    CREATE POLICY "Admin write media_files" ON public.media_files FOR ALL USING (true) WITH CHECK (true);
 
-    -- Appointments Policies
-    DROP POLICY IF EXISTS "Public insert appointments" ON public.appointments;
-    CREATE POLICY "Public insert appointments" ON public.appointments FOR INSERT WITH CHECK (true);
+    -- 3. Appointments Policies: Public can ONLY insert new reservations
     DROP POLICY IF EXISTS "Public read appointments" ON public.appointments;
-    CREATE POLICY "Public read appointments" ON public.appointments FOR SELECT USING (true);
     DROP POLICY IF EXISTS "Admin update appointments" ON public.appointments;
-    CREATE POLICY "Admin update appointments" ON public.appointments FOR UPDATE USING (true) WITH CHECK (true);
     DROP POLICY IF EXISTS "Admin delete appointments" ON public.appointments;
-    CREATE POLICY "Admin delete appointments" ON public.appointments FOR DELETE USING (true);
     DROP POLICY IF EXISTS "Admin manage appointments" ON public.appointments;
-    CREATE POLICY "Admin manage appointments" ON public.appointments FOR ALL USING (true) WITH CHECK (true);
+    DROP POLICY IF EXISTS "Public insert appointments" ON public.appointments;
+    CREATE POLICY "Public insert appointments" ON public.appointments FOR INSERT TO anon, authenticated WITH CHECK (true);
 
-    -- Doctor Blocked Dates Policies
+    -- 4. Doctor Blocked Dates Policies
+    DROP POLICY IF EXISTS "Admin manage doctor_blocked_dates" ON public.doctor_blocked_dates;
     DROP POLICY IF EXISTS "Public read doctor_blocked_dates" ON public.doctor_blocked_dates;
     CREATE POLICY "Public read doctor_blocked_dates" ON public.doctor_blocked_dates FOR SELECT USING (true);
-    DROP POLICY IF EXISTS "Admin manage doctor_blocked_dates" ON public.doctor_blocked_dates;
-    CREATE POLICY "Admin manage doctor_blocked_dates" ON public.doctor_blocked_dates FOR ALL USING (true) WITH CHECK (true);
 END $$;
 
 -- ==============================================================================
