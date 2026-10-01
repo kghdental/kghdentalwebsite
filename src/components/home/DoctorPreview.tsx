@@ -511,9 +511,14 @@ export function DoctorPreview() {
                           {t(doc.specialty)}
                         </h3>
 
-                        <h4 className="text-xs sm:text-sm font-bold text-zinc-800 mt-1 mb-1">
-                          {t(doc.name)}
-                        </h4>
+                        <Link
+                          href={`/doctors?doctor=${doc.id}#${doc.id}`}
+                          className="hover:text-indigo-600 transition-colors inline-block"
+                        >
+                          <h4 className="text-xs sm:text-sm font-bold text-zinc-800 mt-1 mb-1">
+                            {t(doc.name)}
+                          </h4>
+                        </Link>
 
                         <p className="text-[11px] font-semibold text-zinc-600 mb-2 line-clamp-1">
                           {t(doc.degrees)}
@@ -527,7 +532,7 @@ export function DoctorPreview() {
                       {/* Action Buttons: "View Profile" + "Book Serial" */}
                       <div className="pt-3 border-t border-zinc-100 flex items-center justify-between gap-2">
                         <Link
-                          href={`/doctors#${doc.id}`}
+                          href={`/doctors?doctor=${doc.id}#${doc.id}`}
                           onClick={(e) => {
                             if (hasMovedRef.current) e.preventDefault();
                           }}
