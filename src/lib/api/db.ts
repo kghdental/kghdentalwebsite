@@ -42,18 +42,21 @@ export async function fetchLiveDoctors(includePrivate: boolean = false): Promise
       return DOCTORS;
     }
 
-    const liveDocs = data.map((d: any) => {
+    const liveDocs: Doctor[] = data.map((d: any): Doctor => {
       const staticDoc = DOCTORS.find((s) => s.id === d.id);
       return {
         id: d.id,
         slug: staticDoc?.slug || d.id,
-        name: { en: d.name_en, bn: d.name_bn },
-        specialty: { en: d.specialty_en, bn: d.specialty_bn },
+        name: { en: d.name_en || staticDoc?.name?.en || "", bn: d.name_bn || staticDoc?.name?.bn || "" },
+        specialty: { en: d.specialty_en || staticDoc?.specialty?.en || "", bn: d.specialty_bn || staticDoc?.specialty?.bn || "" },
         degrees: (() => {
           if (d.id === "dr-rafia" && staticDoc?.degrees) {
             return staticDoc.degrees;
           }
-          return d.degrees_en ? { en: d.degrees_en, bn: d.degrees_bn } : staticDoc?.degrees;
+          if (d.degrees_en) {
+            return { en: d.degrees_en, bn: d.degrees_bn || "" };
+          }
+          return staticDoc?.degrees || { en: "", bn: "" };
         })(),
         designation: d.designation_en ? { en: d.designation_en, bn: d.designation_bn } : staticDoc?.designation,
         institution: (() => {
@@ -76,12 +79,17 @@ export async function fetchLiveDoctors(includePrivate: boolean = false): Promise
           return d.experience_en ? { en: d.experience_en, bn: d.experience_bn } : staticDoc?.experience;
         })(),
         departmentId: d.department_id || staticDoc?.departmentId,
-        schedule: d.schedule,
+        schedule: d.schedule || staticDoc?.schedule || {
+          days: ["Everyday"],
+          startTime: "17:00",
+          endTime: "21:30",
+          slotDurationMinutes: 30,
+        },
         bio: (() => {
           if (d.id === "dr-rafia" && staticDoc?.bio) {
             return staticDoc.bio;
           }
-          return { en: d.bio_en, bn: d.bio_bn };
+          return { en: d.bio_en || staticDoc?.bio?.en || "", bn: d.bio_bn || staticDoc?.bio?.bn || "" };
         })(),
         photoUrl: d.photo_url || staticDoc?.photoUrl || "/images/doctors/dr-diean.jpg",
         bmdcReg: d.bmdc_reg || staticDoc?.bmdcReg || "",
