@@ -33,11 +33,36 @@ export default function AdminMediaPage() {
   // Upload State
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState("");
+  const [deletingId, setDeletingId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     loadMedia();
   }, []);
+
+  const handleDeleteMedia = async (item: MediaItem) => {
+    if (!window.confirm(`Are you sure you want to delete "${item.name}"? This action cannot be undone.`)) {
+      return;
+    }
+
+    setDeletingId(item.id);
+    try {
+      const res = await fetch("/api/media", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id: item.id, url: item.url, source: item.source }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        throw new Error(data.error || "Failed to delete media");
+      }
+      setMediaList((prev) => prev.filter((m) => m.id !== item.id));
+    } catch (err: any) {
+      alert(err.message || "Failed to delete media");
+    } finally {
+      setDeletingId(null);
+    }
+  };
 
   const loadMedia = async () => {
     setIsLoading(true);
@@ -221,11 +246,23 @@ export default function AdminMediaPage() {
                     href={item.url}
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="p-1.5 rounded-lg bg-black/70 text-white hover:bg-black"
+                    className="p-1.5 rounded-lg bg-black/70 text-white hover:bg-black transition-colors"
                     title="Open full image"
                   >
                     <ExternalLink className="w-3.5 h-3.5" />
                   </a>
+                  <button
+                    onClick={() => handleDeleteMedia(item)}
+                    disabled={deletingId === item.id}
+                    className="p-1.5 rounded-lg bg-red-600/90 text-white hover:bg-red-700 transition-colors disabled:opacity-50 cursor-pointer"
+                    title="Delete image"
+                  >
+                    {deletingId === item.id ? (
+                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <Trash2 className="w-3.5 h-3.5" />
+                    )}
+                  </button>
                 </div>
               </div>
 

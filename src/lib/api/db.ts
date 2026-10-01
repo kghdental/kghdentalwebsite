@@ -930,16 +930,32 @@ export async function saveLiveGalleryItem(item: GalleryItem): Promise<{ success:
   if (!isSupabaseConfigured) return { success: true };
 
   try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
     const payload = {
-      title_en: item.title.en,
-      title_bn: item.title.bn,
-      category: item.category,
-      desc_en: item.desc.en,
-      desc_bn: item.desc.bn,
+      title_en: item.title?.en || "Clinic Photo",
+      title_bn: item.title?.bn || item.title?.en || "ক্লিনিক ফটো",
+      category: item.category || "clinic",
+      desc_en: item.desc?.en || "",
+      desc_bn: item.desc?.bn || "",
       image_url: item.imageUrl,
+      sort_order: (item as any).sortOrder ?? (item as any).sort_order ?? 0,
     };
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: isUuid ? "upsert" : "insert",
+          table: "gallery_items",
+          payload: isUuid ? { id: item.id, ...payload } : payload,
+          onConflict: isUuid ? "id" : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save gallery photo");
+      return { success: true, data: json.data };
+    }
 
     if (isUuid) {
       const { data, error } = await supabase
@@ -973,6 +989,24 @@ export async function deleteLiveGalleryItem(id: string): Promise<{ success: bool
       localStorage.setItem("kgh_gallery_items", JSON.stringify(list));
     } catch (e) {
       // ignore
+    }
+
+    try {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          table: "gallery_items",
+          id,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to delete gallery photo");
+      return { success: true };
+    } catch (err: any) {
+      console.error("deleteLiveGalleryItem error:", err);
+      return { success: false, error: err.message };
     }
   }
 
@@ -1074,18 +1108,33 @@ export async function saveLiveBeforeAfterItem(
   if (!isSupabaseConfigured) return { success: true };
 
   try {
+    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
     const payload = {
-      title_en: item.title.en,
-      title_bn: item.title.bn,
-      category: item.category,
+      title_en: item.title?.en || "Treatment Case",
+      title_bn: item.title?.bn || item.title?.en || "চিকিৎসার ফলাফল",
+      category: item.category || "General",
       before_image_url: item.beforeImageUrl,
       after_image_url: item.afterImageUrl,
-      desc_en: item.desc?.en || null,
-      desc_bn: item.desc?.bn || null,
+      desc_en: item.desc?.en || "",
+      desc_bn: item.desc?.bn || "",
       sort_order: item.sortOrder ?? 0,
     };
 
-    const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(item.id);
+    if (typeof window !== "undefined") {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: isUuid ? "upsert" : "insert",
+          table: "before_after_items",
+          payload: isUuid ? { id: item.id, ...payload } : payload,
+          onConflict: isUuid ? "id" : undefined,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to save Before & After case");
+      return { success: true, data: json.data };
+    }
 
     if (isUuid) {
       const { data, error } = await supabase
@@ -1121,6 +1170,24 @@ export async function deleteLiveBeforeAfterItem(
       localStorage.setItem("kgh_before_after_items", JSON.stringify(list));
     } catch (e) {
       // ignore
+    }
+
+    try {
+      const res = await fetch("/api/admin/content", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          action: "delete",
+          table: "before_after_items",
+          id,
+        }),
+      });
+      const json = await res.json();
+      if (!res.ok || json.error) throw new Error(json.error || "Failed to delete Before & After case");
+      return { success: true };
+    } catch (err: any) {
+      console.error("deleteLiveBeforeAfterItem error:", err);
+      return { success: false, error: err.message };
     }
   }
 

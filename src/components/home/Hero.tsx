@@ -291,13 +291,39 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
   const containerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(0);
+  const [mobileTrackHeight, setMobileTrackHeight] = useState<number | null>(null);
+  const [mobileScreenH, setMobileScreenH] = useState<number | null>(null);
+
+  // Freeze initial viewport height on mobile so iOS Safari address bar expansion/collapse
+  // NEVER changes the container dimensions or causes violent 1200px layout shifts!
+  useEffect(() => {
+    if (!isDesktop && typeof window !== "undefined") {
+      const initialH = window.innerHeight;
+      setMobileScreenH(initialH);
+      setMobileTrackHeight(Math.round(TOTAL_WAYPOINTS * (VH_PER_STAGE / 100) * initialH));
+    }
+  }, [isDesktop]);
+
+  useEffect(() => {
+    if (isDesktop || typeof window === "undefined") return;
+    const handleOrientation = () => {
+      const initialH = window.innerHeight;
+      setMobileScreenH(initialH);
+      setMobileTrackHeight(Math.round(TOTAL_WAYPOINTS * (VH_PER_STAGE / 100) * initialH));
+    };
+    window.addEventListener("orientationchange", handleOrientation);
+    return () => window.removeEventListener("orientationchange", handleOrientation);
+  }, [isDesktop]);
 
   // Measure the site header so the image/text can start right below it
   // (header stays visible/clickable — we never hide or cover it).
   useEffect(() => {
     const header = document.querySelector("header");
     if (!header) return;
-    const update = () => setHeaderHeight(header.getBoundingClientRect().height);
+    const update = () => {
+      const h = header.getBoundingClientRect().height;
+      setHeaderHeight((prev) => (Math.abs(prev - h) > 1 ? h : prev));
+    };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(header);
@@ -306,6 +332,7 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
 
   useEffect(() => {
     let raf = 0;
+    let lastWidth = typeof window !== "undefined" ? window.innerWidth : 0;
 
     const compute = () => {
       const el = containerRef.current;
@@ -317,7 +344,8 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
         return;
       }
       const scrolled = Math.min(Math.max(-rect.top, 0), scrollable);
-      setProgress(scrolled / scrollable);
+      const rawProgress = scrolled / scrollable;
+      setProgress((prev) => (Math.abs(prev - rawProgress) > 0.001 ? rawProgress : prev));
     };
 
     const onScroll = () => {
@@ -325,13 +353,23 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
       raf = requestAnimationFrame(compute);
     };
 
+    const onResize = () => {
+      // On mobile devices, ignore height-only resizes caused by address bar collapsing/expanding!
+      // Only recompute if width changed (e.g. rotation/orientation change)
+      if (typeof window !== "undefined" && Math.abs(window.innerWidth - lastWidth) > 15) {
+        lastWidth = window.innerWidth;
+        cancelAnimationFrame(raf);
+        raf = requestAnimationFrame(compute);
+      }
+    };
+
     window.addEventListener("scroll", onScroll, { passive: true });
-    window.addEventListener("resize", onScroll);
+    window.addEventListener("resize", onResize);
     compute();
 
     return () => {
       window.removeEventListener("scroll", onScroll);
-      window.removeEventListener("resize", onScroll);
+      window.removeEventListener("resize", onResize);
       cancelAnimationFrame(raf);
     };
   }, []);
@@ -361,18 +399,30 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
     // central incisors centered with several neighboring teeth + gum
     // visible, while still using the SAME pin+zoom+crossfade mechanic.
     // Text sits immediately below the image box, not floating over it.
+    // Height is locked to frozen pixels to prevent iOS address bar shifts.
     // ================================================================
-    const mobileImgH = "min(92vw, 58vh)";
+    const mobileImgH = mobileScreenH ? `min(92vw, ${Math.round(mobileScreenH * 0.58)}px)` : "min(92vw, 58svh)";
     return (
       <div
         ref={containerRef}
         className="relative w-full bg-[#e8eaf4]"
-        style={{ height: `${TOTAL_WAYPOINTS * VH_PER_STAGE}vh` }}
+        style={{
+          height: mobileTrackHeight ? `${mobileTrackHeight}px` : `${TOTAL_WAYPOINTS * VH_PER_STAGE}svh`,
+        }}
       >
-        <div className="sticky top-0 h-screen w-full overflow-hidden bg-[#e8eaf4]">
+        <div
+          className="sticky top-0 w-full overflow-hidden bg-[#e8eaf4]"
+          style={{ height: mobileScreenH ? `${mobileScreenH}px` : "100svh" }}
+        >
           {/* Shifted down by the header's height — header stays visible/clickable,
               never covered, and this reveals the gum area that used to sit behind it. */}
-          <div className="absolute left-0 right-0" style={{ top: headerHeight, height: "100vh" }}>
+          <div
+            className="absolute left-0 right-0"
+            style={{
+              top: headerHeight,
+              height: mobileScreenH ? `${mobileScreenH}px` : "100svh",
+            }}
+          >
             <div className="relative w-full" style={{ height: mobileImgH }}>
               <img
                 src={currentStage.image}

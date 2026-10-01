@@ -1,8 +1,17 @@
-import { NextResponse } from "next/server";
-import { readdir, stat } from "fs/promises";
+import { NextRequest, NextResponse } from "next/server";
+import { readdir, unlink } from "fs/promises";
 import path from "path";
+import { cookies } from "next/headers";
+import { verifySignedSessionToken } from "@/lib/auth/session";
 import { createServerSupabaseClient } from "@/lib/supabase/server";
+import { getSupabaseAdminClient } from "@/lib/supabase/admin";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
+
+async function verifyAdminAuth() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("kgh_admin_session")?.value;
+  return verifySignedSessionToken(token);
+}
 
 export async function GET() {
   const allMedia: Array<{ id: string; name: string; url: string; source: "supabase" | "local" }> = [];
@@ -69,4 +78,58 @@ export async function GET() {
   }
 
   return NextResponse.json({ media: allMedia });
+}
+
+export async function DELETE(req: NextRequest) {
+  const user = await verifyAdminAuth();
+  if (!user) {
+    return NextResponse.json({ error: "Unauthorized. Admin session required." }, { status: 401 });
+  }
+
+  try {
+    const { id, url, source } = await req.json();
+
+    if (!id && !url) {
+      return NextResponse.json({ error: "Media ID or URL is required" }, { status: 400 });
+    }
+
+    if (isSupabaseConfigured) {
+      const supabaseAdmin = getSupabaseAdminClient();
+      const isUuid = id && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id);
+
+      if (source === "supabase" || isUuid) {
+        // Delete record from media_files table
+        if (id) {
+          await supabaseAdmin.from("media_files").delete().eq("id", id);
+        }
+
+        // Delete from storage bucket if present in kgh-media
+        if (url) {
+          const match = url.match(/\/kgh-media\/([^?#]+)/);
+          if (match && match[1]) {
+            const storagePath = decodeURIComponent(match[1]);
+            await supabaseAdmin.storage.from("kgh-media").remove([storagePath]);
+          }
+        }
+        return NextResponse.json({ success: true });
+      }
+    }
+
+    // Local file delete (strictly isolated to public/images/uploads/)
+    if (url && typeof url === "string" && url.startsWith("/images/uploads/")) {
+      const filename = path.basename(url);
+      const filePath = path.join(process.cwd(), "public", "images", "uploads", filename);
+      try {
+        await unlink(filePath);
+      } catch {
+        // Already unlinked or missing
+      }
+      return NextResponse.json({ success: true });
+    }
+
+    return NextResponse.json({ success: true, message: "Asset reference cleared" });
+  } catch (err: any) {
+    console.error("Media delete error:", err);
+    return NextResponse.json({ error: err.message || "Failed to delete media" }, { status: 500 });
+  }
 }

@@ -131,7 +131,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" data-scroll-behavior="smooth" className={`${inter.variable} ${hindSiliguri.variable} scroll-smooth`}>
+    <html lang="en" className={`${inter.variable} ${hindSiliguri.variable}`}>
       <head>
         <JsonLd />
       </head>

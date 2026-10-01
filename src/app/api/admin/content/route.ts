@@ -40,6 +40,8 @@ export async function POST(req: NextRequest) {
       "why_choose_cards",
       "clinical_creed",
       "gallery_items",
+      "before_after_items",
+      "featured_videos",
       "media_files",
       "doctor_blocked_dates",
     ]);
@@ -48,12 +50,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid target table" }, { status: 403 });
     }
 
+    const UUID_ID_TABLES = new Set([
+      "gallery_items",
+      "before_after_items",
+      "featured_videos",
+      "media_files",
+      "blog_posts",
+    ]);
+
     const supabaseAdmin = getSupabaseAdminClient();
 
     if (action === "delete") {
       if (!id) {
         return NextResponse.json({ error: "ID required for deletion" }, { status: 400 });
       }
+
+      // If this table uses UUID primary keys and the provided ID is not a UUID,
+      // it is a local dummy ID (e.g. gal-xxx) that was never persisted in PostgreSQL
+      if (
+        UUID_ID_TABLES.has(table) &&
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(id)
+      ) {
+        return NextResponse.json({ success: true, message: "Non-persisted ID skipped" });
+      }
+
       const { error } = await supabaseAdmin.from(table).delete().eq("id", id);
       if (error) throw error;
       return NextResponse.json({ success: true });
@@ -63,6 +83,22 @@ export async function POST(req: NextRequest) {
       if (!payload) {
         return NextResponse.json({ error: "Payload required for upsert" }, { status: 400 });
       }
+
+      const isTableUuid = UUID_ID_TABLES.has(table);
+      const hasValidUuid =
+        payload.id &&
+        /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(payload.id);
+
+      // If the table uses UUID and payload.id is not a valid UUID (e.g. gal-xxx),
+      // switch to insert without the invalid id string so PostgreSQL generates gen_random_uuid()
+      if (isTableUuid && !hasValidUuid) {
+        const cleanPayload = { ...payload };
+        delete cleanPayload.id;
+        const { data, error } = await supabaseAdmin.from(table).insert(cleanPayload).select();
+        if (error) throw error;
+        return NextResponse.json({ success: true, data });
+      }
+
       const options = onConflict ? { onConflict } : undefined;
       const { data, error } = await supabaseAdmin.from(table).upsert(payload, options).select();
       if (error) throw error;
@@ -73,7 +109,17 @@ export async function POST(req: NextRequest) {
       if (!payload) {
         return NextResponse.json({ error: "Payload required for insert" }, { status: 400 });
       }
-      const { data, error } = await supabaseAdmin.from(table).insert(payload).select();
+
+      const cleanPayload = { ...payload };
+      if (
+        UUID_ID_TABLES.has(table) &&
+        cleanPayload.id &&
+        !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(cleanPayload.id)
+      ) {
+        delete cleanPayload.id;
+      }
+
+      const { data, error } = await supabaseAdmin.from(table).insert(cleanPayload).select();
       if (error) throw error;
       return NextResponse.json({ success: true, data });
     }

@@ -77,9 +77,17 @@ body {
   border-color: rgba(161, 161, 170, 0.8);
 }
 
-/* Smooth Scrolling */
-html {
-  scroll-behavior: smooth;
+/* Smooth Scrolling: active for fine-pointer desktop/mouse navigation, while preserving native 120Hz momentum touch on iOS/Android */
+@media (hover: hover) and (pointer: fine) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto !important;
+  }
 }
 
 /* Custom Scrollbar */

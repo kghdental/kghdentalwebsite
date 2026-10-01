@@ -124,7 +124,8 @@ export function DoctorPreview() {
     if (!containerRef.current) return;
     const updateWidth = () => {
       if (containerRef.current) {
-        setContainerWidth(containerRef.current.offsetWidth);
+        const w = containerRef.current.offsetWidth;
+        setContainerWidth((prev) => (prev !== w ? w : prev));
       }
     };
     updateWidth();
@@ -238,26 +239,31 @@ export function DoctorPreview() {
     const currentY = e.clientY;
     const deltaX = currentX - dragStartXRef.current;
     const deltaY = currentY - dragStartYRef.current;
+    const absX = Math.abs(deltaX);
+    const absY = Math.abs(deltaY);
 
-    // Vertical scroll tolerance on touch screens
-    if (!hasMovedRef.current && Math.abs(deltaY) > Math.abs(deltaX) && Math.abs(deltaY) > 8) {
-      isDraggingRef.current = false;
-      setIsDragging(false);
-      setDragOffset(0);
-      try {
-        if (
-          pointerIdRef.current !== null &&
-          (e.currentTarget as HTMLElement).hasPointerCapture(pointerIdRef.current)
-        ) {
-          (e.currentTarget as HTMLElement).releasePointerCapture(pointerIdRef.current);
+    // Yield immediately to native vertical page scrolling when gesture is vertical
+    if (!hasMovedRef.current) {
+      if (absY > 6 || absY >= absX) {
+        isDraggingRef.current = false;
+        setIsDragging(false);
+        setDragOffset(0);
+        try {
+          if (
+            pointerIdRef.current !== null &&
+            (e.currentTarget as HTMLElement).hasPointerCapture(pointerIdRef.current)
+          ) {
+            (e.currentTarget as HTMLElement).releasePointerCapture(pointerIdRef.current);
+          }
+        } catch {
+          // ignore
         }
-      } catch {
-        // ignore
+        return;
       }
-      return;
     }
 
-    if (Math.abs(deltaX) > 6) {
+    // Only engage carousel horizontal drag when the movement is decisively horizontal
+    if (absX > 14 && absX > absY * 1.5) {
       if (!hasMovedRef.current) {
         hasMovedRef.current = true;
         setIsDragging(true);

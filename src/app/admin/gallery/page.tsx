@@ -36,12 +36,14 @@ export default function AdminGalleryPage() {
   const [editingGalleryItem, setEditingGalleryItem] = useState<GalleryItem | null>(null);
   const [galleryCategoryFilter, setGalleryCategoryFilter] = useState<string>("all");
   const [gallerySearchQuery, setGallerySearchQuery] = useState("");
+  const [isSavingGallery, setIsSavingGallery] = useState(false);
 
   // Before & After cases state
   const [beforeAfterItems, setBeforeAfterItems] = useState<BeforeAfterItem[]>([]);
   const [isBAModalOpen, setIsBAModalOpen] = useState(false);
   const [editingBAItem, setEditingBAItem] = useState<BeforeAfterItem | null>(null);
   const [baSearchQuery, setBASearchQuery] = useState("");
+  const [isSavingBA, setIsSavingBA] = useState(false);
 
   // Media Picker state
   const [isMediaPickerOpen, setIsMediaPickerOpen] = useState(false);
@@ -100,22 +102,40 @@ export default function AdminGalleryPage() {
 
   const handleDeleteGallery = async (id: string) => {
     if (confirm("Are you sure you want to delete this gallery photo?")) {
-      setGalleryItems(galleryItems.filter((i) => i.id !== id));
-      await deleteLiveGalleryItem(id);
+      const res = await deleteLiveGalleryItem(id);
+      if (!res.success) {
+        alert(res.error || "Failed to delete gallery photo.");
+        return;
+      }
+      setGalleryItems((prev) => prev.filter((i) => i.id !== id));
+      const refreshed = await fetchLiveGalleryItems();
+      setGalleryItems(refreshed || []);
     }
   };
 
   const handleSubmitGallery = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingGalleryItem) {
-      setGalleryItems(galleryItems.map((i) => (i.id === editingGalleryItem.id ? galleryForm : i)));
-    } else {
-      setGalleryItems([galleryForm, ...galleryItems]);
+    if (!galleryForm.imageUrl) {
+      alert("Please select or upload an image first.");
+      return;
     }
-    setIsGalleryModalOpen(false);
-    await saveLiveGalleryItem(galleryForm);
-    const refreshed = await fetchLiveGalleryItems();
-    setGalleryItems(refreshed || []);
+
+    setIsSavingGallery(true);
+    try {
+      const res = await saveLiveGalleryItem(galleryForm);
+      if (!res.success) {
+        alert(res.error || "Failed to save photo to Supabase database.");
+        return;
+      }
+
+      setIsGalleryModalOpen(false);
+      const refreshed = await fetchLiveGalleryItems();
+      setGalleryItems(refreshed || []);
+    } catch (err: any) {
+      alert(err.message || "Failed to save gallery photo.");
+    } finally {
+      setIsSavingGallery(false);
+    }
   };
 
   // --------------------------------------------------------------------------
@@ -143,22 +163,40 @@ export default function AdminGalleryPage() {
 
   const handleDeleteBA = async (id: string) => {
     if (confirm("Are you sure you want to delete this Before & After case?")) {
-      setBeforeAfterItems(beforeAfterItems.filter((i) => i.id !== id));
-      await deleteLiveBeforeAfterItem(id);
+      const res = await deleteLiveBeforeAfterItem(id);
+      if (!res.success) {
+        alert(res.error || "Failed to delete Before & After case.");
+        return;
+      }
+      setBeforeAfterItems((prev) => prev.filter((i) => i.id !== id));
+      const refreshed = await fetchLiveBeforeAfterItems();
+      setBeforeAfterItems(refreshed || []);
     }
   };
 
   const handleSubmitBA = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingBAItem) {
-      setBeforeAfterItems(beforeAfterItems.map((i) => (i.id === editingBAItem.id ? baForm : i)));
-    } else {
-      setBeforeAfterItems([...beforeAfterItems, baForm]);
+    if (!baForm.beforeImageUrl || !baForm.afterImageUrl) {
+      alert("Please select both Before and After images.");
+      return;
     }
-    setIsBAModalOpen(false);
-    await saveLiveBeforeAfterItem(baForm);
-    const refreshed = await fetchLiveBeforeAfterItems();
-    setBeforeAfterItems(refreshed || []);
+
+    setIsSavingBA(true);
+    try {
+      const res = await saveLiveBeforeAfterItem(baForm);
+      if (!res.success) {
+        alert(res.error || "Failed to save Before & After case to Supabase.");
+        return;
+      }
+
+      setIsBAModalOpen(false);
+      const refreshed = await fetchLiveBeforeAfterItems();
+      setBeforeAfterItems(refreshed || []);
+    } catch (err: any) {
+      alert(err.message || "Failed to save Before & After case.");
+    } finally {
+      setIsSavingBA(false);
+    }
   };
 
   // Media Picker Callback
@@ -433,12 +471,16 @@ export default function AdminGalleryPage() {
                   Photo
                 </label>
                 <div className="flex items-center gap-4">
-                  <div className="w-20 h-16 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 shrink-0">
-                    <img
-                      src={galleryForm.imageUrl}
-                      alt="Preview"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="w-20 h-16 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 shrink-0 flex items-center justify-center">
+                    {galleryForm.imageUrl ? (
+                      <img
+                        src={galleryForm.imageUrl}
+                        alt="Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-6 h-6 text-zinc-400" />
+                    )}
                   </div>
                   <div>
                     <button
@@ -569,9 +611,10 @@ export default function AdminGalleryPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-zinc-950 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-black"
+                  disabled={isSavingGallery}
+                  className="px-5 py-2 bg-zinc-950 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save Photo
+                  {isSavingGallery ? "Saving..." : "Save Photo"}
                 </button>
               </div>
             </form>
@@ -605,12 +648,16 @@ export default function AdminGalleryPage() {
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-700">
                     Before Image *
                   </label>
-                  <div className="aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 relative group">
-                    <img
-                      src={baForm.beforeImageUrl}
-                      alt="Before Preview"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 relative group flex items-center justify-center">
+                    {baForm.beforeImageUrl ? (
+                      <img
+                        src={baForm.beforeImageUrl}
+                        alt="Before Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-zinc-400" />
+                    )}
                     <div className="absolute top-2 left-2 bg-black/70 text-white text-[9px] font-black px-1.5 py-0.5 rounded">
                       BEFORE
                     </div>
@@ -633,12 +680,16 @@ export default function AdminGalleryPage() {
                   <label className="block text-[11px] font-bold uppercase tracking-wider text-zinc-700">
                     After Image *
                   </label>
-                  <div className="aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 relative group">
-                    <img
-                      src={baForm.afterImageUrl}
-                      alt="After Preview"
-                      className="w-full h-full object-cover"
-                    />
+                  <div className="aspect-4/3 rounded-xl overflow-hidden bg-zinc-100 border border-zinc-300 relative group flex items-center justify-center">
+                    {baForm.afterImageUrl ? (
+                      <img
+                        src={baForm.afterImageUrl}
+                        alt="After Preview"
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
+                      <ImageIcon className="w-8 h-8 text-zinc-400" />
+                    )}
                     <div className="absolute top-2 right-2 bg-black/70 text-white text-[9px] font-black px-1.5 py-0.5 rounded">
                       AFTER
                     </div>
@@ -789,9 +840,10 @@ export default function AdminGalleryPage() {
                 </button>
                 <button
                   type="submit"
-                  className="px-5 py-2 bg-zinc-950 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-black"
+                  disabled={isSavingBA}
+                  className="px-5 py-2 bg-zinc-950 text-white text-xs font-bold rounded-xl shadow-xs cursor-pointer hover:bg-black disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Save Case
+                  {isSavingBA ? "Saving..." : "Save Case"}
                 </button>
               </div>
             </form>
