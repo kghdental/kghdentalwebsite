@@ -2,7 +2,7 @@
 
 import React, { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { Calendar, ArrowRight, ChevronDown, ChevronUp } from "lucide-react";
+import { Calendar, ArrowRight, ChevronDown, ChevronUp, ChevronsDown } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { UI_STRINGS } from "@/data/translations";
 
@@ -135,7 +135,12 @@ const STAGES: StageContent[] = [
 ];
 
 const TOTAL_WAYPOINTS = STAGES.length + 1; // 7 stages + final convergence waypoint
-const VH_PER_STAGE = 170; // larger = slower, more readable pacing per stage
+const VH_PER_STAGE = 85; // larger = slower, more readable pacing per stage (was 170 — halved to cut hero scroll length)
+
+/** Short per-stage labels for the progress rail (stage 1 has no callout). */
+const STAGE_LABELS = STAGES.map((s, i) =>
+  s.callout ?? (i === 0 ? { en: "Healthy", bn: "সুস্থ দাঁত" } : { en: "", bn: "" })
+);
 
 /** Small animated "pointing up at the photo" indicator — used only on Stage 1. */
 function PointerArrow() {
@@ -188,26 +193,147 @@ function DesktopStageTextBlock({
   );
 }
 
-/** Scroll-down hint, shown until the final CTA stage scrolls into view.
- *  Mobile: bottom-center. Desktop: parked on the side so it never
- *  collides with the always-centered headline/bullets. */
-function ScrollHint({ isBn, visible, side }: { isBn: boolean; visible: boolean; side?: boolean }) {
-  const positionClass = side
-    ? "right-4 xl:right-8 top-1/2 -translate-y-1/2 flex-col"
-    : "bottom-4 left-1/2 -translate-x-1/2 flex-col";
+/** Keyframes for the hero controls (scoped by the `kgh-hero-` prefix). */
+const HERO_CONTROL_STYLES = `
+@keyframes kgh-hero-chevron { 0%,100% { opacity: .15; transform: translateY(-3px); } 50% { opacity: 1; transform: translateY(2px); } }
+@keyframes kgh-hero-wheel { 0% { opacity: 0; transform: translateY(0); } 30% { opacity: 1; } 100% { opacity: 0; transform: translateY(9px); } }
+@keyframes kgh-hero-pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(71,75,78,.45); } 50% { box-shadow: 0 0 0 10px rgba(71,75,78,0); } }
+.kgh-hero-chev { animation: kgh-hero-chevron 1.4s ease-in-out infinite; }
+.kgh-hero-wheel { animation: kgh-hero-wheel 1.6s ease-in-out infinite; }
+.kgh-hero-pulse { animation: kgh-hero-pulse 2s ease-out infinite; }
+@media (prefers-reduced-motion: reduce) { .kgh-hero-chev, .kgh-hero-wheel, .kgh-hero-pulse { animation: none; } }
+`;
+
+/** Three stacked chevrons that light up one after another (on/off cascade). */
+function CascadeChevrons({ size = "w-5 h-5" }: { size?: string }) {
+  return (
+    <span className="flex flex-col items-center -space-y-3">
+      {[0, 1, 2].map((i) => (
+        <ChevronDown key={i} className={`${size} kgh-hero-chev`} strokeWidth={3} style={{ animationDelay: `${i * 0.18}s` }} />
+      ))}
+    </span>
+  );
+}
+
+/** Prominent scroll hint: glass pill, mouse icon (desktop) + cascading arrows.
+ *  Shown until the final CTA stage scrolls into view. */
+function ScrollHint({ isBn, visible, isDesktop }: { isBn: boolean; visible: boolean; isDesktop: boolean }) {
   return (
     <div
       style={{ opacity: visible ? 1 : 0, transition: "opacity 400ms ease-out" }}
-      className={`absolute z-30 flex items-center gap-1 pointer-events-none text-[#474B4E] ${positionClass}`}
+      className={`absolute z-30 pointer-events-none ${isDesktop ? "bottom-6 left-8 xl:left-10" : "bottom-[16px] left-4"}`}
     >
-      <span
-        className={`text-[10px] lg:text-xs font-semibold tracking-wide drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)] ${
-          side ? "[writing-mode:vertical-rl] rotate-180" : ""
-        }`}
-      >
-        {isBn ? "নিচে স্ক্রল করুন" : "Scroll Down"}
-      </span>
-      <ChevronDown className="w-5 h-5 lg:w-6 lg:h-6 animate-bounce drop-shadow-[0_1px_2px_rgba(255,255,255,0.5)]" />
+      <div className="kgh-hero-pulse flex items-center gap-2.5 rounded-full bg-white/80 backdrop-blur-md border border-[#474B4E]/25 shadow-lg px-4 py-2 lg:px-5 lg:py-2.5 text-[#2b2b2b]">
+        {isDesktop && (
+          <span className="relative block w-5 h-8 rounded-full border-2 border-[#474B4E]">
+            <span className="kgh-hero-wheel absolute left-1/2 top-1.5 -ml-[2px] w-1 h-1.5 rounded-full bg-[#474B4E]" />
+          </span>
+        )}
+        <span className="text-sm lg:text-base font-bold tracking-wide whitespace-nowrap">
+          {isBn ? "নিচে স্ক্রল করুন" : "Scroll Down"}
+        </span>
+        <span className="text-[#474B4E]">
+          <CascadeChevrons size={isDesktop ? "w-5 h-5" : "w-4 h-4"} />
+        </span>
+      </div>
+    </div>
+  );
+}
+
+/** "Skip intro" button — jumps straight past the hero to the next section. */
+function SkipIntroButton({ isBn, visible, isDesktop, onSkip }: { isBn: boolean; visible: boolean; isDesktop: boolean; onSkip: () => void }) {
+  return (
+    <button
+      type="button"
+      onClick={onSkip}
+      aria-label={isBn ? "ইন্ট্রো এড়িয়ে যান" : "Skip intro"}
+      style={{ opacity: visible ? 1 : 0, pointerEvents: visible ? "auto" : "none", transition: "opacity 400ms ease-out" }}
+      className={`absolute z-30 inline-flex items-center gap-1.5 rounded-full bg-[#474B4E] hover:bg-[#2b2b2b] text-white font-bold shadow-xl border border-white/30 transition-colors active:scale-95 ${
+        isDesktop ? "bottom-6 right-8 xl:right-10 px-5 py-2.5 text-base" : "bottom-[20px] right-4 px-4 py-2 text-xs"
+      }`}
+    >
+      <span>{isBn ? "এড়িয়ে যান" : "Skip intro"}</span>
+      <ChevronsDown className={isDesktop ? "w-5 h-5" : "w-4 h-4"} />
+    </button>
+  );
+}
+
+/** Progress card — soft white card, a "keep scrolling" prompt, a rounded
+ *  track with a dark fill and a percentage bubble riding the fill's edge.
+ *  Mobile: horizontal, in the empty band between the stage text and the
+ *  Scroll Down pill (rendered inside the bottom-anchored control group).
+ *  Desktop: vertical, parked on the right edge, vertically centered. */
+function HeroProgress({
+  isBn,
+  isDesktop,
+  progress,
+  activeIndex,
+  visible,
+}: {
+  isBn: boolean;
+  isDesktop: boolean;
+  progress: number;
+  activeIndex: number;
+  visible: boolean;
+}) {
+  const total = STAGES.length;
+  const label = isBn ? STAGE_LABELS[activeIndex].bn : STAGE_LABELS[activeIndex].en;
+  const fill = Math.min(progress * ((TOTAL_WAYPOINTS - 1) / (total - 1)), 1);
+  const pct = Math.round(fill * 100);
+  const prompt = isBn ? "আরও দেখতে স্ক্রল করুন" : "Keep scrolling to explore";
+  const fade = { opacity: visible ? 1 : 0, transition: "opacity 400ms ease-out" };
+  const card = "rounded-2xl bg-white/85 backdrop-blur-md border border-black/5 shadow-[0_8px_30px_rgba(0,0,0,0.08)]";
+  const bubble = "rounded-md bg-[#5f5e5a] text-white font-medium shadow-md whitespace-nowrap";
+
+  if (!isDesktop) {
+    // Keep the bubble inside the track at 0% / 100%.
+    const bubbleLeft = `clamp(18px, ${fill * 100}%, calc(100% - 18px))`;
+    return (
+      <div className="absolute z-30 left-1/2 -translate-x-1/2 bottom-[76px] w-[calc(100%-32px)] pointer-events-none" style={fade}>
+        <div className={`${card} px-4 pt-2.5 pb-3`}>
+          <div className="flex items-center justify-between gap-3">
+            <span className="text-xs font-semibold text-[#5f5e5a]">{prompt}</span>
+            <span className="text-[11px] font-semibold text-[#474B4E]/70 truncate">
+              {activeIndex + 1}/{total} · {label}
+            </span>
+          </div>
+          <div className="relative mt-[26px]">
+            <div className="absolute bottom-full mb-2 -translate-x-1/2 transition-[left] duration-150 ease-out" style={{ left: bubbleLeft }}>
+              <div className={`relative ${bubble} px-1.5 py-0.5 text-[11px]`}>
+                {pct}%
+                <span className="absolute left-1/2 -translate-x-1/2 top-full w-0 h-0 border-x-[5px] border-x-transparent border-t-[5px] border-t-[#5f5e5a]" />
+              </div>
+            </div>
+            <div className="w-full h-[8px] rounded-full bg-[#e9e9e7] overflow-hidden">
+              <div className="h-full rounded-full bg-[#5f5e5a] transition-[width] duration-150 ease-out" style={{ width: `${fill * 100}%` }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Desktop: vertical track, fills top → bottom; bubble rides on the left.
+  const bubbleTop = `clamp(10px, ${fill * 100}%, calc(100% - 10px))`;
+  return (
+    <div className="absolute z-30 right-8 xl:right-10 top-1/2 -translate-y-1/2 pointer-events-none" style={fade}>
+      <div className={`${card} w-[132px] px-3 pt-3.5 pb-4 flex flex-col items-center text-center`}>
+        <span className="text-xs font-semibold leading-snug text-[#5f5e5a]">{prompt}</span>
+        <span className="mt-1 text-[11px] font-semibold text-[#474B4E]/70">
+          {activeIndex + 1}/{total} · {label}
+        </span>
+        <div className="relative mt-4 h-[260px] w-[10px]">
+          <div className="absolute inset-0 rounded-full bg-[#e9e9e7] overflow-hidden">
+            <div className="w-full rounded-full bg-[#5f5e5a] transition-[height] duration-150 ease-out" style={{ height: `${fill * 100}%` }} />
+          </div>
+          <div className="absolute right-full mr-2 -translate-y-1/2 transition-[top] duration-150 ease-out" style={{ top: bubbleTop }}>
+            <div className={`relative ${bubble} px-2 py-1 text-xs`}>
+              {pct}%
+              <span className="absolute top-1/2 -translate-y-1/2 left-full w-0 h-0 border-y-[5px] border-y-transparent border-l-[5px] border-l-[#5f5e5a]" />
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
@@ -290,6 +416,9 @@ function MobileStageTextBlock({
 function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) {
   const containerRef = useRef<HTMLDivElement>(null);
   const [progress, setProgress] = useState(0);
+  // Before the pin engages, the sticky frame sits below the header and its
+  // bottom edge is off-screen — lift bottom-anchored controls by that amount.
+  const [bottomLift, setBottomLift] = useState(0);
   const [headerHeight, setHeaderHeight] = useState(0);
   const [mobileTrackHeight, setMobileTrackHeight] = useState<number | null>(null);
   const [mobileScreenH, setMobileScreenH] = useState<number | null>(null);
@@ -338,6 +467,8 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
       const el = containerRef.current;
       if (!el) return;
       const rect = el.getBoundingClientRect();
+      const lift = Math.max(Math.round(rect.top), 0);
+      setBottomLift((prev) => (prev === lift ? prev : lift));
       const scrollable = el.offsetHeight - window.innerHeight;
       if (scrollable <= 0) {
         setProgress(0);
@@ -391,6 +522,44 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
 
   const activeTextStage = localT < 0.5 ? currentStage : nextStage;
   const activeTextOpacity = localT < 0.5 ? 1 - localT * 2 : (localT - 0.5) * 2;
+  const activeIndex = localT < 0.5 ? currentIndex : Math.min(currentIndex + 1, STAGES.length - 1);
+
+  // Scroll to a point inside the pinned track (0..1). Header is sticky (in flow),
+  // so the container's document top already sits below it.
+  const scrollToProgress = (p: number) => {
+    const el = containerRef.current;
+    if (!el) return;
+    const top = el.getBoundingClientRect().top + window.scrollY;
+    const scrollable = el.offsetHeight - window.innerHeight;
+    window.scrollTo({ top: top + p * scrollable, behavior: "smooth" });
+  };
+  // Skip straight to the final "Whatever Your Dental Problem Is…" CTA stage
+  // (end of the pinned track, where the CTA is fully faded in).
+  const skipIntro = () => scrollToProgress(1);
+
+  const progressCard = (
+    <HeroProgress
+      isBn={isBn}
+      isDesktop={isDesktop}
+      progress={safeProgress}
+      activeIndex={activeIndex}
+      visible={!isFinalStage}
+    />
+  );
+
+  const controls = (
+    <>
+      <style>{HERO_CONTROL_STYLES}</style>
+      {isDesktop && progressCard}
+      <div className="absolute inset-x-0 bottom-0 z-30 pointer-events-none" style={{ transform: `translateY(-${bottomLift}px)` }}>
+        <div className="relative">
+          {!isDesktop && progressCard}
+          <ScrollHint isBn={isBn} visible={!isFinalStage} isDesktop={isDesktop} />
+          <SkipIntroButton isBn={isBn} visible={!isFinalStage} isDesktop={isDesktop} onSkip={skipIntro} />
+        </div>
+      </div>
+    </>
+  );
 
   if (!isDesktop) {
     // ================================================================
@@ -458,7 +627,7 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
             <FinalCta isBn={isBn} />
           </div>
 
-          <ScrollHint isBn={isBn} visible={!isFinalStage} />
+          {controls}
         </div>
       </div>
     );
@@ -507,7 +676,7 @@ function PinnedHero({ isBn, isDesktop }: { isBn: boolean; isDesktop: boolean }) 
           <FinalCta isBn={isBn} />
         </div>
 
-        <ScrollHint isBn={isBn} visible={!isFinalStage} side />
+        {controls}
       </div>
     </div>
   );
