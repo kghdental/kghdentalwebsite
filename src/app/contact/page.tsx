@@ -14,6 +14,7 @@ import {
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useClinicSettings } from "@/context/ClinicSettingsContext";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 
 export default function ContactPage() {
   const { t, isBn } = useLanguage();
@@ -27,11 +28,16 @@ export default function ContactPage() {
   });
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState("");
+  const [turnstileToken, setTurnstileToken] = useState("");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.phone) {
       setError(isBn ? "অনুগ্রহ করে আপনার নাম ও ফোন নম্বর প্রদান করুন" : "Please provide your name and phone number");
+      return;
+    }
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      setError(isBn ? "অনুগ্রহ করে সিকিউরিটি ক্যাপচা সম্পন্ন করুন" : "Please complete the security verification");
       return;
     }
     setError("");
@@ -281,6 +287,17 @@ export default function ContactPage() {
                             : "Write your questions or details here..."
                         }
                         className="w-full px-4 py-3 rounded-xl border border-zinc-300 text-sm focus:outline-hidden focus:ring-2 focus:ring-zinc-950"
+                      />
+                    </div>
+
+                    {/* Cloudflare Turnstile Bot Protection */}
+                    <div className="py-2 flex justify-center">
+                      <TurnstileWidget
+                        onSuccess={(token) => {
+                          setTurnstileToken(token);
+                          setError("");
+                        }}
+                        onExpire={() => setTurnstileToken("")}
                       />
                     </div>
 

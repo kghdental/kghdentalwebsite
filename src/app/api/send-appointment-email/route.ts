@@ -5,6 +5,7 @@ import {
 } from "@/lib/email/appointment-email";
 import { fetchLiveDoctors } from "@/lib/api/db";
 import { checkRateLimit } from "@/lib/security/rate-limiter";
+import { verifyTurnstileToken } from "@/lib/security/turnstile";
 
 export const dynamic = "force-dynamic";
 export const maxDuration = 15; // 15-second timeout for serverless environments
@@ -12,7 +13,7 @@ export const maxDuration = 15; // 15-second timeout for serverless environments
 export async function POST(request: NextRequest) {
   try {
     // 1. Rate limiting: Prevent email flooding / quota exhaustion (max 6 requests per 10 min)
-    const rateCheck = checkRateLimit(request, "send_appointment_email", {
+    const rateCheck = await checkRateLimit(request, "send_appointment_email", {
       limit: 6,
       windowMs: 10 * 60 * 1000,
     });
@@ -28,6 +29,18 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json().catch(() => ({}));
+
+    // 2. CAPTCHA verification (Cloudflare Turnstile)
+    const turnstileCheck = await verifyTurnstileToken(body.turnstile_token, request);
+    if (!turnstileCheck.success) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: turnstileCheck.error || "Security verification failed. Please try again.",
+        },
+        { status: 403 }
+      );
+    }
 
     const {
       reference_code,

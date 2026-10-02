@@ -43,6 +43,7 @@ import { useLanguage } from "@/context/LanguageContext";
 import { useClinicSettings } from "@/context/ClinicSettingsContext";
 import { UI_STRINGS } from "@/data/translations";
 import { downloadSlipPdf } from "@/lib/pdf-export";
+import { TurnstileWidget } from "@/components/security/TurnstileWidget";
 
 export function BookingWizard() {
   const searchParams = useSearchParams();
@@ -126,6 +127,7 @@ export function BookingWizard() {
   const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [showSlipPreview, setShowSlipPreview] = useState<boolean>(true);
   const [isDownloadingPdf, setIsDownloadingPdf] = useState<boolean>(false);
+  const [turnstileToken, setTurnstileToken] = useState<string>("");
   const slipContainerRef = React.useRef<HTMLDivElement>(null);
 
   // Calendar and slot collision states
@@ -265,6 +267,12 @@ export function BookingWizard() {
       errs.phone = isBn ? "সঠিক মোবাইল নম্বর প্রদান করুন" : "A valid phone number is required";
     }
 
+    if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
+      errs.turnstile = isBn
+        ? "অনুগ্রহ করে সিকিউরিটি ভেরিফিকেশন (CAPTCHA) সম্পন্ন করুন"
+        : "Please complete the security verification";
+    }
+
     if (Object.keys(errs).length > 0) {
       setErrors(errs);
       return;
@@ -310,6 +318,7 @@ export function BookingWizard() {
           appointment_date: selectedDate,
           time_slot: selectedTimeSlot,
           symptoms: visitReason || undefined,
+          turnstile_token: turnstileToken || undefined,
         }),
       }).catch((emailErr) => {
         console.warn("Background doctor email dispatch notification (non-fatal):", emailErr);
@@ -923,8 +932,29 @@ export function BookingWizard() {
               </div>
             </div>
 
+            {/* Cloudflare Turnstile Bot Protection */}
+            <div className="pt-2 flex flex-col items-center justify-center">
+              <TurnstileWidget
+                onSuccess={(token) => {
+                  setTurnstileToken(token);
+                  setErrors((prev) => {
+                    const next = { ...prev };
+                    delete next.turnstile;
+                    return next;
+                  });
+                }}
+                onExpire={() => setTurnstileToken("")}
+              />
+              {errors.turnstile && (
+                <p className="text-xs text-rose-600 font-medium mt-1 flex items-center gap-1">
+                  <AlertCircle className="w-3.5 h-3.5 shrink-0" />
+                  <span>{errors.turnstile}</span>
+                </p>
+              )}
+            </div>
+
             {/* Buttons */}
-            <div className="pt-6 border-t border-zinc-200 flex items-center justify-between gap-4">
+            <div className="pt-4 border-t border-zinc-200 flex items-center justify-between gap-4">
               <button
                 type="button"
                 onClick={() => setCurrentStep(1)}

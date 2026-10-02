@@ -10,8 +10,11 @@
     "test:email": "node --env-file=.env.local scripts/test-email.mjs"
   },
   "dependencies": {
+    "@marsidev/react-turnstile": "^1.6.1",
     "@supabase/ssr": "^0.12.5",
     "@supabase/supabase-js": "^2.114.0",
+    "@upstash/ratelimit": "^2.2.0",
+    "@upstash/redis": "^1.39.0",
     "bcryptjs": "^3.0.3",
     "html2canvas": "^1.4.1",
     "isomorphic-dompurify": "^3.19.0",

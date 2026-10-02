@@ -30,7 +30,7 @@ function maskEmail(email: string | null | undefined): string {
 export async function POST(req: NextRequest) {
   try {
     // 1. Rate limiting: max 15 tracking checks per 10 minutes per IP
-    const rateCheck = checkRateLimit(req, "patient_track", {
+    const rateCheck = await checkRateLimit(req, "patient_track", {
       limit: 15,
       windowMs: 10 * 60 * 1000,
     });

@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Rate limiting (max 20 uploads per 10 minutes)
-    const rateCheck = checkRateLimit(req, "admin_upload", {
+    const rateCheck = await checkRateLimit(req, "admin_upload", {
       limit: 20,
       windowMs: 10 * 60 * 1000,
     });

@@ -9,7 +9,7 @@ import { checkRateLimit } from "@/lib/security/rate-limiter";
 export async function POST(req: NextRequest) {
   try {
     // 1. Enforce strict rate limiting to prevent brute-force attacks (5 attempts per 15 min)
-    const rateCheck = checkRateLimit(req, "admin_login", {
+    const rateCheck = await checkRateLimit(req, "admin_login", {
       limit: 5,
       windowMs: 15 * 60 * 1000,
     });
