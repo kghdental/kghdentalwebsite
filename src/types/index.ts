@@ -240,3 +240,17 @@ export interface FeaturedVideo {
   sortOrder: number;
   createdAt?: string;
 }
+
+export type InquiryStatus = "unread" | "read" | "replied" | "archived";
+
+export interface ContactInquiry {
+  id: string;
+  name: string;
+  phone: string;
+  email?: string | null;
+  message: string;
+  status: InquiryStatus;
+  admin_notes?: string | null;
+  created_at: string;
+}
+

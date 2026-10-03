@@ -17,8 +17,10 @@ import {
   ClinicalCreedData,
   CreedQuoteItem,
   FeaturedVideo,
+  ContactInquiry,
 } from "@/types";
 import { notifyAppointmentsUpdated } from "@/lib/appointment-utils";
+import { notifyInquiriesUpdated } from "@/lib/inquiry-utils";
 
 // ==============================================================================
 // 1. DOCTORS API
@@ -490,6 +492,100 @@ export async function deleteLiveAppointment(
       return { success: true };
     } catch (err: any) {
       console.error("deleteLiveAppointment error:", err);
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true };
+}
+
+// ==============================================================================
+// 3.1 CONTACT INQUIRIES API
+// ==============================================================================
+
+export async function fetchLiveInquiries(): Promise<ContactInquiry[]> {
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/admin/inquiries");
+      if (res.ok) {
+        const json = await res.json();
+        if (json && Array.isArray(json.inquiries)) {
+          try {
+            localStorage.setItem("kgh_admin_inquiries", JSON.stringify(json.inquiries));
+          } catch {}
+          return json.inquiries;
+        }
+      }
+    } catch (err) {
+      console.error("fetchLiveInquiries API error:", err);
+    }
+
+    // Local storage fallback
+    try {
+      const stored = localStorage.getItem("kgh_admin_inquiries");
+      if (stored) return JSON.parse(stored);
+    } catch {}
+  }
+  return [];
+}
+
+export async function updateLiveInquiryStatus(
+  id: string,
+  status: string,
+  adminNotes?: string
+): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("kgh_admin_inquiries");
+      if (stored) {
+        const list: ContactInquiry[] = JSON.parse(stored);
+        const updated = list.map((item) =>
+          item.id === id
+            ? {
+                ...item,
+                status: status as any,
+                admin_notes: adminNotes !== undefined ? adminNotes : item.admin_notes,
+              }
+            : item
+        );
+        localStorage.setItem("kgh_admin_inquiries", JSON.stringify(updated));
+      }
+      notifyInquiriesUpdated();
+
+      const res = await fetch("/api/admin/inquiries", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id, status, admin_notes: adminNotes }),
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Update inquiry failed");
+      return { success: true };
+    } catch (err: any) {
+      console.error("updateLiveInquiryStatus error:", err);
+      return { success: false, error: err.message };
+    }
+  }
+  return { success: true };
+}
+
+export async function deleteLiveInquiry(id: string): Promise<{ success: boolean; error?: string }> {
+  if (typeof window !== "undefined") {
+    try {
+      const stored = localStorage.getItem("kgh_admin_inquiries");
+      if (stored) {
+        const list: ContactInquiry[] = JSON.parse(stored);
+        const filtered = list.filter((item) => item.id !== id);
+        localStorage.setItem("kgh_admin_inquiries", JSON.stringify(filtered));
+      }
+      notifyInquiriesUpdated();
+
+      const res = await fetch(`/api/admin/inquiries?id=${encodeURIComponent(id)}`, {
+        method: "DELETE",
+      });
+      const data = await res.json();
+      if (!res.ok || data.error) throw new Error(data.error || "Delete inquiry failed");
+      return { success: true };
+    } catch (err: any) {
+      console.error("deleteLiveInquiry error:", err);
       return { success: false, error: err.message };
     }
   }

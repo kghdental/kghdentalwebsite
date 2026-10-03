@@ -21,27 +21,42 @@ import {
   Star,
   Layers,
   Video,
+  MessageSquare,
 } from "lucide-react";
 import { isSupabaseConfigured } from "@/lib/supabase/client";
-import { fetchLiveAppointments } from "@/lib/api/db";
+import { fetchLiveAppointments, fetchLiveInquiries } from "@/lib/api/db";
 import { getReadAppointmentRefs } from "@/lib/appointment-utils";
+import { getReadInquiryIds } from "@/lib/inquiry-utils";
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [unreadAppointmentsCount, setUnreadAppointmentsCount] = useState<number>(0);
+  const [unreadInquiriesCount, setUnreadInquiriesCount] = useState<number>(0);
 
-  // Track unread appointments count across admin panel
+  // Track unread appointments & inquiries count across admin panel
   useEffect(() => {
     const computeUnread = async () => {
       try {
         const readRefs = getReadAppointmentRefs();
         const live = await fetchLiveAppointments();
         const allApps = live || [];
-        const unread = allApps.filter(
+        const unreadApps = allApps.filter(
           (a) => !readRefs.includes(a.reference_code) && !readRefs.includes(a.id)
         ).length;
-        setUnreadAppointmentsCount(unread);
+        setUnreadAppointmentsCount(unreadApps);
+      } catch (err) {
+        // ignore
+      }
+
+      try {
+        const readInqIds = getReadInquiryIds();
+        const liveInqs = await fetchLiveInquiries();
+        const allInqs = liveInqs || [];
+        const unreadInqs = allInqs.filter(
+          (i) => !readInqIds.includes(i.id) && i.status !== "replied" && i.status !== "archived"
+        ).length;
+        setUnreadInquiriesCount(unreadInqs);
       } catch (err) {
         // ignore
       }
@@ -54,9 +69,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     };
 
     window.addEventListener("kgh_appointments_updated", handleUpdate);
+    window.addEventListener("kgh_inquiries_updated", handleUpdate);
     window.addEventListener("storage", handleUpdate);
     return () => {
       window.removeEventListener("kgh_appointments_updated", handleUpdate);
+      window.removeEventListener("kgh_inquiries_updated", handleUpdate);
       window.removeEventListener("storage", handleUpdate);
     };
   }, []);
@@ -94,6 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const navLinks = [
     { href: "/admin", label: "Dashboard", icon: LayoutDashboard },
     { href: "/admin/appointments", label: "Appointments", icon: CalendarCheck },
+    { href: "/admin/inquiries", label: "Patient Inquiries", icon: MessageSquare },
     { href: "/admin/doctors", label: "Doctors Directory", icon: Users },
     { href: "/admin/departments", label: "Departments & 64 Services", icon: Building2 },
     { href: "/admin/reviews", label: "Patient Reviews", icon: Star },
@@ -123,7 +141,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin/appointments"
               className="px-2 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-extrabold animate-pulse"
             >
-              {unreadAppointmentsCount} New
+              {unreadAppointmentsCount} Apps
+            </Link>
+          )}
+          {unreadInquiriesCount > 0 && (
+            <Link
+              href="/admin/inquiries"
+              className="px-2 py-0.5 rounded-full bg-amber-500 text-zinc-950 text-[10px] font-extrabold animate-pulse"
+            >
+              {unreadInquiriesCount} Leads
             </Link>
           )}
         </div>
@@ -205,6 +231,14 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
                       title={`${unreadAppointmentsCount} new unread appointments`}
                     >
                       {unreadAppointmentsCount}
+                    </span>
+                  )}
+                  {link.href === "/admin/inquiries" && unreadInquiriesCount > 0 && (
+                    <span
+                      className="px-2 py-0.5 rounded-full bg-amber-500 text-zinc-950 text-[10px] font-extrabold tracking-wide animate-pulse shadow-xs"
+                      title={`${unreadInquiriesCount} new unread inquiries`}
+                    >
+                      {unreadInquiriesCount}
                     </span>
                   )}
                 </Link>

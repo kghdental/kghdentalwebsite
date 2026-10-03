@@ -11,6 +11,7 @@ import {
   AlertCircle,
   MessageSquare,
   ExternalLink,
+  Loader2,
 } from "lucide-react";
 import { useLanguage } from "@/context/LanguageContext";
 import { useClinicSettings } from "@/context/ClinicSettingsContext";
@@ -26,14 +27,23 @@ export default function ContactPage() {
     email: "",
     message: "",
   });
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSent, setIsSent] = useState(false);
   const [error, setError] = useState("");
   const [turnstileToken, setTurnstileToken] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !formData.phone) {
+    if (!formData.name.trim() || !formData.phone.trim()) {
       setError(isBn ? "অনুগ্রহ করে আপনার নাম ও ফোন নম্বর প্রদান করুন" : "Please provide your name and phone number");
+      return;
+    }
+    if (formData.phone.replace(/[^0-9]/g, "").length < 10) {
+      setError(isBn ? "সঠিক ১১-সংখ্যার মোবাইল নম্বর লিখুন" : "Please provide a valid mobile phone number");
+      return;
+    }
+    if (!formData.message.trim() || formData.message.trim().length < 5) {
+      setError(isBn ? "অনুগ্রহ করে আপনার বার্তা বা প্রশ্ন বিস্তারিত লিখুন" : "Please write your message or inquiry (minimum 5 characters)");
       return;
     }
     if (process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY && !turnstileToken) {
@@ -41,7 +51,48 @@ export default function ContactPage() {
       return;
     }
     setError("");
-    setIsSent(true);
+    setIsSubmitting(true);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.name.trim(),
+          phone: formData.phone.trim(),
+          email: formData.email.trim() || undefined,
+          message: formData.message.trim(),
+          turnstile_token: turnstileToken || undefined,
+        }),
+      });
+
+      const data = await res.json().catch(() => ({}));
+
+      if (!res.ok || !data.success) {
+        throw new Error(data.error || (isBn ? "বার্তা পাঠানো সম্ভব হয়নি। অনুগ্রহ করে হটলাইনে কল করুন।" : "Failed to send message. Please contact our reception."));
+      }
+
+      // Optimistically cache in browser for immediate local admin preview
+      if (typeof window !== "undefined" && data.inquiry) {
+        try {
+          const stored = localStorage.getItem("kgh_admin_inquiries");
+          const list = stored ? JSON.parse(stored) : [];
+          localStorage.setItem("kgh_admin_inquiries", JSON.stringify([data.inquiry, ...list.filter((x: any) => x.id !== data.inquiry.id)]));
+          window.dispatchEvent(new CustomEvent("kgh_inquiries_updated"));
+        } catch {
+          // ignore
+        }
+      }
+
+      setIsSent(true);
+      setFormData({ name: "", phone: "", email: "", message: "" });
+      setTurnstileToken("");
+    } catch (err: any) {
+      console.error("Contact submission error:", err);
+      setError(err.message || (isBn ? "বার্তা পাঠাতে সমস্যা হয়েছে। পুনরায় চেষ্টা করুন।" : "An error occurred. Please try again."));
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -303,10 +354,20 @@ export default function ContactPage() {
 
                     <button
                       type="submit"
-                      className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 bg-[#474B4E] hover:bg-[#373a3c] active:bg-[#2b2d2f] text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer"
+                      disabled={isSubmitting}
+                      className="w-full inline-flex items-center justify-center gap-2 py-3.5 px-6 bg-[#474B4E] hover:bg-[#373a3c] active:bg-[#2b2d2f] disabled:opacity-60 disabled:cursor-not-allowed text-white text-xs sm:text-sm font-bold rounded-xl shadow-xs hover:shadow-md transition-all cursor-pointer"
                     >
-                      <Send className="w-4 h-4" />
-                      <span>{isBn ? "বার্তা পাঠান" : "Submit Message"}</span>
+                      {isSubmitting ? (
+                        <>
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <span>{isBn ? "বার্তা পাঠানো হচ্ছে..." : "Sending Message..."}</span>
+                        </>
+                      ) : (
+                        <>
+                          <Send className="w-4 h-4" />
+                          <span>{isBn ? "বার্তা পাঠান" : "Submit Message"}</span>
+                        </>
+                      )}
                     </button>
                   </form>
                 )}

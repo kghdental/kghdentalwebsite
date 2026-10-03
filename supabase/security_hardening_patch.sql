@@ -74,6 +74,33 @@ GRANT ALL ON public.admin_users TO service_role;
 GRANT ALL ON public.appointments TO service_role;
 GRANT ALL ON public.doctors TO service_role;
 
+-- 4. Contact Inquiries Table & RLS Policies
+CREATE TABLE IF NOT EXISTS public.contact_inquiries (
+  id text PRIMARY KEY DEFAULT ('inq-' || extract(epoch from now())::bigint || '-' || substr(md5(random()::text), 1, 6)),
+  name text NOT NULL,
+  phone text NOT NULL,
+  email text,
+  message text NOT NULL,
+  status text NOT NULL DEFAULT 'unread',
+  admin_notes text,
+  created_at timestamptz NOT NULL DEFAULT now()
+);
+
+ALTER TABLE public.contact_inquiries ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Allow public to insert contact inquiries" ON public.contact_inquiries;
+CREATE POLICY "Allow public to insert contact inquiries"
+  ON public.contact_inquiries
+  FOR INSERT
+  TO anon, authenticated
+  WITH CHECK (true);
+
+GRANT ALL ON public.contact_inquiries TO service_role;
+GRANT INSERT ON public.contact_inquiries TO anon, authenticated;
+
+CREATE INDEX IF NOT EXISTS idx_contact_inquiries_created_at ON public.contact_inquiries (created_at DESC);
+CREATE INDEX IF NOT EXISTS idx_contact_inquiries_status ON public.contact_inquiries (status);
+
 -- ==============================================================================
 -- Patch complete.
 -- ==============================================================================
