@@ -546,6 +546,26 @@ export async function createLiveAppointment(record: {
     }
   }
 
+  // Primary: Use secure server-side API with rate limiting & service role execution
+  if (typeof window !== "undefined") {
+    try {
+      const res = await fetch("/api/appointments/create", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(record),
+      });
+      const data = await res.json();
+      if (res.ok && data?.success) {
+        return { success: true };
+      }
+      if (!res.ok && data?.error) {
+        console.warn("createLiveAppointment server API warning:", data.error);
+      }
+    } catch (apiErr) {
+      console.warn("createLiveAppointment API fetch error, attempting direct sync:", apiErr);
+    }
+  }
+
   if (!isSupabaseConfigured) return { success: true };
 
   try {
@@ -565,7 +585,6 @@ export async function createLiveAppointment(record: {
     };
 
     let { error } = await supabase.from("appointments").insert(payload);
-    // Graceful fallback if patient_age / patient_gender columns are not yet added to Supabase table
     if (error && (error.message?.includes("patient_age") || error.message?.includes("patient_gender") || error.code === "PGRST204")) {
       delete payload.patient_age;
       delete payload.patient_gender;
@@ -575,7 +594,7 @@ export async function createLiveAppointment(record: {
     if (error) throw error;
     return { success: true };
   } catch (err: any) {
-    console.error("createLiveAppointment error:", err);
+    console.error("createLiveAppointment fallback error:", err);
     return { success: false, error: err.message };
   }
 }
@@ -699,11 +718,34 @@ export async function fetchAppointmentsByQuery(query: string): Promise<any[]> {
         body: JSON.stringify({ query: q }),
       });
       const data = await res.json();
-      if (data && Array.isArray(data.records)) {
+      if (data && Array.isArray(data.records) && data.records.length > 0) {
         return data.records;
       }
     } catch (e) {
       console.warn("fetchAppointmentsByQuery API error:", e);
+    }
+
+    // Client-side instant fallback: check local storage for recently booked appointments on this device
+    try {
+      const stored = localStorage.getItem("kgh_admin_appointments");
+      if (stored) {
+        const localList = JSON.parse(stored);
+        if (Array.isArray(localList)) {
+          const cleanQ = q.toUpperCase().replace(/\s+/g, "");
+          const cleanDigits = q.replace(/[^0-9]/g, "");
+          const matched = localList.filter((a: any) => {
+            const ref = (a.reference_code || "").toUpperCase();
+            const phone = (a.patient_phone || "").replace(/[^0-9]/g, "");
+            return (
+              (ref && (ref.includes(cleanQ) || cleanQ.includes(ref))) ||
+              (cleanDigits.length >= 8 && phone.includes(cleanDigits))
+            );
+          });
+          if (matched.length > 0) return matched;
+        }
+      }
+    } catch {
+      // ignore
     }
   }
 

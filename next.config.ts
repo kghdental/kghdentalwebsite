@@ -42,7 +42,7 @@ const nextConfig: NextConfig = {
               "img-src 'self' data: blob: https:",
               "font-src 'self' data: https://fonts.gstatic.com",
               "frame-src 'self' https://challenges.cloudflare.com https://www.youtube.com https://www.youtube-nocookie.com https://youtube.com https://player.vimeo.com https://www.google.com https://maps.google.com",
-              "connect-src 'self' https://*.supabase.co https://va.vercel-scripts.com https://challenges.cloudflare.com https: wss:",
+              "connect-src 'self' https://*.supabase.co wss://*.supabase.co https://va.vercel-scripts.com https://challenges.cloudflare.com https://*.upstash.io",
               "media-src 'self' blob: https:",
             ].join("; "),
           },

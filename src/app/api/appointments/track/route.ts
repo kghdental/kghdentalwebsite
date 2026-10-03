@@ -74,15 +74,20 @@ export async function POST(req: NextRequest) {
       "id, reference_code, patient_name, patient_phone, patient_email, doctor_id, department_id, appointment_date, time_slot, symptoms, status, created_at"
     );
 
-    // Exact search matching only (prevents data harvesting)
-    if (cleanRef.startsWith("KGH-") || cleanRef.includes("-")) {
-      queryBuilder = queryBuilder.eq("reference_code", cleanRef);
+    // Case-insensitive reference matching (PostgreSQL .eq is case-sensitive, month names in codes vary)
+    const normalizedRef = cleanRef.trim();
+    const prefixedRef = normalizedRef.startsWith("KGH-") ? normalizedRef : `KGH-${normalizedRef}`;
+
+    if (normalizedRef.startsWith("KGH-")) {
+      queryBuilder = queryBuilder.ilike("reference_code", normalizedRef);
     } else if (cleanDigits.length >= 10) {
-      // Last 10 digits exact match
+      // 10 or 11 digits phone match
       const last10 = cleanDigits.slice(-10);
       queryBuilder = queryBuilder.ilike("patient_phone", `%${last10}%`);
+    } else if (normalizedRef.includes("-")) {
+      queryBuilder = queryBuilder.or(`reference_code.ilike.${normalizedRef},reference_code.ilike.${prefixedRef}`);
     } else {
-      queryBuilder = queryBuilder.eq("reference_code", cleanRef);
+      queryBuilder = queryBuilder.or(`reference_code.ilike.${normalizedRef},reference_code.ilike.${prefixedRef}`);
     }
 
     const { data, error } = await queryBuilder.limit(5);

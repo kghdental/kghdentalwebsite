@@ -30,9 +30,18 @@ export async function POST(req: NextRequest) {
     const inputEmail = (email || "").trim().toLowerCase();
     const inputPassword = (password || "").trim();
 
+    // Email syntax validation to prevent SQL syntax fuzzing or wildcard probes (CWE-209 / SEC-05)
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!inputEmail || !inputPassword) {
       return NextResponse.json(
         { success: false, error: "Email and password are required" },
+        { status: 400 }
+      );
+    }
+
+    if (!emailRegex.test(inputEmail) || inputEmail.length > 254) {
+      return NextResponse.json(
+        { success: false, error: "Invalid email format" },
         { status: 400 }
       );
     }
@@ -86,15 +95,15 @@ export async function POST(req: NextRequest) {
     const { data: adminUser, error: dbError } = await supabaseAdmin
       .from("admin_users")
       .select("id, email, password, is_active, role, name")
-      .ilike("email", inputEmail)
+      .eq("email", inputEmail)
       .eq("is_active", true)
       .maybeSingle();
 
     if (dbError) {
-      console.error("Supabase admin verification error:", dbError);
+      console.error("Supabase admin verification database error:", dbError);
       return NextResponse.json(
-        { success: false, error: "Database verification error. Please try again." },
-        { status: 500 }
+        { success: false, error: "Invalid admin email or password" },
+        { status: 401 }
       );
     }
 
