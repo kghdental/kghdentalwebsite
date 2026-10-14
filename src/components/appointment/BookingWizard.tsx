@@ -581,8 +581,13 @@ export function BookingWizard() {
                           >
                             <div className="relative w-16 h-16 sm:w-18 sm:h-18 rounded-2xl overflow-hidden bg-zinc-200 shrink-0 border border-zinc-300 shadow-2xs">
                               <img
-                                src={doc.photoUrl}
+                                src={doc.photoUrl || "/images/doctors/dr-diean.jpg"}
                                 alt={t(doc.name)}
+                                onError={(e) => {
+                                  if (e.currentTarget.src !== "/images/doctors/dr-diean.jpg" && !e.currentTarget.src.endsWith("/images/doctors/dr-diean.jpg")) {
+                                    e.currentTarget.src = "/images/doctors/dr-diean.jpg";
+                                  }
+                                }}
                                 className="w-full h-full object-cover object-top"
                               />
                             </div>
@@ -784,8 +789,13 @@ export function BookingWizard() {
                 <div className="flex items-center gap-3">
                   <div className="w-12 h-12 rounded-xl overflow-hidden bg-zinc-200 shrink-0 border border-zinc-300">
                     <img
-                      src={activeDoctor.photoUrl}
+                      src={activeDoctor.photoUrl || "/images/doctors/dr-diean.jpg"}
                       alt={t(activeDoctor.name)}
+                      onError={(e) => {
+                        if (e.currentTarget.src !== "/images/doctors/dr-diean.jpg" && !e.currentTarget.src.endsWith("/images/doctors/dr-diean.jpg")) {
+                          e.currentTarget.src = "/images/doctors/dr-diean.jpg";
+                        }
+                      }}
                       className="w-full h-full object-cover object-top"
                     />
                   </div>

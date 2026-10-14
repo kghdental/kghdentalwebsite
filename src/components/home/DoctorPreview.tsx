@@ -20,25 +20,48 @@ import { useLanguage } from "@/context/LanguageContext";
 
 const LOCAL_DOCTOR_IMAGES: Record<string, string> = {
   "dr-diean": "/images/doctors/dr-diean.jpg",
-  "dr-sanwar": "/images/doctors/DR. MD. SANWAR HOSSAIN.png",
+  "dr-sanwar": "/images/doctors/dr-sanwar.jpg",
   "dr-fatema": "/images/doctors/dr-fatema.jpg",
-  "dr-bappy": "/images/doctors/dr-Bappy.png",
-  "dr-ratina": "/images/doctors/Dr Jesinta Islam.png",
-  "dr-rifat": "/images/doctors/Dr Rifat Rahman.png",
-  "dr-rafia": "/images/doctors/dr-rafia-nazneen.png",
-  "dr-rafia-nazneen": "/images/doctors/dr-rafia-nazneen.png",
+  "dr-bappy": "/images/doctors/dr-bappy.jpg",
+  "dr-ratina": "/images/doctors/dr-ratina.jpg",
+  "dr-rifat": "/images/doctors/dr-rifat.jpg",
+  "dr-rafia": "/images/doctors/dr-rafia.jpg",
+  "dr-rafia-nazneen": "/images/doctors/dr-rafia.jpg",
 };
 
 // Global image cache to keep pre-decoded Image objects alive in memory across scroll and route navigation
 const globalImageCache: Record<string, HTMLImageElement> = {};
 
-function preloadDoctorImages() {
+export function getDoctorPhotoSrc(doc: Doctor): string {
+  // 1st Priority: Database photoUrl if present and non-empty
+  if (doc.photoUrl && doc.photoUrl.trim() !== "") {
+    return doc.photoUrl.trim();
+  }
+  // 2nd Priority: Local corresponding static image
+  if (LOCAL_DOCTOR_IMAGES[doc.id]) {
+    return LOCAL_DOCTOR_IMAGES[doc.id];
+  }
+  // 3rd Priority: Default fallback
+  return "/images/doctors/dr-diean.jpg";
+}
+
+function preloadDoctorImages(list: Doctor[] = DOCTORS) {
   if (typeof window === "undefined") return;
-  Object.entries(LOCAL_DOCTOR_IMAGES).forEach(([id, src]) => {
-    if (!globalImageCache[id]) {
+  // Preload local defaults
+  Object.values(LOCAL_DOCTOR_IMAGES).forEach((src) => {
+    if (src && !globalImageCache[src]) {
       const img = new window.Image();
       img.src = src;
-      globalImageCache[id] = img;
+      globalImageCache[src] = img;
+    }
+  });
+  // Preload live doctor photos
+  list.forEach((doc) => {
+    const src = getDoctorPhotoSrc(doc);
+    if (src && !globalImageCache[src]) {
+      const img = new window.Image();
+      img.src = src;
+      globalImageCache[src] = img;
     }
   });
 }
@@ -55,8 +78,8 @@ export function DoctorPreview() {
 
   // Preload all images on component mount as well
   useEffect(() => {
-    preloadDoctorImages();
-  }, []);
+    preloadDoctorImages(doctorsList);
+  }, [doctorsList]);
 
   // Repeat array 5 times to form a robust, perfectly seamless circular track that never runs out of cards
   const REPEAT_COUNT = 5;
@@ -78,19 +101,18 @@ export function DoctorPreview() {
   const timerRef = useRef<NodeJS.Timeout | null>(null);
   const boundaryTimerRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Sync with Supabase only if data actually changes
+  // Always fetch live doctors from Supabase on mount so database updates (photos, schedule, etc.) are reflected immediately
   useEffect(() => {
+    let isMounted = true;
     fetchLiveDoctors().then((docs) => {
-      if (docs && docs.length > 0) {
-        // Compare IDs to avoid redundant re-renders
-        const sameDocs =
-          docs.length === DOCTORS.length &&
-          docs.every((d, i) => d.id === DOCTORS[i]?.id);
-        if (!sameDocs) {
-          setDoctorsList(docs);
-        }
+      if (isMounted && docs && docs.length > 0) {
+        setDoctorsList(docs);
+        preloadDoctorImages(docs);
       }
     });
+    return () => {
+      isMounted = false;
+    };
   }, []);
 
   // IntersectionObserver: Pause auto-play when section is not visible in viewport (prevents image purge & background thrashing)
@@ -439,7 +461,8 @@ export function DoctorPreview() {
           >
             {extendedDoctors.map((doc, idx) => {
               const isActive = idx === activeTrackIndex;
-              const photoSrc = LOCAL_DOCTOR_IMAGES[doc.id] || doc.photoUrl || "/images/doctors/dr-diean.jpg";
+              const photoSrc = getDoctorPhotoSrc(doc);
+              const fallbackPhoto = LOCAL_DOCTOR_IMAGES[doc.id] || "/images/doctors/dr-diean.jpg";
 
               return (
                 <div
@@ -487,6 +510,17 @@ export function DoctorPreview() {
                       draggable={false}
                       loading="eager"
                       decoding="sync"
+                      onError={(e) => {
+                        // If remote database image fails or 404s, fall back to local doctor image, and then generic doctor image
+                        if (e.currentTarget.src !== fallbackPhoto && !e.currentTarget.src.endsWith(fallbackPhoto)) {
+                          e.currentTarget.src = fallbackPhoto;
+                        } else if (
+                          e.currentTarget.src !== "/images/doctors/dr-diean.jpg" &&
+                          !e.currentTarget.src.endsWith("/images/doctors/dr-diean.jpg")
+                        ) {
+                          e.currentTarget.src = "/images/doctors/dr-diean.jpg";
+                        }
+                      }}
                       className={`w-full h-full object-cover object-top select-none pointer-events-none transition-transform duration-400 ${
                         !isActive ? "group-hover:scale-104 opacity-95 group-hover:opacity-100" : ""
                       }`}

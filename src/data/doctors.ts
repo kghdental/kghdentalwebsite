@@ -73,7 +73,7 @@ export const DOCTORS: Doctor[] = [
       en: "Kumudini Women's Medical College & Hospital",
       bn: "কুমুদিনী উইমেন'স মেডিকেল কলেজ",
     },
-    photoUrl: "/images/doctors/DR. MD. SANWAR HOSSAIN.png",
+    photoUrl: "/images/doctors/dr-sanwar.jpg",
     bio: {
       en: "Dr. Md. Sanwar Hossain is a fellowship-trained oral and maxillofacial surgeon (FCPS) with extensive experience in oral cancer surgery, facial trauma management, and complex dental surgeries. He currently serves as Assistant Professor at Kumudini Women's Medical College and has published research in oral and maxillofacial pathology.",
       bn: "ডা. মো. সানোয়ার হোসেন একজন ফেলোশিপপ্রাপ্ত ওরাল অ্যান্ড ম্যাক্সিলোফেসিয়াল সার্জন (এফসিপিএস)। তিনি রাজশাহী মেডিকেল কলেজ থেকে বিডিএস এবং বিসিপিএস থেকে এফসিপিএস সম্পন্ন করেন। মুখমণ্ডলের ট্রমা সার্জারি, ওরাল অনকোলজি এবং জটিল দাঁতের সার্জারিতে তার দীর্ঘ অভিজ্ঞতা রয়েছে। বর্তমানে তিনি কুমুদিনী উইমেন'স মেডিকেল কলেজে সহকারী অধ্যাপক হিসেবে কর্মরত।",
@@ -168,7 +168,7 @@ export const DOCTORS: Doctor[] = [
       en: "BSMMU (Ex-PG Hospital)",
       bn: "বিএসএমএমইউ (সাবেক পিজি হাসপাতাল)",
     },
-    photoUrl: "/images/doctors/dr-Bappy.png",
+    photoUrl: "/images/doctors/dr-bappy.jpg",
     bio: {
       en: "Dr. Md. Muhtashim Chowdhury (Bappy) is an Oral and Dental Surgeon holding BDS from Dhaka University (DU) and MPH from North South University (NSU). He completed Post Graduate Training (PGT) in Conservative Dentistry & Maxillofacial Surgery at BSMMU (Ex-PG Hospital). Dr. Bappy has attained Advance Implant Training from USC (USA) and Advance Endodontic Training from Japan, specializing in modern painless root canals, dental implants, and maxillofacial procedures.",
       bn: "ডা. মো. মুহতাসিম চৌধুরী (বাপ্পী) একজন দক্ষ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ সম্পন্ন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও ম্যাক্সিলোফেসিয়াল সার্জারিতে পিজিটি সম্পন্ন করেন। এছাড়া তিনি আমেরিকার ইউএসসি (USC, USA) থেকে অ্যাডভান্সড ইমপ্ল্যান্ট ট্রেনিং এবং জাপান থেকে অ্যাডভান্সড এন্ডোডন্টিক ট্রেনিং প্রাপ্ত। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল, ডেন্টাল ইমপ্ল্যান্ট ও ম্যাক্সিলোফেসিয়াল চিকিৎসায় অভিজ্ঞ।",
@@ -215,7 +215,7 @@ export const DOCTORS: Doctor[] = [
       en: "BSMMU (Ex-PG Hospital)",
       bn: "বিএসএমএমইউ (সাবেক পিজি হাসপাতাল)",
     },
-    photoUrl: "/images/doctors/Dr Jesinta Islam.png",
+    photoUrl: "/images/doctors/dr-ratina.jpg",
     bio: {
       en: "Dr. Jesinta Islam is an accomplished Oral and Dental Surgeon holding BDS from Dhaka University (DU) and MPH from North South University (NSU). She completed Post Graduate Training (PGT) in Conservative Dentistry & Endodontics at BSMMU (Ex-PG Hospital) and received Advance Implant Training in Rome, Italy. She specializes in precision root canal therapy, aesthetic dentistry, conservative treatments, and dental implant solutions with patient-centered care.",
       bn: "ডা. জেসিন্টা ইসলাম একজন নিবেদিতপ্রাণ ওরাল অ্যান্ড ডেন্টাল সার্জন। তিনি ঢাকা বিশ্ববিদ্যালয় (ঢাবি) থেকে বিডিএস এবং নর্থ সাউথ বিশ্ববিদ্যালয় (এনএসইউ) থেকে এমপিএইচ ডিগ্রি অর্জন করেছেন। তিনি বিএসএমএমইউ (সাবেক পিজি হাসপাতাল) থেকে কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে পিজিটি সম্পন্ন করেছেন এবং ইতালির রোম থেকে অ্যাডভান্সড ইমপ্ল্যান্ট ট্রেনিং সম্পন্ন করেছেন। তিনি আধুনিক রুট ক্যানেল, নান্দনিক ডেন্টিস্ট্রি ও ডেন্টাল ইমপ্ল্যান্ট চিকিৎসায় বিশেষভাবে পারদর্শী।",
@@ -263,7 +263,7 @@ export const DOCTORS: Doctor[] = [
       bn: "ওরাল মেডিসিন বিশেষজ্ঞ",
     },
     bmdcReg: "4564",
-    photoUrl: "/images/doctors/Dr Rifat Rahman.png",
+    photoUrl: "/images/doctors/dr-rifat.jpg",
     bio: {
       en: "Dr. Rifat Rahman is an accomplished Oral Medicine Consultant and Dental Surgeon holding a BDS, MPH, and MSc in Oral Medicine from Thailand, a PhD in Oral Oncology from Australia, and advanced clinical training in Oral Radiology from Japan. With BMDC Registration No. 4564, he specializes in comprehensive oral mucosal disease diagnosis, precancerous lesion detection, salivary gland disorders, and complex oral medicine care.",
       bn: "ডা. রিফাত রহমান একজন উচ্চশিক্ষিত ও অভিজ্ঞ ওরাল মেডিসিন কনসালটেন্ট ও ডেন্টাল সার্জন (বিএমডিসি রেজি: ৪৫৬৪)। তিনি বিডিএস এবং এমপিএইচ সম্পন্ন করার পর থাইল্যান্ড থেকে ওরাল মেডিসিনে এমএসসি এবং অস্ট্রেলিয়া থেকে ওরাল অনকোলজিতে পিএইচডি ডিগ্রি অর্জন করেছেন। এছাড়া জাপান থেকে ওরাল রেডিওলজিতে বিশেষ প্রশিক্ষণপ্রাপ্ত। তিনি মুখের ক্যান্সার স্ক্রিনিং, প্রিক্যান্সারাস ক্ষত, ওএসএমএফ, মুখের দীর্ঘস্থায়ী ঘা ও লালাগ্রন্থির জটিল রোগের আধুনিক ডায়াগনোসিস ও চিকিৎসায় বিশেষ পারদর্শী।",
@@ -310,7 +310,7 @@ export const DOCTORS: Doctor[] = [
       en: "BIRDEM General Hospital & IMC Dental Unit",
       bn: "বারডেম জেনারেল হাসপাতাল ও আইএমসি ডেন্টাল ইউনিট",
     },
-    photoUrl: "/images/doctors/dr-rafia-nazneen.png",
+    photoUrl: "/images/doctors/dr-rafia.jpg",
     bio: {
       en: "Dr. Rafia Nazneen is an Associate Professor & Head of the Department of Dental Surgery at BIRDEM General Hospital & IMC Dental Unit. Holding a BDS, FCPS in Conservative Dentistry & Endodontics, and MFD from the Royal College of Surgeons in Ireland, she specializes in modern painless root canals, cosmetic dental restorations, and advanced microscopic endodontic procedures.",
       bn: "ডা. রাফিয়া নাজনীন বারডেম জেনারেল হাসপাতাল ও আইএমসি ডেন্টাল ইউনিটের ডেন্টাল সার্জারি বিভাগের সহযোগী অধ্যাপক ও বিভাগীয় প্রধান। তিনি বিডিএস, কনজারভেটিভ ডেন্টিস্ট্রি ও এন্ডোডন্টিক্সে এফসিপিএস এবং রয়্যাল কলেজ অব সার্জনস ইন আয়ারল্যান্ড থেকে এমএফডি (MFD RCSI) ডিগ্রিধারী। তিনি আধুনিক ব্যথামুক্ত রুট ক্যানেল চিকিৎসা, নান্দনিক ডেন্টাল রেস্টোরেশন এবং উন্নত মাইক্রোস্কোপিক এন্ডোডন্টিক পদ্ধতিতে বিশেষভাবে অভিজ্ঞ।",

@@ -23,13 +23,13 @@ import { CtaBanner } from "@/components/home/CtaBanner";
 
 const LOCAL_DOCTOR_IMAGES: Record<string, string> = {
   "dr-diean": "/images/doctors/dr-diean.jpg",
-  "dr-sanwar": "/images/doctors/DR. MD. SANWAR HOSSAIN.png",
+  "dr-sanwar": "/images/doctors/dr-sanwar.jpg",
   "dr-fatema": "/images/doctors/dr-fatema.jpg",
-  "dr-bappy": "/images/doctors/dr-Bappy.png",
-  "dr-ratina": "/images/doctors/Dr Jesinta Islam.png",
-  "dr-rifat": "/images/doctors/Dr Rifat Rahman.png",
-  "dr-rafia": "/images/doctors/dr-rafia-nazneen.png",
-  "dr-rafia-nazneen": "/images/doctors/dr-rafia-nazneen.png",
+  "dr-bappy": "/images/doctors/dr-bappy.jpg",
+  "dr-ratina": "/images/doctors/dr-ratina.jpg",
+  "dr-rifat": "/images/doctors/dr-rifat.jpg",
+  "dr-rafia": "/images/doctors/dr-rafia.jpg",
+  "dr-rafia-nazneen": "/images/doctors/dr-rafia.jpg",
 };
 
 export default function DoctorsPage() {
